@@ -1,0 +1,421 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>15.0</VCProjectVersion>
+    <ProjectGuid>{E1DB4189-38A7-4A94-9126-A68F09F11760}</ProjectGuid>
+    <RootNamespace>RouterSimulator</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>
+    <Keyword>MFCProj</Keyword>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+    <UseOfMfc>Dynamic</UseOfMfc>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+    <UseOfMfc>Dynamic</UseOfMfc>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+    <UseOfMfc>Dynamic</UseOfMfc>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+    <UseOfMfc>Dynamic</UseOfMfc>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+    <Midl>
+      <MkTypLibCompatible>false</MkTypLibCompatible>
+      <ValidateAllParameters>true</ValidateAllParameters>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </Midl>
+    <ResourceCompile>
+      <Culture>0x0804</Culture>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>_WINDOWS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+    <Midl>
+      <MkTypLibCompatible>false</MkTypLibCompatible>
+      <ValidateAllParameters>true</ValidateAllParameters>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </Midl>
+    <ResourceCompile>
+      <Culture>0x0804</Culture>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+    <Midl>
+      <MkTypLibCompatible>false</MkTypLibCompatible>
+      <ValidateAllParameters>true</ValidateAllParameters>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </Midl>
+    <ResourceCompile>
+      <Culture>0x0804</Culture>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>_WINDOWS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+    <Midl>
+      <MkTypLibCompatible>false</MkTypLibCompatible>
+      <ValidateAllParameters>true</ValidateAllParameters>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </Midl>
+    <ResourceCompile>
+      <Culture>0x0804</Culture>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Building.h" />
+    <ClInclude Include="BuildingType.h" />
+    <ClInclude Include="ChildFrm.h" />
+    <ClInclude Include="ClassView.h" />
+    <ClInclude Include="commonmsg.h" />
+    <ClInclude Include="CommonTimer.h" />
+    <ClInclude Include="CommonTimerRecord.h" />
+    <ClInclude Include="ConnectionJudge.h" />
+    <ClInclude Include="DijConnection.h" />
+    <ClInclude Include="DijItem.h" />
+    <ClInclude Include="DijNode.h" />
+    <ClInclude Include="DijRecord.h" />
+    <ClInclude Include="DijTable.h" />
+    <ClInclude Include="DlgHostInfo.h" />
+    <ClInclude Include="DlgHostPptMsg.h" />
+    <ClInclude Include="DlgHostProperty.h" />
+    <ClInclude Include="DoublePoint.h" />
+    <ClInclude Include="EngineEvent.h" />
+    <ClInclude Include="EngineUser.h" />
+    <ClInclude Include="FileView.h" />
+    <ClInclude Include="Host.h" />
+    <ClInclude Include="HostEngine.h" />
+    <ClInclude Include="HostGui.h" />
+    <ClInclude Include="HostInfo.h" />
+    <ClInclude Include="HostReference.h" />
+    <ClInclude Include="HostRouteEntry.h" />
+    <ClInclude Include="HostRouteTable.h" />
+    <ClInclude Include="HostStateWnd.h" />
+    <ClInclude Include="Intersection.h" />
+    <ClInclude Include="IntersectionRouter.h" />
+    <ClInclude Include="InterToInter.h" />
+    <ClInclude Include="LineInMap.h" />
+    <ClInclude Include="ListCtrlMessages.h" />
+    <ClInclude Include="ListCtrlProcessInfo.h" />
+    <ClInclude Include="MainFrm.h" />
+    <ClInclude Include="MapGui.h" />
+    <ClInclude Include="MarkPoint.h" />
+    <ClInclude Include="MobileSocialNetworkHost.h" />
+    <ClInclude Include="MsgCntJudgeReceiverReport.h" />
+    <ClInclude Include="MsgHopInfo.h" />
+    <ClInclude Include="MsgInfo.h" />
+    <ClInclude Include="MsgInsideInfo.h" />
+    <ClInclude Include="NearbyNodeEntry.h" />
+    <ClInclude Include="OutputWnd.h" />
+    <ClInclude Include="PictureBackup.h" />
+    <ClInclude Include="PlayField.h" />
+    <ClInclude Include="PointKey.h" />
+    <ClInclude Include="PointReference.h" />
+    <ClInclude Include="PositionForecast.h" />
+    <ClInclude Include="PositionForecastUser.h" />
+    <ClInclude Include="PropertiesWnd.h" />
+    <ClInclude Include="ProtocolInfo.h" />
+    <ClInclude Include="Resource.h" />
+    <ClInclude Include="Road.h" />
+    <ClInclude Include="RoadInsideRouter.h" />
+    <ClInclude Include="RoadInsideRouterEntry.h" />
+    <ClInclude Include="RoadNet.h" />
+    <ClInclude Include="RoadPoint.h" />
+    <ClInclude Include="RoadPointConnection.h" />
+    <ClInclude Include="RoadPointStateInfo.h" />
+    <ClInclude Include="RoadRouteAgency.h" />
+    <ClInclude Include="RoadRouter.h" />
+    <ClInclude Include="RouterRunner.h" />
+    <ClInclude Include="RouterSimulator.h" />
+    <ClInclude Include="RouterSimulatorDoc.h" />
+    <ClInclude Include="RouterSimulatorView.h" />
+    <ClInclude Include="RouteTable.h" />
+    <ClInclude Include="RouteTableItem.h" />
+    <ClInclude Include="RoutingData.h" />
+    <ClInclude Include="RoutingDataEnc.h" />
+    <ClInclude Include="RoutingDataEncBSW.h" />
+    <ClInclude Include="RoutingMsg.h" />
+    <ClInclude Include="RoutingMsgBSW.h" />
+    <ClInclude Include="RoutingMsgPmhns.h" />
+    <ClInclude Include="RoutingMsgEncAnony.h" />
+    <ClInclude Include="RoutingMsgHslpo.h" />
+    <ClInclude Include="RoutingProcess.h" />
+    <ClInclude Include="RoutingProcessBSW.h" />
+    <ClInclude Include="RoutingProcessHslpo.h" />
+    <ClInclude Include="RoutingProtocol.h" />
+    <ClInclude Include="RoutingProtocolBSW.h" />
+    <ClInclude Include="RoutingProcessPmhns.h" />
+    <ClInclude Include="RoutingProtocolEncAnony.h" />
+    <ClInclude Include="RoutingProtocolHslpo.h" />
+    <ClInclude Include="RoutingStatisticsInfo.h" />
+    <ClInclude Include="SimulatorCfg.h" />
+    <ClInclude Include="SimulatorCommon.h" />
+    <ClInclude Include="StatisticsReport.h" />
+    <ClInclude Include="StatisticSummary.h" />
+    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="streethead.h" />
+    <ClInclude Include="targetver.h" />
+    <ClInclude Include="TransmitionRecord.h" />
+    <ClInclude Include="TrustEntry.h" />
+    <ClInclude Include="TrustValue.h" />
+    <ClInclude Include="ViewTree.h" />
+    <ClInclude Include="WktParse.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Building.cpp" />
+    <ClCompile Include="BuildingType.cpp" />
+    <ClCompile Include="ChildFrm.cpp" />
+    <ClCompile Include="ClassView.cpp" />
+    <ClCompile Include="CommonTimer.cpp" />
+    <ClCompile Include="CommonTimerRecord.cpp" />
+    <ClCompile Include="ConnectionJudge.cpp" />
+    <ClCompile Include="DijConnection.cpp" />
+    <ClCompile Include="DijItem.cpp" />
+    <ClCompile Include="DijNode.cpp" />
+    <ClCompile Include="DijRecord.cpp" />
+    <ClCompile Include="DijTable.cpp" />
+    <ClCompile Include="DlgHostInfo.cpp" />
+    <ClCompile Include="DlgHostPptMsg.cpp" />
+    <ClCompile Include="DlgHostProperty.cpp" />
+    <ClCompile Include="EngineEvent.cpp" />
+    <ClCompile Include="EngineUser.cpp" />
+    <ClCompile Include="FileView.cpp" />
+    <ClCompile Include="Host.cpp" />
+    <ClCompile Include="HostEngine.cpp" />
+    <ClCompile Include="HostGui.cpp" />
+    <ClCompile Include="HostInfo.cpp" />
+    <ClCompile Include="HostReference.cpp" />
+    <ClCompile Include="HostRouteEntry.cpp" />
+    <ClCompile Include="HostRouteTable.cpp" />
+    <ClCompile Include="HostStateWnd.cpp" />
+    <ClCompile Include="Intersection.cpp" />
+    <ClCompile Include="IntersectionRouter.cpp" />
+    <ClCompile Include="InterToInter.cpp" />
+    <ClCompile Include="LineInMap.cpp" />
+    <ClCompile Include="ListCtrlMessages.cpp" />
+    <ClCompile Include="ListCtrlProcessInfo.cpp" />
+    <ClCompile Include="MainFrm.cpp" />
+    <ClCompile Include="MapGui.cpp" />
+    <ClCompile Include="MarkPoint.cpp" />
+    <ClCompile Include="MobileSocialNetworkHost.cpp" />
+    <ClCompile Include="MsgCntJudgeReceiverReport.cpp" />
+    <ClCompile Include="MsgHopInfo.cpp" />
+    <ClCompile Include="MsgInfo.cpp" />
+    <ClCompile Include="MsgInsideInfo.cpp" />
+    <ClCompile Include="NearbyNodeEntry.cpp" />
+    <ClCompile Include="OutputWnd.cpp" />
+    <ClCompile Include="PictureBackup.cpp" />
+    <ClCompile Include="PlayField.cpp" />
+    <ClCompile Include="PointKey.cpp" />
+    <ClCompile Include="PointReference.cpp" />
+    <ClCompile Include="PositionForecast.cpp" />
+    <ClCompile Include="PositionForecastUser.cpp" />
+    <ClCompile Include="PropertiesWnd.cpp" />
+    <ClCompile Include="ProtocolInfo.cpp" />
+    <ClCompile Include="Road.cpp" />
+    <ClCompile Include="RoadInsideRouter.cpp" />
+    <ClCompile Include="RoadInsideRouterEntry.cpp" />
+    <ClCompile Include="RoadNet.cpp" />
+    <ClCompile Include="RoadPoint.cpp" />
+    <ClCompile Include="RoadPointConnection.cpp" />
+    <ClCompile Include="RoadPointStateInfo.cpp" />
+    <ClCompile Include="RoadRouteAgency.cpp" />
+    <ClCompile Include="RoadRouter.cpp" />
+    <ClCompile Include="RouterRunner.cpp" />
+    <ClCompile Include="RouterSimulator.cpp" />
+    <ClCompile Include="RouterSimulatorDoc.cpp" />
+    <ClCompile Include="RouterSimulatorView.cpp" />
+    <ClCompile Include="RouteTable.cpp" />
+    <ClCompile Include="RouteTableItem.cpp" />
+    <ClCompile Include="RoutingData.cpp" />
+    <ClCompile Include="RoutingDataEnc.cpp" />
+    <ClCompile Include="RoutingDataEncBSW.cpp" />
+    <ClCompile Include="RoutingMsg.cpp" />
+    <ClCompile Include="RoutingMsgBSW.cpp" />
+    <ClCompile Include="RoutingMsgPmhns.cpp" />
+    <ClCompile Include="RoutingMsgEncAnony.cpp" />
+    <ClCompile Include="RoutingMsgHslpo.cpp" />
+    <ClCompile Include="RoutingProcess.cpp" />
+    <ClCompile Include="RoutingProcessBSW.cpp" />
+    <ClCompile Include="RoutingProcessHslpo.cpp" />
+    <ClCompile Include="RoutingProtocol.cpp" />
+    <ClCompile Include="RoutingProtocolBSW.cpp" />
+    <ClCompile Include="RoutingProcessPmhns.cpp" />
+    <ClCompile Include="RoutingProtocolEncAnony.cpp" />
+    <ClCompile Include="RoutingProtocolHslpo.cpp" />
+    <ClCompile Include="RoutingStatisticsInfo.cpp" />
+    <ClCompile Include="SimulatorCfg.cpp" />
+    <ClCompile Include="StatisticsReport.cpp" />
+    <ClCompile Include="StatisticSummary.cpp" />
+    <ClCompile Include="stdafx.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="TransmitionRecord.cpp" />
+    <ClCompile Include="TrustEntry.cpp" />
+    <ClCompile Include="TrustValue.cpp" />
+    <ClCompile Include="ViewTree.cpp" />
+    <ClCompile Include="WktParse.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="RouterSimulator.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="res\classview.bmp" />
+    <Image Include="res\classview_hc.bmp" />
+    <Image Include="res\class_view.ico" />
+    <Image Include="res\class_view_hc.ico" />
+    <Image Include="res\explorer.bmp" />
+    <Image Include="res\explorer_hc.bmp" />
+    <Image Include="res\fileview.bmp" />
+    <Image Include="res\fileview_hc.bmp" />
+    <Image Include="res\file_view.ico" />
+    <Image Include="res\file_view_hc.ico" />
+    <Image Include="res\menuimages.bmp" />
+    <Image Include="res\menuimages_hc.bmp" />
+    <Image Include="res\output_wnd.ico" />
+    <Image Include="res\output_wnd_hc.ico" />
+    <Image Include="res\properties.bmp" />
+    <Image Include="res\properties_hc.bmp" />
+    <Image Include="res\properties_wnd.ico" />
+    <Image Include="res\properties_wnd_hc.ico" />
+    <Image Include="res\RouterSimulator.ico" />
+    <Image Include="res\RouterSimulatorDoc.ico" />
+    <Image Include="res\sort.bmp" />
+    <Image Include="res\sort_hc.bmp" />
+    <Image Include="res\Toolbar.bmp" />
+    <Image Include="res\Toolbar256.bmp" />
+    <Image Include="UserImages.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\RouterSimulator.rc2" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

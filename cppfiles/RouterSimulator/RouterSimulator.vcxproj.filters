@@ -1,0 +1,675 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="源文件">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="头文件">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="资源文件">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="RouterSimulator.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="stdafx.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="MainFrm.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ChildFrm.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="RouterSimulatorDoc.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="RouterSimulatorView.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Resource.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="FileView.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ClassView.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ViewTree.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="OutputWnd.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="PropertiesWnd.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="PlayField.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="DoublePoint.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="MarkPoint.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="RoadPoint.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Road.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="streethead.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="RoadNet.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="LineInMap.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Intersection.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="WktParse.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="MapGui.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="RouterRunner.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="RoadPointConnection.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="DijNode.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="RoadPointStateInfo.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="DijConnection.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="DijItem.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="DijTable.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="DijRecord.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="RoadRouter.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="IntersectionRouter.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="commonmsg.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="PointReference.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="PointKey.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Building.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="BuildingType.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="HostRouteEntry.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="HostRouteTable.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="InterToInter.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="RoadInsideRouter.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="RoadInsideRouterEntry.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="RoadRouteAgency.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Host.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="PictureBackup.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="HostEngine.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="HostGui.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="CommonTimer.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="CommonTimerRecord.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="PositionForecast.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="HostReference.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="PositionForecastUser.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ConnectionJudge.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="MsgCntJudgeReceiverReport.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="RoutingProtocolBSW.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="RoutingMsgBSW.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="EngineUser.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="EngineEvent.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="TransmitionRecord.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="NearbyNodeEntry.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="DlgHostInfo.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="HostInfo.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ProtocolInfo.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="MsgInfo.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="SimulatorCommon.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="MobileSocialNetworkHost.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="TrustEntry.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="RoutingProtocolHslpo.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="RoutingMsgHslpo.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="TrustValue.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="RoutingProtocolEncAnony.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="RoutingMsgEncAnony.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="RouteTableItem.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="RouteTable.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="RoutingStatisticsInfo.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="HostStateWnd.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="DlgHostProperty.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="DlgHostPptMsg.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ListCtrlMessages.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="MsgInsideInfo.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="RoutingMsgPmhns.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="RoutingProcess.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="RoutingProtocol.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="RoutingProcessPmhns.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ListCtrlProcessInfo.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="StatisticSummary.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="RoutingMsg.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="RoutingData.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="RoutingDataEnc.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="MsgHopInfo.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="RoutingProcessBSW.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="RoutingDataEncBSW.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="RoutingProcessHslpo.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="SimulatorCfg.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="StatisticsReport.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="RouterSimulator.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="MainFrm.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ChildFrm.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="RouterSimulatorDoc.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="RouterSimulatorView.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="FileView.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ClassView.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ViewTree.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="OutputWnd.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="PropertiesWnd.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="PlayField.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="MarkPoint.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="RoadPoint.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Road.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="RoadNet.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="LineInMap.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Intersection.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="WktParse.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="MapGui.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="RouterRunner.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="RoadPointConnection.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="DijNode.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="RoadPointStateInfo.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="DijConnection.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="DijItem.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="DijTable.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="DijRecord.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="RoadRouter.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="IntersectionRouter.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="PointReference.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="PointKey.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Building.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="BuildingType.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="HostRouteEntry.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="HostRouteTable.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="InterToInter.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="RoadInsideRouter.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="RoadInsideRouterEntry.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="RoadRouteAgency.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Host.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="PictureBackup.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="HostEngine.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="HostGui.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="CommonTimer.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="CommonTimerRecord.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="PositionForecast.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="HostReference.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="PositionForecastUser.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ConnectionJudge.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="MsgCntJudgeReceiverReport.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="RoutingProtocolBSW.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="RoutingMsgBSW.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="EngineUser.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="EngineEvent.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="TransmitionRecord.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="NearbyNodeEntry.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="DlgHostInfo.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="HostInfo.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ProtocolInfo.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="MsgInfo.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="MobileSocialNetworkHost.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="TrustEntry.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="RoutingProtocolHslpo.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="RoutingMsgHslpo.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="TrustValue.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="RoutingProtocolEncAnony.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="RoutingMsgEncAnony.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="RouteTableItem.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="RouteTable.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="RoutingStatisticsInfo.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="HostStateWnd.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="DlgHostProperty.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="DlgHostPptMsg.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ListCtrlMessages.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="MsgInsideInfo.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="RoutingMsgPmhns.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="RoutingProcess.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="RoutingProtocol.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="RoutingProcessPmhns.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ListCtrlProcessInfo.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="StatisticSummary.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="RoutingMsg.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="RoutingData.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="RoutingDataEnc.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="MsgHopInfo.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="RoutingProcessBSW.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="RoutingDataEncBSW.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="RoutingProcessHslpo.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="SimulatorCfg.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="StatisticsReport.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="RouterSimulator.rc">
+      <Filter>资源文件</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="res\file_view.ico">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\file_view_hc.ico">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\class_view.ico">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\class_view_hc.ico">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\fileview.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\fileview_hc.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\classview.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\classview_hc.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\explorer.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\explorer_hc.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\sort.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\sort_hc.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\menuimages.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\menuimages_hc.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\output_wnd.ico">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\output_wnd_hc.ico">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\properties_wnd.ico">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\properties_wnd_hc.ico">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\properties.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\properties_hc.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="UserImages.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\RouterSimulatorDoc.ico">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\RouterSimulator.ico">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\Toolbar.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\Toolbar256.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\RouterSimulator.rc2">
+      <Filter>资源文件</Filter>
+    </None>
+  </ItemGroup>
+</Project>
