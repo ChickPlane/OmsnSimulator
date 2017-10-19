@@ -52,6 +52,8 @@ CRouterSimulatorView::CRouterSimulatorView()
 	, m_pBtnCopySummary(NULL)
 	, m_pEngine(NULL)
 	, m_pEditSpeed(NULL)
+	, m_pSimTimeSecond(NULL)
+	, m_pEditActualSpeed(NULL)
 	, m_pEditMsgStatistic(NULL)
 	, m_pEditPickCount(NULL)
 	, m_pEditTimeOut(NULL)
@@ -88,6 +90,16 @@ void CRouterSimulatorView::OnEngineSpeedChanged()
 	CString strSpeed;
 	strSpeed.Format(_T("X %d"),nSpeed);
 	m_pEditSpeed->SetWindowText(strSpeed);
+}
+
+void CRouterSimulatorView::OnEngineTimeChanged(SIM_TIME lnCurrentTime)
+{
+	CString strTime;
+	strTime.Format(_T("Sec: %d"), lnCurrentTime / 1000);
+	m_pSimTimeSecond->SetWindowText(strTime);
+	CString strActualSpeed;
+	strActualSpeed.Format(_T("XA: %d"), m_pEngine->GetActualSpeed());
+	m_pEditActualSpeed->SetWindowText(strActualSpeed);
 }
 
 void CRouterSimulatorView::OnEngineMessageStatisticsChanged(const CStatisticsReport & report)
@@ -331,6 +343,10 @@ void CRouterSimulatorView::OnInitialUpdate()
 	m_pBtnCopySummary->Create(_T("Cpy Sum"), WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, CRect(0, 0, 100, 30), this, DYN_IDC_CPY_SUMMARY);
 	m_pEditSpeed = new CEdit();
 	m_pEditSpeed->Create(WS_DISABLED | WS_CHILD | WS_VISIBLE | WS_TABSTOP | DT_CENTER | DT_VCENTER, CRect(0, 0, 100, 30), this, 3000);
+	m_pEditActualSpeed = new CEdit();
+	m_pEditActualSpeed->Create(WS_DISABLED | WS_CHILD | WS_VISIBLE | WS_TABSTOP | DT_CENTER | DT_VCENTER, CRect(0, 0, 100, 30), this, 3000);
+	m_pSimTimeSecond = new CEdit();
+	m_pSimTimeSecond->Create(WS_DISABLED | WS_CHILD | WS_VISIBLE | WS_TABSTOP | DT_CENTER | DT_VCENTER, CRect(0, 0, 100, 30), this, 3000);
 	m_pEditMsgStatistic = new CEdit();
 	m_pEditMsgStatistic->Create(WS_DISABLED | WS_CHILD | WS_VISIBLE | WS_TABSTOP | DT_CENTER | DT_VCENTER, CRect(0, 0, 100, 30), this, 3000);
 	m_pEditPickCount = new CEdit();
@@ -401,34 +417,12 @@ void CRouterSimulatorView::OnSize(UINT nType, int cx, int cy)
 	GetClientRect(&rectClient);
 
 	int nMostRight = rectClient.left;
+	int nMostTop = 0;
 	int nWidth = 150;
-	if (m_pBtnCopySummary)
-	{
-		nWidth = 40;
-		m_pBtnCopySummary->MoveWindow(nMostRight, 0, nWidth, 30);
-		nMostRight += nWidth + 5;
-	}
-	if (m_pEditSpeed)
-	{
-		nWidth = 70;
-		m_pEditSpeed->MoveWindow(nMostRight, 0, nWidth, 30);
-		nMostRight += nWidth + 5;
-	}
-	if (m_pBtnCreateMsgs)
-	{
-		nWidth = 100;
-		m_pBtnCreateMsgs->MoveWindow(nMostRight, 0, nWidth, 30);
-		nMostRight += nWidth + 5;
-	}
 	if (m_pEditPickCount)
 	{
 		nWidth = 100;
 		m_pEditPickCount->MoveWindow(nMostRight, 0, nWidth, 30);
-		nMostRight += nWidth + 5;
-	}
-	if (m_pEditLabel)
-	{
-		m_pEditLabel->MoveWindow(nMostRight, 0, nWidth, 30);
 		nMostRight += nWidth + 5;
 	}
 	if (m_pEditTimeOut)
@@ -437,34 +431,74 @@ void CRouterSimulatorView::OnSize(UINT nType, int cx, int cy)
 		m_pEditTimeOut->MoveWindow(nMostRight, 0, nWidth, 30);
 		nMostRight += nWidth + 5;
 	}
+	if (m_pBtnCreateMsgs)
+	{
+		nWidth = 130;
+		m_pBtnCreateMsgs->MoveWindow(nMostRight, 0, nWidth, 30);
+		nMostRight += nWidth + 5;
+	}
+
+	if (m_pBtnCopySummary)
+	{
+		nWidth = 100;
+		m_pBtnCopySummary->MoveWindow(nMostRight, 0, nWidth, 30);
+		nMostRight += nWidth + 5;
+	}
+	if (m_pSimTimeSecond)
+	{
+		nWidth = 120;
+		m_pSimTimeSecond->MoveWindow(nMostRight, 0, nWidth, 30);
+		nMostRight += nWidth + 5;
+	}
+	if (m_pEditActualSpeed)
+	{
+		nWidth = 80;
+		m_pEditActualSpeed->MoveWindow(nMostRight, 0, nWidth, 30);
+		nMostRight += nWidth + 1;
+	}
+	if (m_pEditSpeed)
+	{
+		nWidth = 80;
+		m_pEditSpeed->MoveWindow(nMostRight, 0, nWidth, 30);
+		nMostRight += nWidth + 5;
+	}
+
+	nMostTop = 30;
+	nMostRight = rectClient.left;
+	if (m_pEditLabel)
+	{
+		m_pEditLabel->MoveWindow(nMostRight, nMostTop, nWidth, 30);
+		nMostRight += nWidth + 5;
+	}
 	if (m_pEditMsgStatistic)
 	{
 		nWidth = 700;
-		m_pEditMsgStatistic->MoveWindow(nMostRight, 0, nWidth, 30);
+		m_pEditMsgStatistic->MoveWindow(nMostRight, nMostTop, nWidth, 30);
 		nMostRight += nWidth + 5;
 	}
 	if (m_pAveLatency)
 	{
 		nWidth = 150;
-		m_pAveLatency->MoveWindow(nMostRight, 0, nWidth, 30);
+		m_pAveLatency->MoveWindow(nMostRight, nMostTop, nWidth, 30);
 		nMostRight += nWidth + 5;
 	}
 	if (m_pAveAnonyDistance)
 	{
 		nWidth = 150;
-		m_pAveAnonyDistance->MoveWindow(nMostRight, 0, nWidth, 30);
+		m_pAveAnonyDistance->MoveWindow(nMostRight, nMostTop, nWidth, 30);
 		nMostRight += nWidth + 5;
 	}
 	if (m_pAveAnonyTime)
 	{
 		nWidth = 150;
-		m_pAveAnonyTime->MoveWindow(nMostRight, 0, nWidth, 30);
+		m_pAveAnonyTime->MoveWindow(nMostRight, nMostTop, nWidth, 30);
 		nMostRight += nWidth + 5;
 	}
 
+	nMostTop = 60;
 	if (m_pMapGui)
 	{
-		m_pMapGui->MoveWindow(0, 30, rectClient.Width(), rectClient.Height() - 30);
+		m_pMapGui->MoveWindow(0, nMostTop, rectClient.Width(), rectClient.Height() - nMostTop);
 	}
 	// TODO: 在此处添加消息处理程序代码
 }

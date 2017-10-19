@@ -23,6 +23,11 @@ void CEngineUser::OnEngineSpeedChanged()
 
 }
 
+void CEngineUser::OnEngineTimeChanged(SIM_TIME lnCurrentTime)
+{
+
+}
+
 void CEngineUser::OnEngineMessageStatisticsChanged(const CStatisticsReport & report)
 {
 

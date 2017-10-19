@@ -30,7 +30,7 @@ CHostEngine::CHostEngine()
 	, m_lnLastForecastSimTime(INT_MIN)
 	, m_lnLastForecastedSimTime(INT_MIN)
 	, m_nMsgId(0)
-	, m_nJudgeMax(5)
+	, m_nJudgeMax(7)
 	, m_bEnableMonitor(TRUE)
 	, m_blimitedSpeed(TRUE)
 	, m_bWaitingActualTime(TRUE)
@@ -167,9 +167,16 @@ void CHostEngine::WriteLog(const CString & strLog)
 	m_pMapGui->PostMessage(MSG_ID_WRITE_LOG, 0, (LPARAM)pNewLog);
 }
 
-int CHostEngine::GetSpeed()
+int CHostEngine::GetSpeed() const
 {
 	return m_lnExpectSimMillisecPerActSec / 1000.0 + 0.5;
+}
+
+int CHostEngine::GetActualSpeed() const
+{
+	SIM_TIME lnExpectPass = GetBoundary() - m_lnSimTimeTickCountStart;
+	SIM_TIME lnActualPass = m_lnSimTimeMillisecond - m_lnSimTimeTickCountStart;
+	return m_lnExpectSimMillisecPerActSec * lnActualPass / (lnExpectPass*1000.0) + 0.5;
 }
 
 void CHostEngine::RecordPackageStateChange(int nDataId, const CMsgInsideInfo & msgInfo, int nState)
@@ -232,14 +239,14 @@ void CHostEngine::OnEveryPeriod()
 	SIM_TIME Interval = GetPeriodDefaultInterval();
 	RegisterTimer(0, NULL, Interval);
 
-	int nHostCount = m_pRoadNet->m_allHosts.GetSize();
-	int nSum = 0;
-	for (int i = 1; i < nHostCount; ++i)
-	{
-		nSum += m_pRoadNet->m_allHosts[i]->m_pProtocol->GetDebugNumber(0);
-	}
+// 	int nHostCount = m_pRoadNet->m_allHosts.GetSize();
+// 	int nSum = 0;
+// 	for (int i = 1; i < nHostCount; ++i)
+// 	{
+// 		nSum += m_pRoadNet->m_allHosts[i]->m_pProtocol->GetDebugNumber(0);
+// 	}
 	CString strOut;
-	strOut.Format(_T("\nDN %d"), nSum / 126);
+	strOut.Format(_T("\n%d\t%d"), lnCurrentTime, GetTickCount64() - m_ulStartTickCount);
 	OutputDebugString(strOut);
 }
 
@@ -248,25 +255,10 @@ void CHostEngine::RefreshUi()
 	CDoublePoint lt, rb;
 	m_pMapGui->GetRefreshArea(lt, rb);
 	CArray<CHostGui> * pMessageDirectly = new CArray<CHostGui>();
-	CArray<CHostGui> * pMessageOptimize = new CArray<CHostGui>();
 	CArray<CHostGui> * pMessage = NULL;
-	ULONGLONG lla = GetTickCount64();
-	bool bRet = RefreshUiOptimize(pMessageOptimize, lt, rb);
-	ULONGLONG llb = GetTickCount64();
-	ULONGLONG llc = llb - lla;
-	if (bRet)
-	{
-		pMessage = pMessageOptimize;
-		delete pMessageDirectly;
-		pMessageDirectly = NULL;
-	}
-	else
-	{
-		RefreshUiDirectly(pMessageDirectly, lt, rb);
-		pMessage = pMessageDirectly;
-		delete pMessageOptimize;
-		pMessageOptimize = NULL;
-	}
+
+	RefreshUiDirectly(pMessageDirectly, lt, rb);
+	pMessage = pMessageDirectly;
 
 	if (m_pMapGui && IsWindow(m_pMapGui->GetSafeHwnd()))
 	{
@@ -307,7 +299,7 @@ void CHostEngine::RefreshUiDirectly(CArray<CHostGui> * pMessage, const CDoublePo
 
 bool CHostEngine::RefreshUiOptimize(CArray<CHostGui> * pMessage, const CDoublePoint & lt, const CDoublePoint & rb)
 {
-	SIM_TIME lnPeriodDefaultInterval = GetPeriodDefaultInterval();
+	SIM_TIME lnPeriodDefaultInterval = INT_MAX;
 	CHostGui newHostPosition;
 	pMessage->RemoveAll();
 
@@ -493,12 +485,21 @@ SIM_TIME CHostEngine::GetActualSimMillisecPerActSec()
 	return 1.0*m_lnExpectSimMillisecPerActSec * m_lnEventCheckBoundary / m_lnEventCheckBoundaryExpect;
 }
 
-SIM_TIME CHostEngine::GetBoundary()
+SIM_TIME CHostEngine::GetBoundary() const
 {
 	ULONGLONG ulCurrentTK = GetTickCount64();
 	ULONGLONG ulDiffer = ulCurrentTK - m_ulStartTickCount;
 	SIM_TIME lnRet = m_lnExpectSimMillisecPerActSec * ulDiffer / 1000 + m_lnSimTimeTickCountStart;
 	return lnRet;
+}
+
+void CHostEngine::NotifyTimeChange()
+{
+	POSITION pos = m_NotifyList.GetHeadPosition();
+	while (pos)
+	{
+		m_NotifyList.GetNext(pos)->OnEngineTimeChanged(m_lnSimTimeMillisecond);
+	}
 }
 
 double CHostEngine::GetAveSurroundingHosts(double fRadius, int nComment)
@@ -589,6 +590,10 @@ int CHostEngine::CheckEventList()
 			}
 			m_EventList.RemoveHead();
 
+			if (m_lnSimTimeMillisecond != FirstEvent.m_lnSimTime)
+			{
+				NotifyTimeChange();
+			}
 			m_lnSimTimeMillisecond = FirstEvent.m_lnSimTime;
 			if (FirstEvent.m_pUser)
 			{
@@ -646,6 +651,7 @@ void CHostEngine::OnResetEngine(WPARAM wParam, LPARAM lParam)
 	WriteLog(_T("RESET"));
 	m_bPaused = true;
 	m_lnSimTimeMillisecond = 0;
+	NotifyTimeChange();
 	m_lnSimTimeTickCountStart = m_lnSimTimeMillisecond;
 	m_lnEventCheckBoundary = GetPeriodDefaultInterval();
 	m_pForecastThread->PostThreadMessage(MSG_ID_POS_FRCST_REMOVEALL, 0, 0);

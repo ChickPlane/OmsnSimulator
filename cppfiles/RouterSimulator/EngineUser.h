@@ -13,6 +13,7 @@ public:
 
 	virtual void OnEngineTimer(int nCommandId) = 0;
 	virtual void OnEngineSpeedChanged();
+	virtual void OnEngineTimeChanged(SIM_TIME lnCurrentTime);
 	virtual void OnEngineMessageStatisticsChanged(const CStatisticsReport & report);
 
 	virtual void SetEngine(CHostEngine * pEngine);
@@ -21,7 +22,6 @@ public:
 	virtual void EngineRegisterTimer(int nCommandId, CEngineUser * pUser, SIM_TIME lnLaterMilliseconds);
 	virtual void EngineWriteLog(const CString & strLog);
 
-	const CHostEngine * GetEngine() const;
 	CHostEngine * GetEngine() { return m_pEngine; }
 
 private:

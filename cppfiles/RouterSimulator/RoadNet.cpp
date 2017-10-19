@@ -275,7 +275,7 @@ void CRoadNet::CalculateBlockAndPredictTime(int & nBlockCount, SIM_TIME & lnPred
 	double fSpeedMax = GetSpeedLimit();
 	int nBlock = fCommunicationRadius / fHashInterval;
 	nBlockCount = nBlock + 1;
-	lnPredictTime = 1000 * (nBlock * fHashInterval - fCommunicationRadius) / (2 * fSpeedMax);
+	lnPredictTime = 1000 * (nBlockCount * fHashInterval - fCommunicationRadius) / (2 * fSpeedMax);
 	lnHalfBlockTime = 1000 * fHashInterval / (2 * fSpeedMax);
 }
 

@@ -24,6 +24,8 @@ public:
 	CHostEngine * m_pEngine;
 	CButton * m_pBtnCopySummary;
 	CEdit * m_pEditSpeed;
+	CEdit * m_pEditActualSpeed;
+	CEdit * m_pSimTimeSecond;
 	CEdit * m_pEditMsgStatistic;
 	CEdit * m_pEditPickCount;
 	CEdit * m_pEditTimeOut;
@@ -42,6 +44,7 @@ public:
 public:
 	virtual void OnEngineTimer(int nCommandId);
 	virtual void OnEngineSpeedChanged();
+	virtual void OnEngineTimeChanged(SIM_TIME lnCurrentTime);
 	virtual void OnEngineMessageStatisticsChanged(const CStatisticsReport & report);
 	virtual void OnDraw(CDC* pDC);  // 重写以绘制该视图
 	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);

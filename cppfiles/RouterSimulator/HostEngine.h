@@ -30,7 +30,7 @@ enum {
 	TIMER_ID_PERIOD = 1000
 };
 
-#define TIMER_LONG_PERIOD 100
+#define TIMER_LONG_PERIOD 50
 
 // CHostEngine
 
@@ -53,7 +53,8 @@ public:
 	void RegisterTimer(int nCommandId, CEngineUser * pUser, SIM_TIME lnLaterMilliseconds);
 	SIM_TIME GetSimTime() const;
 	void WriteLog(const CString & strLog);
-	int GetSpeed();
+	int GetSpeed() const;
+	int GetActualSpeed() const;
 	void RecordPackageStateChange(int nDataId, const CMsgInsideInfo & msgInfo, int nState);
 	CRoadNet * GetRoadNet();
 	void RegisterUser(CEngineUser * pUser);
@@ -98,7 +99,8 @@ protected:
 
 	CMsgCntJudgeReceiverReport * GetUnicastReport(const CTransmitionRecord & tr);
 	SIM_TIME GetActualSimMillisecPerActSec();
-	SIM_TIME GetBoundary();
+	SIM_TIME GetBoundary() const;
+	void NotifyTimeChange();
 
 private:
 	SIM_TIME m_lnSimTimeMillisecond;
