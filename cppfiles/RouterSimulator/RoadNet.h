@@ -41,8 +41,8 @@ public:
 	void InitOriginalFromIntersection(int nIntersectionId, PtrRoadPoint pIntersectionNext, PtrRoadPoint pDesPrev, PtrRoadPoint pDes, double fDistance);
 	DWORD GetHashValue(const CDoublePoint * pPoint);
 	DWORD GetHashValue(double fX, double fY);
-	double GetHashInterval();
-	SIM_TIME GetSimTimeCrossHalfBlank();
+	double GetHashInterval() const;
+	void CalculateBlockAndPredictTime(int & nBlockCount, SIM_TIME & lnPredictTime, SIM_TIME & lnHalfBlockTime, double fCommunicationRadius) const;
 
 	void GetMapRange(CDoublePoint & lefttop, CDoublePoint & rightbottom);
 	void GetMapCenter(CDoublePoint & center);
@@ -51,7 +51,7 @@ public:
 	PtrRoadPoint FindNearestRoadPoints(const CDoublePoint & coor, double fDistance);
 	PtrRoadPoint FindNearestRoadPoint(const CDoublePoint & coor);
 	int GetHostNumberInRange(const CDoublePoint & coor, double fRadius, SIM_TIME lnTime) const;
-	double GetSpeedLimit();
+	double GetSpeedLimit() const;
 
 	void LoadBuildingSettings(char * strFileName);
 	void ConnectBuildingsToRoads();

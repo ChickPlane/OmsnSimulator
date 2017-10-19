@@ -186,12 +186,6 @@
     <ClInclude Include="MsgCntJudgeReceiverReport.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="RoutingProtocolBSW.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="RoutingMsgBSW.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="EngineUser.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -225,19 +219,7 @@
     <ClInclude Include="TrustEntry.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="RoutingProtocolHslpo.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="RoutingMsgHslpo.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="TrustValue.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="RoutingProtocolEncAnony.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="RoutingMsgEncAnony.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="RouteTableItem.h">
@@ -264,16 +246,10 @@
     <ClInclude Include="MsgInsideInfo.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="RoutingMsgPmhns.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="RoutingProcess.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="RoutingProtocol.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="RoutingProcessPmhns.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="ListCtrlProcessInfo.h">
@@ -282,31 +258,67 @@
     <ClInclude Include="StatisticSummary.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="RoutingMsg.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="RoutingData.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="RoutingDataEnc.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="MsgHopInfo.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="RoutingProcessBSW.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="RoutingDataEncBSW.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="RoutingProcessHslpo.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="SimulatorCfg.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="StatisticsReport.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="RoutingProcessAptCard.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="AppointmentCard.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="AptCardAgencyRecord.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="AptCardFromSameAgency.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="RoutingProtocolAptCard.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="TestSession.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="TestSessionAptCard.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="PkgBsw.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Yell.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Sentence.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="SentenceAptCard.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="TestRecord.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="TestRecordAptCard.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="QueryMission.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="TestSessionBsw.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="MsgShowInfo.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="TestTimer.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="CommonFunctions.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
@@ -464,12 +476,6 @@
     <ClCompile Include="MsgCntJudgeReceiverReport.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="RoutingProtocolBSW.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="RoutingMsgBSW.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="EngineUser.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
@@ -500,19 +506,7 @@
     <ClCompile Include="TrustEntry.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="RoutingProtocolHslpo.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="RoutingMsgHslpo.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="TrustValue.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="RoutingProtocolEncAnony.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="RoutingMsgEncAnony.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="RouteTableItem.cpp">
@@ -539,16 +533,10 @@
     <ClCompile Include="MsgInsideInfo.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="RoutingMsgPmhns.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="RoutingProcess.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="RoutingProtocol.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="RoutingProcessPmhns.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="ListCtrlProcessInfo.cpp">
@@ -557,31 +545,67 @@
     <ClCompile Include="StatisticSummary.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="RoutingMsg.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="RoutingData.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="RoutingDataEnc.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="MsgHopInfo.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="RoutingProcessBSW.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="RoutingDataEncBSW.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="RoutingProcessHslpo.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="SimulatorCfg.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="StatisticsReport.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="RoutingProcessAptCard.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="AppointmentCard.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="AptCardAgencyRecord.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="AptCardFromSameAgency.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="RoutingProtocolAptCard.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="TestSession.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="TestSessionAptCard.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="PkgBsw.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Yell.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Sentence.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="SentenceAptCard.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="TestRecord.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="TestRecordAptCard.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="QueryMission.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="TestSessionBsw.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="MsgShowInfo.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="TestTimer.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="CommonFunctions.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

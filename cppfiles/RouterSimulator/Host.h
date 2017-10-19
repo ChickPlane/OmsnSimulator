@@ -2,6 +2,7 @@
 #include "HostRouteTable.h"
 #include "RoutingProtocol.h"
 #include "HostInfo.h"
+#include "MsgShowInfo.h"
 class CHost
 {
 public:
@@ -11,10 +12,10 @@ public:
 	virtual ~CHost();
 	virtual double GetDefaultSpeed() const;
 	virtual void SetSpeed(double fSpeed);
-	virtual void OnHearMsg(CRoutingMsg * pMsg);
-	virtual void OnPackageArrived(const CRoutingDataEnc & encData);
-	virtual bool IsReceivedPackage(const CRoutingDataEnc * pEncData);
-	virtual void GetAllCarryingMessages(CList<CRoutingDataEnc> & ret);
+	virtual void OnHearMsg(const CYell * pYell);
+	virtual void OnPackageArrived(const CQueryMission * pMission);
+	virtual bool IsReceivedPackage(const CQueryMission * pMission);
+	virtual void GetAllCarryingMessages(CMsgShowInfo & allMessages);
 
 	CDoublePoint GetPosition(SIM_TIME lnSimTime) const;
 	void Reset();

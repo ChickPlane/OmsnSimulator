@@ -11,7 +11,7 @@ CTransmitionRecord::CTransmitionRecord()
 }
 
 
-CTransmitionRecord::CTransmitionRecord(CRoutingProtocol * pFrom, CRoutingProtocol * pTo, CRoutingMsg * pMsg, int nMsgId)
+CTransmitionRecord::CTransmitionRecord(CRoutingProtocol * pFrom, CRoutingProtocol * pTo, CYell * pMsg, int nMsgId)
 	: m_pFrom(pFrom)
 	, m_pTo(pTo)
 	, m_pMsg(pMsg)

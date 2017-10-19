@@ -186,10 +186,14 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AppointmentCard.h" />
+    <ClInclude Include="AptCardAgencyRecord.h" />
+    <ClInclude Include="AptCardFromSameAgency.h" />
     <ClInclude Include="Building.h" />
     <ClInclude Include="BuildingType.h" />
     <ClInclude Include="ChildFrm.h" />
     <ClInclude Include="ClassView.h" />
+    <ClInclude Include="CommonFunctions.h" />
     <ClInclude Include="commonmsg.h" />
     <ClInclude Include="CommonTimer.h" />
     <ClInclude Include="CommonTimerRecord.h" />
@@ -228,9 +232,11 @@
     <ClInclude Include="MsgHopInfo.h" />
     <ClInclude Include="MsgInfo.h" />
     <ClInclude Include="MsgInsideInfo.h" />
+    <ClInclude Include="MsgShowInfo.h" />
     <ClInclude Include="NearbyNodeEntry.h" />
     <ClInclude Include="OutputWnd.h" />
     <ClInclude Include="PictureBackup.h" />
+    <ClInclude Include="PkgBsw.h" />
     <ClInclude Include="PlayField.h" />
     <ClInclude Include="PointKey.h" />
     <ClInclude Include="PointReference.h" />
@@ -238,6 +244,7 @@
     <ClInclude Include="PositionForecastUser.h" />
     <ClInclude Include="PropertiesWnd.h" />
     <ClInclude Include="ProtocolInfo.h" />
+    <ClInclude Include="QueryMission.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="Road.h" />
     <ClInclude Include="RoadInsideRouter.h" />
@@ -254,23 +261,13 @@
     <ClInclude Include="RouterSimulatorView.h" />
     <ClInclude Include="RouteTable.h" />
     <ClInclude Include="RouteTableItem.h" />
-    <ClInclude Include="RoutingData.h" />
-    <ClInclude Include="RoutingDataEnc.h" />
-    <ClInclude Include="RoutingDataEncBSW.h" />
-    <ClInclude Include="RoutingMsg.h" />
-    <ClInclude Include="RoutingMsgBSW.h" />
-    <ClInclude Include="RoutingMsgPmhns.h" />
-    <ClInclude Include="RoutingMsgEncAnony.h" />
-    <ClInclude Include="RoutingMsgHslpo.h" />
     <ClInclude Include="RoutingProcess.h" />
-    <ClInclude Include="RoutingProcessBSW.h" />
-    <ClInclude Include="RoutingProcessHslpo.h" />
+    <ClInclude Include="RoutingProcessAptCard.h" />
     <ClInclude Include="RoutingProtocol.h" />
-    <ClInclude Include="RoutingProtocolBSW.h" />
-    <ClInclude Include="RoutingProcessPmhns.h" />
-    <ClInclude Include="RoutingProtocolEncAnony.h" />
-    <ClInclude Include="RoutingProtocolHslpo.h" />
+    <ClInclude Include="RoutingProtocolAptCard.h" />
     <ClInclude Include="RoutingStatisticsInfo.h" />
+    <ClInclude Include="Sentence.h" />
+    <ClInclude Include="SentenceAptCard.h" />
     <ClInclude Include="SimulatorCfg.h" />
     <ClInclude Include="SimulatorCommon.h" />
     <ClInclude Include="StatisticsReport.h" />
@@ -278,17 +275,28 @@
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="streethead.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="TestRecord.h" />
+    <ClInclude Include="TestRecordAptCard.h" />
+    <ClInclude Include="TestSession.h" />
+    <ClInclude Include="TestSessionAptCard.h" />
+    <ClInclude Include="TestSessionBsw.h" />
+    <ClInclude Include="TestTimer.h" />
     <ClInclude Include="TransmitionRecord.h" />
     <ClInclude Include="TrustEntry.h" />
     <ClInclude Include="TrustValue.h" />
     <ClInclude Include="ViewTree.h" />
     <ClInclude Include="WktParse.h" />
+    <ClInclude Include="Yell.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AppointmentCard.cpp" />
+    <ClCompile Include="AptCardAgencyRecord.cpp" />
+    <ClCompile Include="AptCardFromSameAgency.cpp" />
     <ClCompile Include="Building.cpp" />
     <ClCompile Include="BuildingType.cpp" />
     <ClCompile Include="ChildFrm.cpp" />
     <ClCompile Include="ClassView.cpp" />
+    <ClCompile Include="CommonFunctions.cpp" />
     <ClCompile Include="CommonTimer.cpp" />
     <ClCompile Include="CommonTimerRecord.cpp" />
     <ClCompile Include="ConnectionJudge.cpp" />
@@ -325,9 +333,11 @@
     <ClCompile Include="MsgHopInfo.cpp" />
     <ClCompile Include="MsgInfo.cpp" />
     <ClCompile Include="MsgInsideInfo.cpp" />
+    <ClCompile Include="MsgShowInfo.cpp" />
     <ClCompile Include="NearbyNodeEntry.cpp" />
     <ClCompile Include="OutputWnd.cpp" />
     <ClCompile Include="PictureBackup.cpp" />
+    <ClCompile Include="PkgBsw.cpp" />
     <ClCompile Include="PlayField.cpp" />
     <ClCompile Include="PointKey.cpp" />
     <ClCompile Include="PointReference.cpp" />
@@ -335,6 +345,7 @@
     <ClCompile Include="PositionForecastUser.cpp" />
     <ClCompile Include="PropertiesWnd.cpp" />
     <ClCompile Include="ProtocolInfo.cpp" />
+    <ClCompile Include="QueryMission.cpp" />
     <ClCompile Include="Road.cpp" />
     <ClCompile Include="RoadInsideRouter.cpp" />
     <ClCompile Include="RoadInsideRouterEntry.cpp" />
@@ -350,23 +361,13 @@
     <ClCompile Include="RouterSimulatorView.cpp" />
     <ClCompile Include="RouteTable.cpp" />
     <ClCompile Include="RouteTableItem.cpp" />
-    <ClCompile Include="RoutingData.cpp" />
-    <ClCompile Include="RoutingDataEnc.cpp" />
-    <ClCompile Include="RoutingDataEncBSW.cpp" />
-    <ClCompile Include="RoutingMsg.cpp" />
-    <ClCompile Include="RoutingMsgBSW.cpp" />
-    <ClCompile Include="RoutingMsgPmhns.cpp" />
-    <ClCompile Include="RoutingMsgEncAnony.cpp" />
-    <ClCompile Include="RoutingMsgHslpo.cpp" />
     <ClCompile Include="RoutingProcess.cpp" />
-    <ClCompile Include="RoutingProcessBSW.cpp" />
-    <ClCompile Include="RoutingProcessHslpo.cpp" />
+    <ClCompile Include="RoutingProcessAptCard.cpp" />
     <ClCompile Include="RoutingProtocol.cpp" />
-    <ClCompile Include="RoutingProtocolBSW.cpp" />
-    <ClCompile Include="RoutingProcessPmhns.cpp" />
-    <ClCompile Include="RoutingProtocolEncAnony.cpp" />
-    <ClCompile Include="RoutingProtocolHslpo.cpp" />
+    <ClCompile Include="RoutingProtocolAptCard.cpp" />
     <ClCompile Include="RoutingStatisticsInfo.cpp" />
+    <ClCompile Include="Sentence.cpp" />
+    <ClCompile Include="SentenceAptCard.cpp" />
     <ClCompile Include="SimulatorCfg.cpp" />
     <ClCompile Include="StatisticsReport.cpp" />
     <ClCompile Include="StatisticSummary.cpp" />
@@ -376,11 +377,18 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="TestRecord.cpp" />
+    <ClCompile Include="TestRecordAptCard.cpp" />
+    <ClCompile Include="TestSession.cpp" />
+    <ClCompile Include="TestSessionAptCard.cpp" />
+    <ClCompile Include="TestSessionBsw.cpp" />
+    <ClCompile Include="TestTimer.cpp" />
     <ClCompile Include="TransmitionRecord.cpp" />
     <ClCompile Include="TrustEntry.cpp" />
     <ClCompile Include="TrustValue.cpp" />
     <ClCompile Include="ViewTree.cpp" />
     <ClCompile Include="WktParse.cpp" />
+    <ClCompile Include="Yell.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="RouterSimulator.rc" />

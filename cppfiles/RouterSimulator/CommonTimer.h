@@ -11,7 +11,8 @@ public:
 	static CMap<UINT_PTR, UINT_PTR, CCommonTimerRecord, CCommonTimerRecord&> sm_Records;
 	static CMutex sm_Mutex;
 	static int sm_LastError;
-	UINT_PTR SetCommonTimer(UINT_PTR nIDEvent, UINT uElapse);
+	UINT_PTR SetCommonTimer(UINT_PTR nIDEvent, UINT uElapse, BOOL bAlways);
+	BOOL KillCommonTimer(UINT_PTR nIDEvent);
 	virtual void OnCommonTimer(UINT_PTR nIDEvent) = 0;
 protected:
 	void CleanSelf();

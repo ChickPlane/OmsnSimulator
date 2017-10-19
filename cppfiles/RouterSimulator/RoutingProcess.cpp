@@ -4,6 +4,7 @@
 
 #include "RoutingProtocol.h"
 #include "Host.h"
+#include "Yell.h"
 
 
 CRoutingProcess::CRoutingProcess()
@@ -18,26 +19,18 @@ CRoutingProcess::~CRoutingProcess()
 {
 }
 
-void CRoutingProcess::GenerateMission(const CRoutingDataEnc & encData)
-{
-
-}
-
 void CRoutingProcess::SetEnvironment(CHost * pHost, CHostEngine * pEngine)
 {
 	m_pHost = pHost;
 	SetEngine(pEngine);
 }
 
-void CRoutingProcess::OnReceivedMsg(const CRoutingMsg * pMsg)
-{
-
-}
-
-void CRoutingProcess::TransmitMessage(CRoutingProtocol * pTo, CRoutingMsg * pMsg)
+void CRoutingProcess::TransmitMessage(CRoutingProtocol * pTo, CYell * pMsg)
 {
 	if (m_pProtocol)
 	{
+		pMsg->m_pSender = m_pProtocol;
+		pMsg->m_pRecver = pTo;
 		m_pProtocol->TransmitMessage(this, pTo, pMsg);
 	}
 	else
@@ -46,7 +39,7 @@ void CRoutingProcess::TransmitMessage(CRoutingProtocol * pTo, CRoutingMsg * pMsg
 	}
 }
 
-int CRoutingProcess::GetCarryingMessages(CList<CRoutingDataEnc> & appendTo) const
+int CRoutingProcess::GetCarryingMessages(CMsgShowInfo & allMessages) const
 {
 	return 0;
 }

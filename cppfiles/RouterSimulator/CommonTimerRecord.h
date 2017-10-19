@@ -13,5 +13,6 @@ public:
 
 	UINT_PTR m_nIDEvent;
 	CCommonTimer * m_pCommonTimer;
+	BOOL m_bAlways;
 };
 

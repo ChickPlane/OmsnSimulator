@@ -4,9 +4,9 @@
 #include "stdafx.h"
 #include "RouterSimulator.h"
 #include "ListCtrlMessages.h"
-#include "RoutingMsg.h"
 #include "Host.h"
 #include "HostEngine.h"
+#include "MsgShowInfo.h"
 
 
 // CListCtrlMessages
@@ -37,24 +37,21 @@ void CListCtrlMessages::ShowAllMsgs()
 	{
 		return;
 	}
-	CList<CRoutingDataEnc> allMessages;
+	CMsgShowInfo allMessages;
 	m_pHost->GetAllCarryingMessages(allMessages);
 	DeleteAllItems();
-	POSITION pos = allMessages.GetHeadPosition();
+	POSITION pos = allMessages.m_Rows.GetHeadPosition();
 	CString strItemHead;
 	CString strItem;
 	int nLineNum = 0;
 	while (pos)
 	{
-		CRoutingDataEnc encData = allMessages.GetNext(pos);
+		CMsgShowRow & tmpRow = allMessages.m_Rows.GetNext(pos);
 		strItemHead.Format(_T("%07d"), nLineNum);
 		InsertItem(nLineNum, strItemHead);
-		strItem.Format(_T("%d"), encData.ForceGetDataId(NULL));
-		SetItemText(nLineNum, MSG_GRID_COL_ID, strItem);
-		strItem.Format(_T("%d"), (int)(encData.ForceGetTimeOut(NULL) - m_pEngine->GetSimTime()) / 1000);
-		SetItemText(nLineNum, MSG_GRID_COL_REMAINED, strItem);
-		strItem.Format(_T("%2f"), encData.m_Statistic.GetHopCount());
-		SetItemText(nLineNum, MSG_GRID_COL_HOPS, strItem);
+		SetItemText(nLineNum, MSG_GRID_COL_ID, tmpRow.m_Item0);
+		SetItemText(nLineNum, MSG_GRID_COL_REMAINED, tmpRow.m_Item1);
+		SetItemText(nLineNum, MSG_GRID_COL_HOPS, tmpRow.m_Item2);
 		++nLineNum;
 	}
 }

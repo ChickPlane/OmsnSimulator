@@ -3,6 +3,7 @@
 #include "HostEngine.h"
 #include "Host.h"
 #include "RoutingProcess.h"
+#include "Yell.h"
 
 
 CRoutingProtocol::CRoutingProtocol()
@@ -38,37 +39,25 @@ void CRoutingProtocol::SetCommunicateRadius(double fCommunicationRadius)
 	m_fCommunicationRadius = fCommunicationRadius;
 }
 
-void CRoutingProtocol::RecordNewPackage(CRoutingDataEnc & encData)
-{
-	encData.RecordHop(GetMsgHopInfo(MSG_HOP_STATE_SOURCE, HOP_INFO_TYPE_EVENT));
-	EngineRecordPackage(encData.GetDataId(GetHost()), encData.m_Statistic, MSG_HOP_STATE_SOURCE);
-}
-
 void CRoutingProtocol::OnEngineTimer(int nCommandId)
 {
 
 }
 
-void CRoutingProtocol::GetAllCarryingMessages(CList<CRoutingDataEnc> & ret) const
+void CRoutingProtocol::GetAllCarryingMessages(CMsgShowInfo & allMessages) const
 {
-	ret.RemoveAll();
+	allMessages.m_Rows.RemoveAll();
 	for (int i = 0; i < m_Processes.GetSize(); ++i)
 	{
-		m_Processes[i]->GetCarryingMessages(ret);
+		m_Processes[i]->GetCarryingMessages(allMessages);
 	}
 }
 
-void CRoutingProtocol::OnDelivered(const CRoutingMsg * pMsgBase)
+void CRoutingProtocol::OnDelivered(const CQueryMission * pMission)
 {
-	if (!GetHost()->IsReceivedPackage(pMsgBase->m_pData))
+	if (!GetHost()->IsReceivedPackage(pMission))
 	{
-		CRoutingDataEnc * pEncData = pMsgBase->m_pData->GetDuplicate();
-		pEncData->RecordHop(GetMsgHopInfo(MSG_HOP_STATE_DESTINATION, HOP_INFO_TYPE_EVENT));
-		EngineRecordPackage(pEncData->GetDataId(GetHost()), pEncData->m_Statistic, MSG_HOP_STATE_DESTINATION);
-
-		GetHost()->OnPackageArrived(*pEncData);
-		delete pEncData;
-		pEncData = NULL;
+		GetHost()->OnPackageArrived(pMission);
 	}
 }
 
@@ -96,9 +85,14 @@ int CRoutingProtocol::AddProcess(CRoutingProcess * pProcess)
 	return nProcessId;
 }
 
-int CRoutingProtocol::GetInfoList(CList<CString> & ret)
+int CRoutingProtocol::GetInfoList(CMsgShowInfo & allMessages) const
 {
 	return 0;
+}
+
+void CRoutingProtocol::Turn(BOOL bOn)
+{
+
 }
 
 CMsgHopInfo CRoutingProtocol::GetMsgHopInfo(int nComment, HOP_INFO_TYPE eType) const
@@ -115,13 +109,10 @@ CMsgHopInfo CRoutingProtocol::GetMsgHopInfo(int nComment, HOP_INFO_TYPE eType) c
 	return ret;
 }
 
-void CRoutingProtocol::TransmitMessage(CRoutingProcess * pFromProcess, CRoutingProtocol * pTo, CRoutingMsg * pMsg)
+void CRoutingProtocol::TransmitMessage(CRoutingProcess * pFromProcess, CRoutingProtocol * pTo, CYell * pMsg)
 {
 	if (GetEngine())
 	{
-		pMsg->m_nProtocolType = GetProcessId(pFromProcess);
-		ASSERT(pMsg->m_nProtocolType != INVALID_PROCESS_ID);
-		pMsg->m_pData->RecordHop(GetMsgHopInfo(MSG_HOP_STATE_OTHERS, HOP_INFO_TYPE_DEPARTURE));
 		GetEngine()->TransmitMessage(this, pTo, pMsg);
 	}
 	else
@@ -143,10 +134,20 @@ int CRoutingProtocol::GetProcessId(CRoutingProcess * pProcess)
 }
 
 
+int CRoutingProtocol::GetDebugNumber(int nParam)
+{
+	return 0;
+}
+
 void CRoutingProtocol::WriteLog(const CString & strLog)
 {
 	CString strWriteDown = m_strLogPrefix + _T(" ") + strLog;
 	EngineWriteLog(strWriteDown);
 	OutputDebugString(_T("\n") + strWriteDown);
+}
+
+CString CRoutingProtocol::GetDebugString() const
+{
+	return _T("");
 }
 

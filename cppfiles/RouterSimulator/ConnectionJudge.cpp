@@ -55,8 +55,8 @@ void CConnectionJudge::SetEngine(CHostEngine * pEngine)
 
 void CConnectionJudge::OnFinishedForecastOnce(SIM_TIME lnSimTime)
 {
-	SIM_TIME * pMsg = new SIM_TIME(lnSimTime);
-	PostThreadMessage(MSG_ID_JUDGE_FORECAST_OK, (WPARAM)pMsg, 0);
+// 	SIM_TIME * pMsg = new SIM_TIME(lnSimTime);
+// 	PostThreadMessage(MSG_ID_JUDGE_FORECAST_OK, (WPARAM)pMsg, 0);
 }
 
 void CConnectionJudge::OnFinishedOneForecast(WPARAM wParam, LPARAM lParam)
@@ -70,18 +70,30 @@ void CConnectionJudge::OnFinishedOneForecast(WPARAM wParam, LPARAM lParam)
 void CConnectionJudge::OnNewSend(WPARAM wParam, LPARAM lParam)
 {
 	CMsgNewSendJudge * pMsg = (CMsgNewSendJudge *)wParam;
-	SIM_TIME lnSimTimeHalfBlock = m_pData->GetSimTimeCrossHalfBlank();
-	CMsgPosFrcstReport * pReport = m_pForecast->GetReport(pMsg->m_fSecondId, lnSimTimeHalfBlock);
+
+	int nBlockCount;
+	SIM_TIME lnPredictTime;
+	SIM_TIME lnHalfBlockTime;
+	double fCommunicationRadius;
+	m_pData->CalculateBlockAndPredictTime(nBlockCount, lnPredictTime, lnHalfBlockTime, pMsg->m_fRadius);
+
+	CMsgPosFrcstReport * pReport = m_pForecast->GetReport(pMsg->m_fSecondId, LONG_MAX);
 	if (!pReport)
 	{
-		pReport = m_pForecast->GetReport(pMsg->m_fSecondId, lnSimTimeHalfBlock);
+		ASSERT(NULL);
 	}
-	ASSERT(pReport);
+	SIM_TIME lnDiffer = pMsg->m_fSecondId - pReport->m_lnSimTime;
+	int nLimit = nBlockCount;
+	if (lnDiffer > lnPredictTime)
+	{
+		nLimit += (lnDiffer - lnPredictTime) / lnHalfBlockTime;
+	}
+	ASSERT(nLimit <= 3);
+
 
 	CDoublePoint centerPosition = pMsg->m_pHost->m_schedule.GetPosition(pMsg->m_fSecondId);
 	CMsgCntJudgeReceiverReport * pRet = new CMsgCntJudgeReceiverReport();
 	pRet->m_nMsgId = pMsg->m_nMsgId;
-	int nLimit = pMsg->m_fRadius / m_pData->GetHashInterval() + 2;
 	for (int i = -nLimit; i <= nLimit; ++i)
 	{
 		for (int j = -nLimit; j <= nLimit; ++j)

@@ -20,5 +20,6 @@ CCommonTimerRecord & CCommonTimerRecord::operator=(const CCommonTimerRecord & sr
 {
 	m_nIDEvent = src.m_nIDEvent;
 	m_pCommonTimer = src.m_pCommonTimer;
+	m_bAlways = src.m_bAlways;
 	return *this;
 }

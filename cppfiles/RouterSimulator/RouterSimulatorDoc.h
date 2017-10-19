@@ -23,9 +23,11 @@ protected: // 仅从序列化创建
 // 特性
 public:
 	CRoadNet * m_pRoadNet;
+	CSimulatorCfg m_Cfg;
+
+protected:
 	CList<CLineInMap> * m_pLineInMap;
 	CRouterRunner * m_pRun;
-	CSimulatorCfg m_Cfg;
 
 // 操作
 public:

@@ -19,7 +19,6 @@
 #include "HostEngine.h"
 #include "DlgHostInfo.h"
 #include "MobileSocialNetworkHost.h"
-#include "RoutingProtocolHslpo.h"
 
 
 void CMapGui::SetScale(int nScaleIndex)
@@ -302,6 +301,9 @@ void CMapGui::DrawOneSchedule(CDC * pMemDC, int nHostId, CDoublePoint & lt, CDou
 
 void CMapGui::DrawHosts(CDC * pMemDC)
 {
+	DrawHosts_AptCard(pMemDC);
+	return;
+
 	CDoublePoint lt, rb;
 	GetRefreshArea(lt, rb);
 	if (!m_pHostNeedUpdate)
@@ -379,6 +381,84 @@ void CMapGui::DrawHosts(CDC * pMemDC)
 	pMemDC->SelectObject(pOldBrush);
 }
 
+void CMapGui::DrawHosts_AptCard(CDC * pMemDC)
+{
+	CDoublePoint lt, rb;
+	GetRefreshArea(lt, rb);
+	if (!m_pHostNeedUpdate)
+	{
+		return;
+	}
+	COLORREF color(RGB(50, 50, 50));
+	int nRoadWidth = 2*sm_fRoadHalfWidth / GetScale();
+	if (nRoadWidth == 0)
+	{
+		nRoadWidth = 1;
+	}
+	int nRadius = m_Cfg.m_fCommunicateRadius / GetScale();
+	CPen    pen(PS_SOLID, nRoadWidth, color);
+	CPen penCarry(PS_SOLID, nRoadWidth * 3, RGB(250, 100, 50));
+	CPen penInfo(PS_SOLID, nRoadWidth * 6, RGB(00, 50, 150));
+	CPen*    pOldPen = pMemDC->SelectObject(&pen);
+	CBrush *pOldBrush = pMemDC->SelectObject(CBrush::FromHandle((HBRUSH)GetStockObject(NULL_BRUSH)));
+	//MemDC.SetBkMode(TRANSPARENT);
+	pMemDC->SetTextColor(RGB(0, 0, 0));
+	CFont font;
+
+	font.CreateFont(
+		30 / GetScale(), // nHeight
+		0, // nWidth
+		0, // nEscapement
+		0, // nOrientation
+		FW_NORMAL, // nWeight
+		FALSE, // bItalic
+		FALSE, // bUnderline
+		0, // cStrikeOut
+		ANSI_CHARSET, // nCharSet
+		OUT_DEFAULT_PRECIS, // nOutPrecision
+		CLIP_DEFAULT_PRECIS, // nClipPrecision
+		DEFAULT_QUALITY, // nQuality
+		DEFAULT_PITCH | FF_SWISS,
+		_T("Arial") // nPitchAndFamily Arial
+	);
+	pMemDC->SelectObject(&font);
+	pMemDC->SetBkMode(TRANSPARENT);
+
+	int nLength = m_pHostNeedUpdate->GetSize();
+	for (int i = 0; i < nLength; ++i)
+	{
+		CPoint pointCenter;
+		CDoublePoint hostPosition = m_pHostNeedUpdate->GetAt(i).m_Position;
+		if (hostPosition.m_X < lt.m_X || hostPosition.m_X > rb.m_X)
+			continue;
+		if (hostPosition.m_Y < lt.m_Y || hostPosition.m_Y > rb.m_Y)
+			continue;
+		GeographicToGraphicPoint(hostPosition, pointCenter);
+		CRoutingProtocol * pProtocol = m_pHostNeedUpdate->GetAt(i).m_pHost->m_pProtocol;
+		CPen * pSwitchPen = NULL;
+		if (nRoadWidth > 2)
+		{
+			pSwitchPen = new CPen(PS_SOLID, nRoadWidth, pProtocol->GetInportantLevel());
+			pMemDC->SelectObject(pSwitchPen);
+		}
+		pMemDC->Ellipse(pointCenter.x - nRadius, pointCenter.y - nRadius, pointCenter.x + nRadius, pointCenter.y + nRadius);
+		CString strHost;
+		strHost.Format(_T("%d"), m_pHostNeedUpdate->GetAt(i).m_pHost->m_nId);
+		int nWidth = 50 / GetScale();
+		int nHeight = 30 / GetScale();
+		CRect rctText(pointCenter.x - nWidth, pointCenter.y - nHeight, pointCenter.x + nWidth, pointCenter.y + nHeight);
+		pMemDC->DrawText(strHost, &rctText, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
+		if (pSwitchPen)
+		{
+			delete pSwitchPen;
+			pSwitchPen = NULL;
+		}
+	}
+
+	pMemDC->SelectObject(pOldPen);
+	pMemDC->SelectObject(pOldBrush);
+}
+
 void CMapGui::DrawFollowings(CDC * pMemDC)
 {
 	if (m_pFollowHost == NULL)
@@ -402,7 +482,7 @@ void CMapGui::DrawFollowings(CDC * pMemDC)
 	pMemDC->SetBkMode(TRANSPARENT);
 
 	CMobileSocialNetworkHost * pHost = (CMobileSocialNetworkHost *)m_pFollowHost;
-	CRoutingProtocolHslpo * pProtocol = (CRoutingProtocolHslpo*)pHost->m_pProtocol;
+	//CRoutingProtocolHslpo * pProtocol = (CRoutingProtocolHslpo*)pHost->m_pProtocol;
 
 	int nLength = m_pHostNeedUpdate->GetSize();
 	int nSelfIndex = -1;
@@ -841,7 +921,7 @@ void CMapGui::CreateRandomPackages(int nNumber, SIM_TIME lnTimeOut)
 			}
 		}
 	}
-	CRoutingDataEnc encData;
+	CQueryMission mission;
 	CHost * pHostFrom = NULL;
 	CHost * pHostTo = m_pRoadNet->m_allHosts.GetAt(0);
 	SIM_TIME lnTime = m_pEngine->GetSimTime() + lnTimeOut;
@@ -852,9 +932,10 @@ void CMapGui::CreateRandomPackages(int nNumber, SIM_TIME lnTimeOut)
 		if (pEmpty[i - 1] == 1)
 		{
 			pHostFrom = m_pRoadNet->m_allHosts[i];
-			encData.SetValue(pHostFrom, pHostTo, lnTime);
-			encData.ChangeDataId();
-			pHostFrom->m_pProtocol->SendPackage(encData);
+			mission.m_SenderId = pHostFrom->m_nId;
+			mission.m_RecverId = pHostTo->m_nId;
+			mission.m_lnTimeOut = lnTime;
+			pHostFrom->m_pProtocol->CreateQueryMission(&mission);
 		}
 	}
 	delete[] pEmpty;
@@ -1281,7 +1362,7 @@ LRESULT CMapGui::OnAllInitOk(WPARAM wParam, LPARAM lParam)
 	if (wParam != 0)
 	{
 		SetTimer(MAP_GUI_TIMER_ID_CHECK_TIMEOUT, 5000, NULL);
-		CreateRandomPackages(200, m_Cfg.m_nTimeOutSecond * 1000);
+		CreateRandomPackages(100, m_Cfg.m_nTimeOutSecond * 1000);
 	}
 	return 0;
 }
@@ -1306,16 +1387,16 @@ void CMapGui::OnTimer(UINT_PTR nIDEvent)
 	{
 	case MAP_GUI_TIMER_ID_CHECK_WORKING:
 	{
-		if (m_lnLastEngineTime == m_pEngine->GetSimTime() && m_bEngineShouldBeRunning)
-		{
-			OnEngineRun();
-			m_nRestartTimes++;
-			if (m_nRestartTimes > 5)
-			{
-				PostQuitMessage(0);
-			}
-		}
-		m_lnLastEngineTime = m_pEngine->GetSimTime();
+// 		if (m_lnLastEngineTime == m_pEngine->GetSimTime() && m_bEngineShouldBeRunning)
+// 		{
+// 			OnEngineRun();
+// 			m_nRestartTimes++;
+// 			if (m_nRestartTimes > 5)
+// 			{
+// 				PostQuitMessage(0);
+// 			}
+// 		}
+// 		m_lnLastEngineTime = m_pEngine->GetSimTime();
 		break;
 	}
 	case MAP_GUI_TIMER_ID_CHECK_TIMEOUT:
@@ -1432,7 +1513,8 @@ void CMapGui::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 	{
 		if (m_bEnginePaused)
 		{
-			OnEngineRun();
+			m_pEngine->PostThreadMessage(MSG_ID_ENGINE_RESUME, 0, 0);
+			m_bEnginePaused = false;
 		}
 		else
 		{

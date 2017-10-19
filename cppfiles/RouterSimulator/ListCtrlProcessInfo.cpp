@@ -33,17 +33,18 @@ void CListCtrlProcessInfo::ShowAllMsgs()
 	{
 		return;
 	}
-	CList<CString> allInfoString;
-	m_pHost->m_pProtocol->GetInfoList(allInfoString);
+	CMsgShowInfo allInfo;
+	m_pHost->m_pProtocol->GetInfoList(allInfo);
 	DeleteAllItems();
-	POSITION pos = allInfoString.GetHeadPosition();
+	POSITION pos = allInfo.m_Rows.GetHeadPosition();
 	CString strItemHead;
 	int nLineNum = 0;
 	while (pos)
 	{
-		CString strInfo = allInfoString.GetNext(pos);
 		strItemHead.Format(_T("%07d"), nLineNum);
 		InsertItem(nLineNum, strItemHead);
+
+		CString strInfo = allInfo.m_Rows.GetNext(pos).m_Item0;
 		SetItemText(nLineNum, PINFO_GRID_COL_INFO, strInfo);
 		++nLineNum;
 	}

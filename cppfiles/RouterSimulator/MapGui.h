@@ -68,6 +68,7 @@ protected:
 	void DrawSchedules(CDC * pMemDC);
 	void DrawOneSchedule(CDC * pMemDC, int nHostId, CDoublePoint & lt, CDoublePoint & rb);
 	void DrawHosts(CDC * pMemDC);
+	void DrawHosts_AptCard(CDC * pMemDC);
 	void DrawFollowings(CDC * pMemDC);
 
 	void DrawRoadPoint(CDC * pMemDC);

@@ -61,9 +61,11 @@ void CDlgHostInfo::OnBnClickedButton1()
 	CHost * pHostFrom = m_pHost;
 	CHost * pHostTo = m_pRoadNet->m_allHosts.GetAt(nTargetId);
 	SIM_TIME lnTimeOut = m_pHost->m_pProtocol->GetSimTime() + 1000000;
-	CRoutingDataEnc encData;
-	encData.SetValue(pHostFrom, pHostTo, lnTimeOut);
-	m_pHost->m_pProtocol->SendPackage(encData);
+	CQueryMission mission;
+	mission.m_SenderId = pHostFrom->m_nId;
+	mission.m_RecverId = pHostTo->m_nId;
+	mission.m_lnTimeOut = lnTimeOut;
+	m_pHost->m_pProtocol->CreateQueryMission(&mission);
 
 	UpdateUi();
 }

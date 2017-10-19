@@ -1,10 +1,13 @@
 #pragma once
-#include "RoutingMsg.h"
 #include "EngineUser.h"
 #include "ProtocolInfo.h"
+#include "QueryMission.h"
+#include "MsgShowInfo.h"
+
 class CHost;
 class CHostEngine;
 class CRoutingProcess;
+class CYell;
 
 #define INVALID_PROCESS_ID -1
 
@@ -15,29 +18,31 @@ public:
 	CRoutingProtocol();
 	virtual ~CRoutingProtocol();
 
-	virtual void SendPackage(const CRoutingDataEnc & encData) = 0;
-	virtual void OnReceivedMsg(const CRoutingMsg * pMsg) = 0;
+	virtual void CreateQueryMission(const CQueryMission * pMission) = 0;
+	virtual void OnReceivedMsg(const CYell * pMsg) = 0;
 	virtual void SetEnvironment(CHost * pHost, CHostEngine * pEngine);
-	virtual void RecordNewPackage(CRoutingDataEnc & encData);
 	virtual void OnEngineTimer(int nCommandId);
-	virtual void GetAllCarryingMessages(CList<CRoutingDataEnc> & ret) const;
+	virtual void GetAllCarryingMessages(CMsgShowInfo & allMessages) const;
+	virtual int GetInfoList(CMsgShowInfo & allMessages) const;
+	virtual void Turn(BOOL bOn);
 
-	virtual void OnDelivered(const CRoutingMsg * pMsgBase);
+	virtual void OnDelivered(const CQueryMission * pMission);
 
 	virtual void SetCommunicateRadius(double fCommunicationRadius);
 	virtual double GetCommunicateRadius() const;
 
-	virtual int GetInportantLevel() const { return 0; }
+	virtual COLORREF GetInportantLevel() const { return 0; }
 
 	CHost * GetHost() const;
 	int GetHostId() const;
 	CDoublePoint GetHostPostion(SIM_TIME lnTime) const;
 	virtual int AddProcess(CRoutingProcess * pProcess);
-	virtual int GetInfoList(CList<CString> & ret);
 
 	CMsgHopInfo GetMsgHopInfo(int nComment, HOP_INFO_TYPE eType) const;
-	virtual void TransmitMessage(CRoutingProcess * pFromProcess, CRoutingProtocol * pTo, CRoutingMsg * pMsg);
+	virtual void TransmitMessage(CRoutingProcess * pFromProcess, CRoutingProtocol * pTo, CYell * pMsg);
 	virtual int GetProcessId(CRoutingProcess * pProcess);
+	virtual int GetDebugNumber(int nParam);
+	virtual CString GetDebugString() const;
 
 	void WriteLog(const CString & strLog);
 protected:
@@ -46,4 +51,3 @@ protected:
 	CArray<CRoutingProcess *> m_Processes;
 	CString m_strLogPrefix;
 };
-

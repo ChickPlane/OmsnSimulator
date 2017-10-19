@@ -34,6 +34,7 @@ public:
 	CEdit * m_pAveAnonyTime;
 	CStatisticSummary m_Summare;
 
+
 // ²Ù×÷
 public:
 

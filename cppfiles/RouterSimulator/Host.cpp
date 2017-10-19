@@ -37,36 +37,34 @@ void CHost::SetSpeed(double fSpeed)
 	m_fSpeed = fSpeed;
 }
 
-void CHost::OnHearMsg(CRoutingMsg * pMsg)
+void CHost::OnHearMsg(const CYell * pYell)
 {
 	if (m_pProtocol)
 	{
-		m_pProtocol->OnReceivedMsg(pMsg);
+		m_pProtocol->OnReceivedMsg(pYell);
 	}
 }
 
-void CHost::OnPackageArrived(const CRoutingDataEnc & encData)
+void CHost::OnPackageArrived(const CQueryMission * pMission)
 {
-	int nDataId = encData.GetDataId(this);
-	ASSERT(nDataId != INVALID_DATA_ID);
-	m_nReceivedMsgs[nDataId] = 1;
+	m_nReceivedMsgs[pMission->m_nMissionId] = 1;
+	ASSERT(m_nId == pMission->m_nMissionId);
 
 	CString strOut;
 	int nToId = m_nId;
-	strOut.Format(_T("Receive [%7d] DESTINATION (%d) !!!"), nDataId, nToId);
+	strOut.Format(_T("Receive [%7d] DESTINATION (%d) !!!"), pMission->m_nMissionId, nToId);
 	m_pProtocol->WriteLog(strOut);
 }
 
-bool CHost::IsReceivedPackage(const CRoutingDataEnc * pEncData)
+bool CHost::IsReceivedPackage(const CQueryMission * pMission)
 {
 	int nValue;
-	return true == m_nReceivedMsgs.Lookup(pEncData->GetDataId(this), nValue);
+	return true == m_nReceivedMsgs.Lookup(pMission->m_nMissionId, nValue);
 }
 
-void CHost::GetAllCarryingMessages(CList<CRoutingDataEnc> & ret)
+void CHost::GetAllCarryingMessages(CMsgShowInfo & allMessages)
 {
-	ret.RemoveAll();
-	m_pProtocol->GetAllCarryingMessages(ret);
+	m_pProtocol->GetAllCarryingMessages(allMessages);
 }
 
 CDoublePoint CHost::GetPosition(SIM_TIME lnSimTime) const

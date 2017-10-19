@@ -1,10 +1,21 @@
 #pragma once
 
 typedef long long SIM_TIME;
+typedef unsigned int USERID;
+typedef enum 
+{
+	UID_INVALID = -1,
+	UID_LBSP0 = 0,
+	UID_USER_MIN,
+	UID_USER_MAX = 0X7F00,
+	UID_LBS_MIN,
+	UID_LBS_MAX = 0X7FFF
+};
 
 #define PROTOCOL_NAME_HSLPO "HSLPO"
 #define PROTOCOL_NAME_BSW "BSW"
 #define PROTOCOL_NAME_MHLPSP "MHLPSP"
+#define PROTOCOL_NAME_APTCARD "APTCARD"
 
 #define HOST_SPEED_PEDESTRIANS_MIN 1.8
 #define HOST_SPEED_PEDESTRIANS_MAX 5.4

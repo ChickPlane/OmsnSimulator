@@ -133,7 +133,9 @@ void CDlgHostProperty::OnBnClickedButtonHstPptSend()
 	CHost * pHostFrom = m_RunParam.m_pHost;
 	CHost * pHostTo = m_RunParam.m_pEngine->GetRoadNet()->m_allHosts.GetAt(nId);
 	SIM_TIME lnTimeOut = m_RunParam.m_pEngine->GetSimTime() + nTimeOut * 1000;
-	CRoutingDataEnc encData;
-	encData.SetValue(pHostFrom, pHostTo, lnTimeOut);
-	m_RunParam.m_pHost->m_pProtocol->SendPackage(encData);
+	CQueryMission mission;
+	mission.m_SenderId = pHostFrom->m_nId;
+	mission.m_RecverId = pHostTo->m_nId;
+	mission.m_lnTimeOut = lnTimeOut;
+	m_RunParam.m_pHost->m_pProtocol->CreateQueryMission(&mission);
 }

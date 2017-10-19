@@ -9,6 +9,7 @@ class CRoadNet;
 enum {
 	MSG_ID_POS_FRCST_NEW_TIME = WM_USER + 100,
 	MSG_ID_POS_FRCST_COMPLETE,
+	MSG_ID_POS_FRCST_REMOVEALL
 };
 
 class CMsgPosFrcstNewTime
@@ -64,6 +65,7 @@ protected:
 	DECLARE_MESSAGE_MAP()
 	void OnForecastNewTime(WPARAM wParam, LPARAM lParam);
 	void OnForecastComplete(WPARAM wParam, LPARAM lParam);
+	void OnForecastRemoveAll(WPARAM wParam, LPARAM lParam);
 
 protected:
 	void DeleteRecords(SIM_TIME lnSimTimeBefore);

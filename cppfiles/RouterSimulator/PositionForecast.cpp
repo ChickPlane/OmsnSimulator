@@ -151,17 +151,37 @@ CMsgPosFrcstReport * CPositionForecast::GetReport(SIM_TIME lnSimTime, SIM_TIME l
 	LockReports();
 	POSITION pos = m_Reports.GetHeadPosition();
 	CMsgPosFrcstReport * pRet = NULL;
+	SIM_TIME lnMinDiffer = INT_MAX;
 	while (pos)
 	{
-		pRet = m_Reports.GetNext(pos);
-		if (lnSimTime - pRet->m_lnSimTime >= 0 && lnSimTime - pRet->m_lnSimTime <= lnDiffer)
+		CMsgPosFrcstReport * pCurrent = NULL;
+		pCurrent = m_Reports.GetNext(pos);
+		if (lnSimTime >= pCurrent->m_lnSimTime)
 		{
-			UnlockReports();
-			return pRet;
+			if (lnSimTime - pCurrent->m_lnSimTime < lnMinDiffer)
+			{
+				lnMinDiffer = lnSimTime - pCurrent->m_lnSimTime;
+				pRet = pCurrent;
+			}
+		}
+		else
+		{
+			if (pCurrent->m_lnSimTime - lnSimTime < lnMinDiffer)
+			{
+				lnMinDiffer = lnSimTime - pCurrent->m_lnSimTime;
+				pRet = pCurrent;
+			}
 		}
 	}
 	UnlockReports();
-	return NULL;
+	if (lnMinDiffer > lnDiffer)
+	{
+		return NULL;
+	}
+	else
+	{
+		return pRet;
+	}
 }
 
 void CPositionForecast::OnForecastNewTime(WPARAM wParam, LPARAM lParam)
@@ -169,6 +189,7 @@ void CPositionForecast::OnForecastNewTime(WPARAM wParam, LPARAM lParam)
 	CMsgPosFrcstNewTime * pMsg = (CMsgPosFrcstNewTime *)wParam;
 	if (!pMsg)
 	{
+		ASSERT(0);
 		return;
 	}
 
@@ -182,28 +203,47 @@ void CPositionForecast::OnForecastNewTime(WPARAM wParam, LPARAM lParam)
 
 void CPositionForecast::OnForecastComplete(WPARAM wParam, LPARAM lParam)
 {
-	CMsgPosFrcstComplete * pMsg = (CMsgPosFrcstComplete*)wParam;
-	if (!pMsg)
+	int nBeforeSecond = (int)wParam;
+	DeleteRecords(nBeforeSecond);
+}
+
+void CPositionForecast::OnForecastRemoveAll(WPARAM wParam, LPARAM lParam)
+{
+	LockReports();
+	POSITION pos = m_Reports.GetHeadPosition();
+	CMsgPosFrcstReport * pToBeDelete = NULL;
+	while (pos)
 	{
-		return;
+		pToBeDelete = m_Reports.GetNext(pos);
+		delete pToBeDelete;
 	}
-	DeleteRecords(pMsg->m_lnSimTime);
-	delete pMsg;
+	m_Reports.RemoveAll();
+	UnlockReports();
 }
 
 void CPositionForecast::DeleteRecords(SIM_TIME lnSimTimeBefore)
 {
 	LockReports();
 	POSITION pos = m_Reports.GetHeadPosition(), posLast;
-	CMsgPosFrcstReport * pRet = NULL;
+	CMsgPosFrcstReport * pNext = NULL;
+	CMsgPosFrcstReport * pToBeDelete = NULL;
 	while (pos)
 	{
 		posLast = pos;
-		pRet = m_Reports.GetNext(pos);
-		if (lnSimTimeBefore - pRet->m_lnSimTime > 0)
+		pToBeDelete = m_Reports.GetNext(pos);
+		if (!pos)
 		{
-			delete m_Reports.GetAt(posLast);
+			break;
+		}
+		pNext = m_Reports.GetAt(pos);
+		if (lnSimTimeBefore - pNext->m_lnSimTime > 0)
+		{
+			delete pToBeDelete;
 			m_Reports.RemoveAt(posLast);
+		}
+		else
+		{
+			break;
 		}
 	}
 	UnlockReports();
@@ -242,6 +282,7 @@ void CPositionForecast::DoNewForecast(SIM_TIME lnSimTime)
 BEGIN_MESSAGE_MAP(CPositionForecast, CWinThread)
 	ON_THREAD_MESSAGE(MSG_ID_POS_FRCST_NEW_TIME, OnForecastNewTime)
 	ON_THREAD_MESSAGE(MSG_ID_POS_FRCST_COMPLETE, OnForecastComplete)
+	ON_THREAD_MESSAGE(MSG_ID_POS_FRCST_REMOVEALL, OnForecastRemoveAll)
 END_MESSAGE_MAP()
 
 

@@ -15,9 +15,8 @@
 #include "commonmsg.h"
 #include <fstream>
 #include <string>
-#include "RoutingProtocolHslpo.h"
-#include "RoutingProtocolEncAnony.h"
 #include "MobileSocialNetworkHost.h"
+#include "RoutingProtocolAptCard.h"
 using namespace std;
 
 #ifdef _DEBUG
@@ -173,34 +172,17 @@ void CRouterSimulatorView::InitHostProtocol(int nCopyCount, char * strProtocolNa
 	int nLength = pDoc->m_pRoadNet->m_allHosts.GetSize();
 	m_Summare.m_ProtocolName = strProtocolName;
 	m_Summare.m_nRandomSeed = theApp.nRandSeed;
+	m_pEngine->SetCommunicationRadius(fCommunicateRadius);
 	for (int i = 0; i < nLength; ++i)
 	{
 		CMobileSocialNetworkHost * pHost = (CMobileSocialNetworkHost *)pDoc->m_pRoadNet->m_allHosts[i];
-		if (strcmp(strProtocolName, PROTOCOL_NAME_HSLPO) == 0)
+		if (TRUE || strcmp(strProtocolName, PROTOCOL_NAME_APTCARD) == 0)
 		{
-			CRoutingProtocolHslpo * pHslpo = new CRoutingProtocolHslpo();
-			pHslpo->SetCommunicateRadius(fCommunicateRadius);
-			pHslpo->SetEnvironment(pHost, m_pEngine);
-			pHslpo->SetPrivacyParam(nK, fHigh, fLow);
-			pHslpo->SetCopyCount(nCopyCount);
-			pDoc->m_pRoadNet->m_allHosts[i]->m_pProtocol = pHslpo;
-		}
-		else if (strcmp(strProtocolName, PROTOCOL_NAME_MHLPSP) == 0)
-		{
-			CRoutingProtocolEncAnony * pMhlpsp = new CRoutingProtocolEncAnony();
-			pMhlpsp->SetCommunicateRadius(fCommunicateRadius);
-			pMhlpsp->SetEnvironment(pHost, m_pEngine);
-			pMhlpsp->SetPrivacyParam(fHigh, fAnonymityRadius, 3 * fAnonymityRadius, 10 * fAnonymityRadius);
-			pMhlpsp->SetCopyCount(nCopyCount);
-			pDoc->m_pRoadNet->m_allHosts[i]->m_pProtocol = pMhlpsp;
-		}
-		else
-		{
-			CRoutingProtocolBSW * pBsw = new CRoutingProtocolBSW();
-			pBsw->SetCommunicateRadius(fCommunicateRadius);
-			pBsw->SetEnvironment(pHost, m_pEngine);
-			pBsw->SetCopyCount(nCopyCount);
-			pDoc->m_pRoadNet->m_allHosts[i]->m_pProtocol = pBsw;
+			CRoutingProtocolAptCard * pAptCard = new CRoutingProtocolAptCard();
+			pAptCard->SetCommunicateRadius(fCommunicateRadius);
+			pAptCard->SetEnvironment(pHost, m_pEngine);
+			pAptCard->SetParameters(nK, 3, nCopyCount, fHigh, 150 * 60000);
+			pDoc->m_pRoadNet->m_allHosts[i]->m_pProtocol = pAptCard;
 		}
 	}
 }
@@ -252,7 +234,7 @@ void CRouterSimulatorView::OnButtonCreateMsgs()
 			}
 		}
 	}
-	CRoutingDataEnc encData;
+	CQueryMission mission;
 	CHost * pHostFrom = NULL;
 	CHost * pHostTo = pRoadNet->m_allHosts.GetAt(0);
 	SIM_TIME lnTimeOut = m_pEngine->GetSimTime() + nTimeOut;
@@ -262,9 +244,11 @@ void CRouterSimulatorView::OnButtonCreateMsgs()
 		if (pEmpty[i - 1] == 1)
 		{
 			pHostFrom = pRoadNet->m_allHosts[i];
-			encData.SetValue(pHostFrom, pHostTo, lnTimeOut);
-			encData.ChangeDataId();
-			pHostFrom->m_pProtocol->SendPackage(encData);
+			mission.m_SenderId = pHostFrom->m_nId;
+			mission.m_RecverId = pHostTo->m_nId;
+			mission.m_lnTimeOut = lnTimeOut;
+			mission.ChangeID();
+			pHostFrom->m_pProtocol->CreateQueryMission(&mission);
 		}
 	}
 	delete[] pEmpty;
@@ -387,6 +371,7 @@ void CRouterSimulatorView::OnInitialUpdate()
 	strTimeOut.Format(_T("%d"), pDoc->m_Cfg.m_nTimeOutSecond);
 	m_pEditTimeOut->SetWindowText(strTimeOut);
 	m_pEditPickCount->SetWindowText(_T("100"));
+
 // 	CRect rectClient;
 // 	GetClientRect(&rectClient);
 }
@@ -500,7 +485,7 @@ LRESULT CRouterSimulatorView::OnDataPrepareFinished(WPARAM wParam, LPARAM lParam
 	CRouterSimulatorDoc * pDoc = GetDocument();
 	InitHostProtocol(pDoc->m_Cfg.m_nBswCopyCount, pDoc->m_Cfg.m_strProtocolName, pDoc->m_Cfg.m_fCommunicateRadius, pDoc->m_Cfg.m_nK, pDoc->m_Cfg.m_fPrivacyHigh, pDoc->m_Cfg.m_fPrivacyLow, pDoc->m_Cfg.m_fAnonyRadius);
 #ifdef DEBUG
-	m_pMapGui->PostMessage(MSG_ID_INIT_OK, 1);
+	m_pMapGui->PostMessage(MSG_ID_INIT_OK, 0);
 #else
 	m_pMapGui->PostMessage(MSG_ID_INIT_OK, 1);
 #endif

@@ -264,16 +264,19 @@ DWORD CRoadNet::GetHashValue(double fX, double fY)
 	return m_PointHash.GetHashValue(fX, fY);
 }
 
-double CRoadNet::GetHashInterval()
+double CRoadNet::GetHashInterval() const
 {
 	return m_PointHash.GetInterval();
 }
 
-SIM_TIME CRoadNet::GetSimTimeCrossHalfBlank()
+void CRoadNet::CalculateBlockAndPredictTime(int & nBlockCount, SIM_TIME & lnPredictTime, SIM_TIME & lnHalfBlockTime, double fCommunicationRadius) const
 {
-	double fSeconds = GetHashInterval() / (2 * GetSpeedLimit());
-	SIM_TIME ret = fSeconds * 1000;
-	return ret;
+	double fHashInterval = GetHashInterval();
+	double fSpeedMax = GetSpeedLimit();
+	int nBlock = fCommunicationRadius / fHashInterval;
+	nBlockCount = nBlock + 1;
+	lnPredictTime = 1000 * (nBlock * fHashInterval - fCommunicationRadius) / (2 * fSpeedMax);
+	lnHalfBlockTime = 1000 * fHashInterval / (2 * fSpeedMax);
 }
 
 void CRoadNet::GetMapRange(CDoublePoint & lefttop, CDoublePoint & rightbottom)
@@ -452,7 +455,7 @@ int CRoadNet::GetHostNumberInRange(const CDoublePoint & coor, double fRadius, SI
 	return nRet;
 }
 
-double CRoadNet::GetSpeedLimit()
+double CRoadNet::GetSpeedLimit() const
 {
 	return 33.3333;
 }

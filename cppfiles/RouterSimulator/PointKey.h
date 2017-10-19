@@ -9,7 +9,7 @@ public:
 	DWORD GetHashValue(const CDoublePoint * pPoint);
 	DWORD GetHashValue(double fX, double fY);
 	int SetValue(const CDoublePoint & lefttop, const CDoublePoint & rightbottom, double fInterval);
-	double GetInterval() { return m_fInterval; }
+	double GetInterval() const { return m_fInterval; }
 private:
 	CDoublePoint m_lefttop;
 	CDoublePoint m_rightbottom;

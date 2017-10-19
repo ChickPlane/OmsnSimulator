@@ -9,10 +9,8 @@
 #include "Intersection.h"
 #include "RoadPoint.h"
 #include "commonmsg.h"
-#include "RoutingProtocolBSW.h"
 #include "MobileSocialNetworkHost.h"
-#include "RoutingProtocolHslpo.h"
-#include "RoutingProtocolEncAnony.h"
+#include "CommonFunctions.h"
 
 
 // CRouterRunner
@@ -85,6 +83,7 @@ void CRouterRunner::OnCreateHosts(WPARAM wParam, LPARAM lParam)
 
 void CRouterRunner::CreateSocialRelation()
 {
+
 	int nHostCount = m_pDoc->m_pRoadNet->m_allHosts.GetSize();
 	double fTrustRateBase = pow((double)nHostCount, (1.0 / 4.0));
 	double fTrustInitValue = 0.9;
