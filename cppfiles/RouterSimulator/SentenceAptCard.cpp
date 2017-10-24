@@ -19,7 +19,6 @@ CPkgAptCardHello::~CPkgAptCardHello()
 
 CPkgAptCardAck::CPkgAptCardAck()
 	: m_bAskForCards(FALSE)
-	, m_bCanAckBack(FALSE)
 	, m_pIDs(NULL)
 	, m_nIDNumber(0)
 {
@@ -40,7 +39,6 @@ CPkgAptCardAck & CPkgAptCardAck::operator=(const CPkgAptCardAck & src)
 {
 	CPkgAck::operator=(src);
 	m_bAskForCards = src.m_bAskForCards;
-	m_bCanAckBack = src.m_bCanAckBack;
 	m_nHoldingReadyNumber = src.m_nHoldingReadyNumber;
 	CleanIds();
 	m_nIDNumber = src.m_nIDNumber;
@@ -65,7 +63,7 @@ void CPkgAptCardAck::CleanIds()
 	}
 }
 
-void CPkgAptCardAck::SetIds(CList<CPseudonymPairRecord> & pseduonymPairs)
+void CPkgAptCardAck::SetIds(const CList<CPseudonymPairRecord> & pseduonymPairs)
 {
 	CleanIds();
 	m_nIDNumber = pseduonymPairs.GetSize();
@@ -82,7 +80,6 @@ CPkgAptCardQuery::CPkgAptCardQuery()
 	: m_nAid(UID_INVALID)
 	, m_nAapt(0)
 {
-	m_nSentenceType = AC_SENTENCE_TYPE_QUERY;
 }
 
 CPkgAptCardQuery::CPkgAptCardQuery(const CPkgAptCardQuery & src)
@@ -115,10 +112,8 @@ CTestSessionAptCard * CPkgAptCardQuery::DeepCopySession() const
 }
 
 CPkgAptCardReply::CPkgAptCardReply()
-	: m_nAApt(0)
-	, m_bCheckId(TRUE)
+	: m_bCheckId(TRUE)
 {
-	m_nSentenceType = AC_SENTENCE_TYPE_REPLY;
 }
 
 CPkgAptCardReply::CPkgAptCardReply(const CPkgAptCardReply & src)
@@ -145,8 +140,6 @@ CTestSessionAptCard * CPkgAptCardReply::DeepCopySession() const
 CPkgAptCardReply & CPkgAptCardReply::operator=(const CPkgAptCardReply & src)
 {
 	CPkgBswData::operator=(src);
-	m_nAid = src.m_nAid;
-	m_nAApt = src.m_nAApt;
 	m_bCheckId = src.m_bCheckId;
 	m_Next = src.m_Next;
 	return *this;
@@ -156,7 +149,6 @@ CPkgAptCardCards::CPkgAptCardCards()
 	: m_pCards(NULL)
 	, m_nCardNumber(0)
 {
-	m_nSentenceType = AC_SENTENCE_TYPE_CARD;
 }
 
 CPkgAptCardCards::CPkgAptCardCards(const CPkgAptCardCards & src)

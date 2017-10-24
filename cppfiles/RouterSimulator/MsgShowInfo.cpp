@@ -18,7 +18,6 @@ CMsgShowRow & CMsgShowRow::operator=(const CMsgShowRow & src)
 
 
 CMsgShowInfo::CMsgShowInfo()
-	: m_nColCount(0)
 {
 }
 

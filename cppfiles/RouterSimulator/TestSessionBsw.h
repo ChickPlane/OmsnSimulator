@@ -9,7 +9,5 @@ public:
 	CTestSessionBsw(const CTestSessionBsw & src);
 	virtual CTestSessionBsw & operator = (const CTestSessionBsw & src);
 	virtual ~CTestSessionBsw();
-
-	SIM_TIME m_lnTimeOut;
 };
 

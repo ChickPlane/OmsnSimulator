@@ -1,9 +1,15 @@
 #pragma once
 #include "Sentence.h"
+#include "TestSessionBsw.h"
 class CRoutingProtocol;
-class CTestSession;
 
 typedef unsigned int BSW_USERID;
+
+enum
+{
+	BSW_MSG_TYPE_DATA = SENTENCE_TYPE_MAX + 23,
+	BSW_MSG_TYPE_MAX
+};
 
 class CPkgBswData : public CSentence
 {
@@ -12,28 +18,26 @@ public:
 	CPkgBswData(const CPkgBswData & src);
 	virtual CPkgBswData & operator=(const CPkgBswData & src);
 	virtual ~CPkgBswData();
-	virtual BOOL IsReceiver(BSW_USERID uId) const;
-	BOOL IsKnownNode(CRoutingProtocol * pTest) const;
-	virtual CTestSession * DeepCopySession() const;
+	BOOL IsKnownNode(const CRoutingProtocol * pTest) const;
+	virtual CTestSessionBsw * DeepCopySession() const;
 	void HalfCount(BOOL bBottom);
 	int GetHalfCopyCount(BOOL bBottom) const;
 	void MergeMessage(const CPkgBswData & src);
-
-	void InitParameters(int nCopyCount, BSW_USERID uReceiverId);
 	BOOL OnlyOneCopyLeft();
 	BSW_USERID GetReceiverId() const;
+	void ChangeId();
 
-	CList<CRoutingProtocol *> m_KnownNodes;
+
+	CList<const CRoutingProtocol *> m_KnownNodes;
 	int m_nBswId;
-	CTestSession * m_pTestSession;
+	CTestSessionBsw * m_pTestSession;
 	BOOL m_bLastHop;
-
-protected:
+	SIM_TIME m_lnTimeOut;
 	int m_nCopyCount;
 	BSW_USERID m_uReceiverId;
+	BSW_USERID m_uSenderId;
 
 private:
-	void ChangeId();
 	static int sm_nBswIdMax;
 };
 

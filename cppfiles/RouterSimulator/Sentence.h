@@ -5,6 +5,7 @@ typedef enum
 	SENTENCE_TYPE_NULL = 0,
 	SENTENCE_TYPE_HELLO,
 	SENTENCE_TYPE_ACK,
+	SENTENCE_TYPE_OK,
 	SENTENCE_TYPE_MAX
 };
 
@@ -17,8 +18,10 @@ public:
 	CSentence(const CSentence & src);
 	virtual CSentence & operator=(const CSentence & src);
 	virtual ~CSentence();
+	int m_nProcessID;
 	int m_nSentenceType;
-	CRoutingProtocol * m_pProtocol;
+	CRoutingProtocol * m_pSender;
+	CRoutingProtocol * m_pSpeakTo;
 };
 
 class CPkgHello : public CSentence
@@ -34,5 +37,5 @@ class CPkgAck : public CSentence
 public:
 	CPkgAck() { m_nSentenceType = SENTENCE_TYPE_ACK; }
 	CPkgAck(const CPkgAck & src) { *this = src; }
-	virtual ~CPkgAck() {};
+	void SetAsOkPackage() { m_nSentenceType = SENTENCE_TYPE_OK; }
 };

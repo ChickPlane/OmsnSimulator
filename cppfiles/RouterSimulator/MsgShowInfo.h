@@ -18,7 +18,6 @@ class CMsgShowInfo
 public:
 	CMsgShowInfo();
 	virtual ~CMsgShowInfo();
-	int m_nColCount;
 	CList<CMsgShowRow> m_Rows;
 };
 

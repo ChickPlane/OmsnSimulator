@@ -9,6 +9,7 @@ CPkgBswData::CPkgBswData()
 	, m_uReceiverId(UID_LBSP0)
 	, m_pTestSession(NULL)
 {
+	m_nSentenceType = BSW_MSG_TYPE_DATA;
 	ChangeId();
 }
 
@@ -30,8 +31,10 @@ CPkgBswData & CPkgBswData::operator=(const CPkgBswData & src)
 	m_nCopyCount = src.m_nCopyCount;
 	m_nBswId = src.m_nBswId;
 	m_uReceiverId = src.m_uReceiverId;
+	m_uSenderId = src.m_uSenderId;
 	m_pTestSession = src.DeepCopySession();
 	m_bLastHop = src.m_bLastHop;
+	m_lnTimeOut = src.m_lnTimeOut;
 	return *this;
 }
 
@@ -39,12 +42,7 @@ CPkgBswData::~CPkgBswData()
 {
 }
 
-BOOL CPkgBswData::IsReceiver(BSW_USERID uId) const
-{
-	return uId == m_uReceiverId;
-}
-
-BOOL CPkgBswData::IsKnownNode(CRoutingProtocol * pTest) const
+BOOL CPkgBswData::IsKnownNode(const CRoutingProtocol * pTest) const
 {
 	POSITION posSelf = m_KnownNodes.GetHeadPosition();
 	while (posSelf)
@@ -58,11 +56,11 @@ BOOL CPkgBswData::IsKnownNode(CRoutingProtocol * pTest) const
 	return FALSE;
 }
 
-CTestSession * CPkgBswData::DeepCopySession() const
+CTestSessionBsw * CPkgBswData::DeepCopySession() const
 {
 	if (m_pTestSession)
 	{
-		return new CTestSession(*m_pTestSession);
+		return new CTestSessionBsw(*m_pTestSession);
 	}
 	else
 	{
@@ -106,13 +104,6 @@ void CPkgBswData::MergeMessage(const CPkgBswData & src)
 		}
 	}
 	m_nCopyCount += src.m_nCopyCount;
-}
-
-void CPkgBswData::InitParameters(int nCopyCount, BSW_USERID uReceiverId)
-{
-	m_nCopyCount = nCopyCount;
-	m_uReceiverId = uReceiverId;
-	m_bLastHop = FALSE;
 }
 
 BOOL CPkgBswData::OnlyOneCopyLeft()

@@ -8,26 +8,12 @@
 #include "SentenceAptCard.h"
 #include "Yell.h"
 
+class CRoutingProcessAptCard;
 
-enum
-{
-	AC_TIMER_CMD_HELLO,
-	AC_TIMER_CMD_MAX
-};
-
-class CQueryRecordEntry
+class CRoutingProcessACUser
 {
 public:
-	CAppointmentCard * m_pCard;
-	int m_nQueryId;
-	CQueryRecordEntry() :m_pCard(NULL) {}
-	~CQueryRecordEntry()
-	{
-		if (m_pCard)
-		{
-			delete m_pCard;
-		}
-	}
+	virtual void OnGetNewCards(CRoutingProcessAptCard * pCallBy, const CPkgAptCardCards * pPkg) = 0;
 };
 
 class CRoutingProcessAptCard :
@@ -37,15 +23,25 @@ public:
 	CRoutingProcessAptCard();
 	virtual ~CRoutingProcessAptCard();
 
-	virtual void GenerateMission(const CQueryMission * pMission);
-	virtual void OnReceivedMsg(const CYell * pMsg);
+	virtual void SetBasicParameters(int nProcessID, CRoutingProtocol * pProtocol);
+	virtual void SetProcessUser(CRoutingProcessACUser * pUser) { m_pUser = pUser; }
+	virtual CPkgAptCardCards * GetSendingList(BOOL bNeedReady, int nHoldingCount, CRoutingProtocol * pTo);
+	virtual void OnEncounterUser(const CPkgAck * pAck, CList<CSentence*> & SendingList);
+	virtual void OnReceivePkgFromNetwork(const CSentence * pPkg, CList<CSentence*> & SendingList);
+	CAppointmentCard * SelectMaxMarkAptCardForQuery(SIM_TIME lnTimeout);
+	static void CleanSendingList(CList<CAppointmentCard*> & SendingList);
+	virtual void OnReceivedCards(const CPkgAptCardCards * pCards);
+
+	virtual int GetReadyListSize() const { return m_ReadyCards.GetSize(); }
+	virtual int GetDispenseListSize() const { return m_DispensedCards.GetSize(); }
+
 	virtual void OnEngineTimer(int nCommandId);
 	virtual int GetCarryingMessages(CMsgShowInfo & allMessages) const;
-	virtual void TurnOn();
-	virtual void SetParameters(int nK, int nSeg, int nCopyCount, double fTrust, SIM_TIME lnAcTimeout);
+	static void SetParameters(int nK, int nSeg, SIM_TIME lnAcTimeout);
+	virtual void GetCardCount(int & nDispenseCount, int & nReadyCount);
+	virtual BOOL GetAndRemoveAgencyRecord(USERID uOldId, int nOldApt, CAptCardAgencyRecord & retRecord);
 
 public:
-	void OnCardsRequired(USERID nNextUser, const CPkgAptCardAck * pAck);
 	virtual int GetInfoList(CMsgShowInfo & allMessages) const;
 	virtual COLORREF GetInportantLevel() const;
 	virtual int GetReadyCount() const;
@@ -53,66 +49,35 @@ public:
 	virtual CString GetAgencyListString() const;
 
 protected:
-	void PickDispensedCards(USERID nNextUser);
-	void CreateNewAptCards();
-	void PickReadyCards(int nTheOtherReadyNumber);
+	void PickDispensedCards(USERID nNextUser, CList<CAppointmentCard*> & SendingList);
+	void CreateNewAptCards(CList<CAppointmentCard*> & SendingList);
+	void PickReadyCards(int nTheOtherReadyNumber, CList<CAppointmentCard*> & SendingList);
 	BOOL PickMNumberFromNArr(int nM, char * pArr, int nN);
-	int GetLastAcHopCardNumber() const;
-	void PrepareToSend(USERID nNextUser);
+	static int GetLastAcHopCardNumber(const CList<CAppointmentCard*> & SendingList);
+	void PrepareToSend(USERID nNextUser, CList<CAppointmentCard*> & SendingList);
+
 	CAppointmentCard * CreateSingleNewAptCard(CAptCardFromSameAgency * pCreateList);
 	int GetUniqueRandomNumber(SIM_TIME lnTimeOut);
 	void SweepExsitingAptNumber();
-	CAppointmentCard * SelectRandomAptCardForQuery();
-	CAppointmentCard * SelectMaxMarkAptCardForQuery();
-	BOOL IsTheLastCardRelay(const CAppointmentCard * pCard) const;
+	static BOOL IsTheLastCardRelay(const CAppointmentCard * pCard);
 
 protected:
-	virtual void StartBinarySprayWaitProcess();
-	virtual void ContinueBinarySprayWaitProcess();
 	virtual void CleanTimeOutData();
 
 	virtual void SendHello();
-	virtual void OnReceivedHello(CRoutingProtocol * pSender, const CPkgAptCardHello * pHello, CList<CSentence*> & Answer);
-	virtual void OnReceivedHelloAck(CRoutingProtocol * pSender, const CPkgAptCardAck * pAck, CList<CSentence*> & Answer);
-	virtual void OnReceivedCards(CRoutingProtocol * pSender, const CPkgAptCardCards * pCards, CList<CSentence*> & Answer);
-
-	virtual void ForwardQuery(CRoutingProtocol * pTo, CList<CSentence*> & Answer);
-	virtual void OnReceivedQuery(CRoutingProtocol * pSender, const CPkgAptCardQuery * pQuery, CList<CSentence*> & Answer);
-
-	virtual void ForwardReply(CRoutingProtocol * pTo, const CPkgAptCardAck * pAck, CList<CSentence*> & Answer);
-	virtual void OnReceivedReply(CRoutingProtocol * pSender, const CPkgAptCardReply * pReply, CList<CSentence*> & Answer);
-
-	virtual void PrepareAck(CRoutingProtocol * pTo, CList<CSentence*> & Answer, BOOL bBack);
-	virtual void PrepareAllWaitingQueries();
-	virtual void PrepareQuery(const CQueryMission * pMission, CAppointmentCard * pSelectedAptCard);
-	virtual CPkgAptCardReply * GetRelayReply(const CPkgAptCardReply * pReply);
-
-	virtual CPkgAptCardReply * LbsPrepareReply(const CPkgAptCardQuery * pQuery);
-
-	CPkgBswData * CheckDuplicateInReplyList(int nBswId);
-	CPkgBswData * CheckDuplicateInQueryList(int nBswId);
-	static BOOL IsReplyTmpDestination(CPseudonymPair * pPseudonymPairs, int nPseudonymNumber, const CPseudonymPair & replyTarget);
-	static POSITION IsReplyTmpDestination(CList<CPseudonymPairRecord> & m_PseduonymPairs, const CPseudonymPair & replyTarget);
-	BOOL IsFriend(CRoutingProtocol * pOther);
-	BOOL IsLongTimeNoSee(CRoutingProtocol * pOther);
-	void CleanSendingList();
-
 	void ResetAll();
 	void CleanTimeoutAgencyList();
 	int GetMark();
-	double TestAptCardMark(CAppointmentCard * pCard);
+	double TestAptCardMark(CAppointmentCard * pCard, SIM_TIME lnTimeout);
 	void CheckAptCards(const CAppointmentCard * pCard);
 
 protected:
-	int m_nK;
-	int m_nSeg;
-	int m_nCopyCount;
-	double m_fTrust;
-	SIM_TIME m_lnAptCardsTimeout;
+	static int gm_nK;
+	static int gm_nSeg;
+	static SIM_TIME gm_lnAptCardsTimeout;
 
 	CList<CAppointmentCard*> m_DispensedCards;
 	CList<CAppointmentCard*> m_ReadyCards;
-	CList<CAppointmentCard*> m_SendingList;
 	CMap<USERID, USERID, CAptCardFromSameAgency*, CAptCardFromSameAgency*> m_AgencyList;
 	int m_nNeededCardNumber;
 	SIM_TIME m_lnLastCreateAptCardTime;
@@ -120,20 +85,14 @@ protected:
 
 	bool m_bWork;
 	bool m_bBswLogSwitch;
-	CList<CPkgAptCardQuery*> m_QueryList;
-	CList<CPkgAptCardReply*> m_ReplyList;
-
-	CList<CQueryMission*> m_WaitingMissions;
-	CList<CPseudonymPairRecord> m_PseduonymPairs;
 
 private:
 	CMap<int, int, SIM_TIME, SIM_TIME> m_ExistingCaptNumbers;
-	CList<CQueryRecordEntry*> m_MissionStatisticRecords;
-	CMap<int, int, CTestRecordAptCard *, CTestRecordAptCard *> m_allSessions;
 	CList<SIM_TIME> m_EncounterUserList;
 
-	CMap<CRoutingProtocol*, CRoutingProtocol*, SIM_TIME, SIM_TIME> m_lastTimeExchange;
 	CMap<int, int, SIM_TIME, SIM_TIME> m_DelieverMap;
 	CMap<int, int, SIM_TIME, SIM_TIME> m_RelayMap;
+
+	CRoutingProcessACUser * m_pUser;
 };
 

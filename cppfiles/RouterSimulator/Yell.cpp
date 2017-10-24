@@ -62,13 +62,13 @@ CRoutingProtocol * CYell::SetSentences(CList<CSentence*> & Sentences)
 		m_ppSentences[i++] = pSentence;
 		if (bSingleTarget)
 		{
-			if (pSentence->m_pProtocol != NULL)
+			if (pSentence->m_pSpeakTo != NULL)
 			{
 				if (pTo == NULL)
 				{
-					pTo = pSentence->m_pProtocol;
+					pTo = pSentence->m_pSpeakTo;
 				}
-				else if (pTo != pSentence->m_pProtocol)
+				else if (pTo != pSentence->m_pSpeakTo)
 				{
 					bSingleTarget = FALSE;
 				}

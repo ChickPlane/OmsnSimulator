@@ -1,4 +1,5 @@
 #pragma once
+#include "SimulatorCommon.h"
 
 class CTestRecord;
 
@@ -10,9 +11,9 @@ public:
 	virtual CTestSession & operator = (const CTestSession & src);
 	virtual ~CTestSession();
 
-	void InitSession(int nSessionId, CTestRecord * pRecord);
+	void InitSession(int nSessionId);
 
 	int m_nSessionId;
-	CTestRecord * m_pRecord;
+	SIM_TIME m_lnTimeOut;
 };
 

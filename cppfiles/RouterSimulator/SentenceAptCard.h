@@ -6,8 +6,6 @@
 
 enum {
 	AC_SENTENCE_TYPE_CARD = SENTENCE_TYPE_MAX,
-	AC_SENTENCE_TYPE_QUERY,
-	AC_SENTENCE_TYPE_REPLY,
 	AC_SENTENCE_TYPE_MAX
 };
 
@@ -27,10 +25,9 @@ public:
 	CPkgAptCardAck & operator=(const CPkgAptCardAck & src);
 	~CPkgAptCardAck();
 	virtual void CleanIds();
-	virtual void SetIds(CList<CPseudonymPairRecord> & pseduonymPairs);
+	virtual void SetIds(const CList<CPseudonymPairRecord> & pseduonymPairs);
 
 	BOOL m_bAskForCards;
-	BOOL m_bCanAckBack;
 	CPseudonymPair * m_pIDs;
 	int m_nIDNumber;
 	int m_nHoldingReadyNumber;
@@ -61,8 +58,6 @@ public:
 	virtual CTestSessionAptCard * DeepCopySession() const;
 
 	CPseudonymPair m_Next;
-	USERID m_nAid;
-	int m_nAApt;
 	// The destination is a real ID.
 	BOOL m_bCheckId;
 };
