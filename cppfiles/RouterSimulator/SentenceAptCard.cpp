@@ -149,6 +149,7 @@ CPkgAptCardCards::CPkgAptCardCards()
 	: m_pCards(NULL)
 	, m_nCardNumber(0)
 {
+	m_nSentenceType = AC_SENTENCE_TYPE_CARD;
 }
 
 CPkgAptCardCards::CPkgAptCardCards(const CPkgAptCardCards & src)

@@ -15,6 +15,22 @@ CHostRouteTable & CHostRouteTable::operator=(const CHostRouteTable & src)
 	return *this;
 }
 
+CHostRouteTable & CHostRouteTable::operator+=(const CHostRouteTable & src)
+{
+	if (IsScheduleAvailable() && src.IsScheduleAvailable())
+	{
+		int nOldSize = m_Entries.GetSize();
+		SIM_TIME lnTailTime = m_Entries.GetAt(nOldSize - 1).m_lnSimTime;
+		m_Entries.Append(src.m_Entries);
+		SIM_TIME lnAddTime = lnTailTime + src.m_fStartSecond * 1000 - m_fStartSecond * 1000;
+		for (int i = nOldSize; i < m_Entries.GetSize(); ++i)
+		{
+			m_Entries[i].m_lnSimTime += lnAddTime;
+		}
+	}
+	return *this;
+}
+
 CHostRouteTable::~CHostRouteTable()
 {
 }
@@ -111,7 +127,7 @@ CDoublePoint CHostRouteTable::GetPosition(SIM_TIME lnSimTime) const
 	}
 }
 
-bool CHostRouteTable::IsScheduleAvailable()
+bool CHostRouteTable::IsScheduleAvailable() const
 {
 	return m_Entries.GetSize() > 0;
 }

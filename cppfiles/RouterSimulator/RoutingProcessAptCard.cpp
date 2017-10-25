@@ -9,7 +9,7 @@
 
 
 CRoutingProcessAptCard::CRoutingProcessAptCard()
-	: m_nNeededCardNumber(1000)
+	: m_nNeededCardNumber(50)
 	, m_lnLastCreateAptCardTime(0)
 	, m_lnLastCleanTime(0)
 {
@@ -28,6 +28,7 @@ void CRoutingProcessAptCard::SetBasicParameters(int nProcessID, CRoutingProtocol
 
 CPkgAptCardCards * CRoutingProcessAptCard::GetSendingList(BOOL bNeedReady, int nHoldingCount, CRoutingProtocol * pTo)
 {
+	CleanTimeOutData();
 	CList<CAppointmentCard*> cardList;
 	CreateNewAptCards(cardList);
 	PickDispensedCards(pTo->GetHostId(), cardList);
@@ -44,10 +45,6 @@ CPkgAptCardCards * CRoutingProcessAptCard::GetSendingList(BOOL bNeedReady, int n
 
 	MarkProcessIdToSentences(pNewCards);
 	return pNewCards;
-}
-
-void CRoutingProcessAptCard::OnEncounterUser(const CPkgAck * pAck, CList<CSentence*> & SendingList)
-{
 }
 
 void CRoutingProcessAptCard::OnReceivePkgFromNetwork(const CSentence * pPkg, CList<CSentence*> & SendingList)
@@ -602,7 +599,6 @@ double CRoutingProcessAptCard::TestAptCardMark(CAppointmentCard * pCard, SIM_TIM
 {
 	if (pCard->m_lnTimeout < lnTimeout)
 	{
-		ASSERT(0);
 		return 0;
 	}
 

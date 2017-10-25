@@ -173,6 +173,7 @@ BOOL CRoutingProtocolBsw::SetMissionRecord(int nSessionId, int nEventId)
 	if (pRecord)
 	{
 		pRecord->m_lnTimes[nEventId] = GetSimTime();
+#ifdef DEBUG
 		CString strLog;
 		if (nEventId == REC_ST_GENERATE)
 		{
@@ -183,6 +184,7 @@ BOOL CRoutingProtocolBsw::SetMissionRecord(int nSessionId, int nEventId)
 			strLog.Format(_T("PKG %d: E%d T(%d) TG(%d)"), nSessionId, nEventId, pRecord->m_lnTimes[nEventId], pRecord->m_lnTimes[nEventId] - pRecord->m_lnTimes[REC_ST_GENERATE]);
 		}
 		WriteLog(strLog);
+#endif
 		UpdateSummary();
 		return TRUE;
 	}

@@ -217,7 +217,9 @@ void CHostEngine::OnEveryPeriod()
 {
 	SIM_TIME lnCurrentTime = GetSimTime();
 	SendForecastCommand(lnCurrentTime);
+#ifdef DEBUG
 	RefreshUi();
+#endif
 	DeleteForecastsBefore(lnCurrentTime);
 
 	SIM_TIME Interval = GetPeriodDefaultInterval();
@@ -481,6 +483,7 @@ int CHostEngine::CheckEventList()
 			if (m_lnSimTimeMillisecond != FirstEvent.m_lnSimTime)
 			{
 				NotifyTimeChange();
+				m_Summary.AddTag(m_lnSimTimeMillisecond);
 			}
 			m_lnSimTimeMillisecond = FirstEvent.m_lnSimTime;
 			if (FirstEvent.m_pUser)

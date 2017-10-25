@@ -5,8 +5,8 @@
 #include "RoutingProcessAptCard.h"
 
 class CRoutingProtocolAptCard :
-	public CRoutingProcessHelloUser,
 	public CRoutingProtocol,
+	public CRoutingProcessHelloUser,
 	public CRoutingProcessBswUser,
 	public CRoutingProcessACUser
 {

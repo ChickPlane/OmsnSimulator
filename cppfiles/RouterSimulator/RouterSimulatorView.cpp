@@ -25,6 +25,11 @@ using namespace std;
 #define new DEBUG_NEW
 #endif
 
+#ifdef DEBUG
+#define AUTO_RUN_TEST 0
+#else
+#define AUTO_RUN_TEST 1
+#endif
 
 // CRouterSimulatorView
 
@@ -183,11 +188,12 @@ void CRouterSimulatorView::InitHostProtocol(int nCopyCount, char * strProtocolNa
 	CStatisticSummary & summary = m_pEngine->GetSummary();
 	summary.m_ProtocolName = strProtocolName;
 	summary.m_nRandomSeed = theApp.nRandSeed;
+	summary.m_fCommuRadius = fCommunicateRadius;
+	summary.m_fTrust = fHigh;
 	m_pEngine->SetCommunicationRadius(fCommunicateRadius);
-	//if (TRUE || strcmp(strProtocolName, PROTOCOL_NAME_APTCARD) == 0)
-	if(FALSE)
+	if (TRUE || strcmp(strProtocolName, PROTOCOL_NAME_APTCARD) == 0)
 	{
-		CRoutingProtocolAptCard::SetStaticParameters(nK, 3, fHigh, 150 * 60000);
+		CRoutingProtocolAptCard::SetStaticParameters(nK, 3, fHigh, 2 * 5 * 60000);
 		for (int i = 0; i < nLength; ++i)
 		{
 			CMobileSocialNetworkHost * pHost = (CMobileSocialNetworkHost *)pDoc->m_pRoadNet->m_allHosts[i];
@@ -228,6 +234,7 @@ void CRouterSimulatorView::OnContextMenu(CWnd* /* pWnd */, CPoint point)
 
 void CRouterSimulatorView::OnButtonCreateMsgs()
 {
+
 	CString strNum;
 	m_pEditPickCount->GetWindowText(strNum);
 	int nNum = _ttoi(strNum);
@@ -237,13 +244,15 @@ void CRouterSimulatorView::OnButtonCreateMsgs()
 	CRouterSimulatorDoc * pDoc = GetDocument();
 	CRoadNet * pRoadNet = pDoc->m_pRoadNet;
 	int nHostCount = pRoadNet->m_allHosts.GetSize() - SERVER_NODE_COUNT;
-	int nIndex = -1;
 	char * pEmpty = new char[nHostCount];
 
 	CQueryMission mission;
 	CHost * pHostFrom = NULL;
 	CHost * pHostTo = pRoadNet->m_allHosts.GetAt(0);
 	SIM_TIME lnTimeOut = m_pEngine->GetSimTime() + nTimeOut * 1000;
+
+	m_pEngine->GetSummary().StartTest(m_pEngine->GetSimTime(), lnTimeOut, 1*60*1000);
+
 	BOOL bReverse = CCommonFunctions::PickMFromNDisorder(nNum, pEmpty, nHostCount);
 	int nCmpNum = bReverse ? 0 : 1;
 
@@ -516,11 +525,8 @@ LRESULT CRouterSimulatorView::OnDataPrepareFinished(WPARAM wParam, LPARAM lParam
 {
 	CRouterSimulatorDoc * pDoc = GetDocument();
 	InitHostProtocol(pDoc->m_Cfg.m_nBswCopyCount, pDoc->m_Cfg.m_strProtocolName, pDoc->m_Cfg.m_fCommunicateRadius, pDoc->m_Cfg.m_nK, pDoc->m_Cfg.m_fPrivacyHigh, pDoc->m_Cfg.m_fPrivacyLow, pDoc->m_Cfg.m_fAnonyRadius);
-#ifdef DEBUG
-	m_pMapGui->PostMessage(MSG_ID_INIT_OK, 0);
-#else
-	m_pMapGui->PostMessage(MSG_ID_INIT_OK, 1);
-#endif
+
+	m_pMapGui->PostMessage(MSG_ID_INIT_OK, AUTO_RUN_TEST);
 
 	CString strLabel;
 	strLabel.Format(_T("Mobile Host:%d"), pDoc->m_pRoadNet->m_allHosts.GetSize() - SERVER_NODE_COUNT);

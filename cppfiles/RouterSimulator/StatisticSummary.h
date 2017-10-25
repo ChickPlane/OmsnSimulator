@@ -1,4 +1,5 @@
 #pragma once
+#include "SimulatorCommon.h"
 class CStatisticSummary
 {
 public:
@@ -7,34 +8,25 @@ public:
 	CStatisticSummary & operator = (const CStatisticSummary & src);
 	virtual ~CStatisticSummary();
 
+	void StartTest(SIM_TIME lnStartTime, SIM_TIME lnTestEndTime, SIM_TIME Interval);
+	void AddTag(SIM_TIME lnStartTime);
+	void OutputResult();
+
 	CArray<double> m_RealData;
 	CArray<CString> m_StringData;
 
+	CArray<CArray<double>> m_Tags;
 	CString m_ProtocolName;
 	int m_nRandomSeed;
-	int m_nTotleNodeCount;
-	int m_nMsgCount;
-	int m_nDeliveryCount;
-	int m_nAnonymityK;
-	double m_fLatency;
-	int m_nAnonymityStartCount;
-	int m_nAnonymityEndCount;
-	int m_nAnonymityTimeCost;
-	int m_nTrustValue;
-	double m_fAveInterHopCount;
-	double m_fAveAnonySurroundingCount;
-	double m_fAveRealSurrounding;
-	double m_fRadius;
-	double m_fAnonymityDistance;
-	double m_fAnonymityMaxDistance;
-	int m_nAveStartTime;
-	double m_fAveRingCount;
-	double m_fAveObfuscationNum;
-	int m_nOnRingCount;
+	double m_fCommuRadius;
+	double m_fTrust;
 
-	CString GetString();
-	CString GetUiString();
-	void GetString(char * pOut);
-
+private:
+	SIM_TIME m_lnTestStartTime;
+	SIM_TIME m_Interval;
+	SIM_TIME m_lnTestEndTime;
+	int m_nTagIndex;
+	int m_nMaxSize;
+	BOOL m_bEnd;
 };
 

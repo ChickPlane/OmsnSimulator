@@ -19,6 +19,7 @@
 #include "HostEngine.h"
 #include "DlgHostInfo.h"
 #include "MobileSocialNetworkHost.h"
+#include "CommonFunctions.h"
 
 
 void CMapGui::SetScale(int nScaleIndex)
@@ -899,42 +900,27 @@ void CMapGui::CreateRandomPackages(int nNumber, SIM_TIME lnTimeOut)
 {
 	int nNum = nNumber;
 	int nHostCount = m_pRoadNet->m_allHosts.GetSize() - SERVER_NODE_COUNT;
-	int nCreatedCount = 0;
-	int nIndex = -1;
-	int * pEmpty = new int[nHostCount];
-	memset(pEmpty, 0, sizeof(int)*nHostCount);
-	while (nCreatedCount < nNum)
-	{
-		int nRand = rand() % (nHostCount - nCreatedCount) + 1;
-		int nEmptyCount = 0;
-		for (int i = 0; i < nHostCount; ++i)
-		{
-			if (pEmpty[i] == 0)
-			{
-				nEmptyCount++;
-				if (nEmptyCount == nRand)
-				{
-					pEmpty[i] = 1;
-					++nCreatedCount;
-					break;
-				}
-			}
-		}
-	}
 	CQueryMission mission;
 	CHost * pHostFrom = NULL;
 	CHost * pHostTo = m_pRoadNet->m_allHosts.GetAt(0);
 	SIM_TIME lnTime = m_pEngine->GetSimTime() + lnTimeOut;
 	m_lnExpectEndTime = lnTime + 10000;
 
+	m_pEngine->GetSummary().StartTest(m_pEngine->GetSimTime(), lnTimeOut, 1 * 60 * 1000);
+	char * pEmpty = new char[nHostCount];
+	BOOL bReverse = CCommonFunctions::PickMFromNDisorder(nNum, pEmpty, nHostCount);
+
+	int nCmpNum = bReverse ? 0 : 1;
+
 	for (int i = SERVER_NODE_COUNT; i < nHostCount + SERVER_NODE_COUNT; ++i)
 	{
-		if (pEmpty[i - 1] == 1)
+		if (pEmpty[i - SERVER_NODE_COUNT] == nCmpNum)
 		{
 			pHostFrom = m_pRoadNet->m_allHosts[i];
 			mission.m_SenderId = pHostFrom->m_nId;
 			mission.m_RecverId = pHostTo->m_nId;
 			mission.m_lnTimeOut = lnTime;
+			mission.ChangeID();
 			pHostFrom->m_pProtocol->CreateQueryMission(&mission);
 		}
 	}

@@ -9,12 +9,16 @@
 CRoutingProtocolAptCard::CRoutingProtocolAptCard()
 {
 	CRoutingProcessHello * pHelloProcess = new CRoutingProcessHello();
+	pHelloProcess->SetProcessUser(this);
 	m_nHelloProcessId = AddProcess(pHelloProcess);
 	CRoutingProcessBsw * pBswQuery = new CRoutingProcessBsw();
+	pBswQuery->SetProcessUser(this);
 	m_nQueryBswProcessId = AddProcess(pBswQuery);
 	CRoutingProcessBsw * pBswReply = new CRoutingProcessBsw();
+	pBswReply->SetProcessUser(this);
 	m_nReplyBswProcessId = AddProcess(pBswReply);
 	CRoutingProcessAptCard * pAptCardProcess = new CRoutingProcessAptCard();
+	pAptCardProcess->SetProcessUser(this);
 	m_nAptCardProcessId = AddProcess(pAptCardProcess);
 }
 
@@ -255,6 +259,13 @@ void CRoutingProtocolAptCard::OnBswPkgReachDestination(CRoutingProcessBsw * pCal
 void CRoutingProtocolAptCard::OnGetNewCards(CRoutingProcessAptCard * pCallBy, const CPkgAptCardCards * pPkg)
 {
 	PrepareAllWaitingQueries();
+
+	CList<CSentence *> sendingList;
+	// BSW Query
+	GetQueryProcess()->OnEncounterUser(pPkg->m_pSender, sendingList, NULL);
+	CYell * pNewYell = new CYell();
+	CRoutingProtocol * pTo = pNewYell->SetSentences(sendingList);
+	TransmitMessage(pTo, pNewYell);
 }
 
 BOOL CRoutingProtocolAptCard::IsFriend(const CRoutingProtocol * pOther) const

@@ -26,7 +26,6 @@ public:
 	virtual void SetBasicParameters(int nProcessID, CRoutingProtocol * pProtocol);
 	virtual void SetProcessUser(CRoutingProcessACUser * pUser) { m_pUser = pUser; }
 	virtual CPkgAptCardCards * GetSendingList(BOOL bNeedReady, int nHoldingCount, CRoutingProtocol * pTo);
-	virtual void OnEncounterUser(const CPkgAck * pAck, CList<CSentence*> & SendingList);
 	virtual void OnReceivePkgFromNetwork(const CSentence * pPkg, CList<CSentence*> & SendingList);
 	CAppointmentCard * SelectMaxMarkAptCardForQuery(SIM_TIME lnTimeout);
 	static void CleanSendingList(CList<CAppointmentCard*> & SendingList);

@@ -188,7 +188,8 @@ void CRouterRunner::CreateHosts(int nHostCount, int nTryMax)
 			pHost->SetSpeed(GenerateRandomSpeed(HOST_SPEED_CAR_MIN, HOST_SPEED_CAR_MAX));
 		}
 		int nTryTimes = 0;
-		while (!pHost->m_schedule.IsScheduleAvailable())
+		CHostRouteTable schedule1;
+		while (!schedule1.IsScheduleAvailable())
 		{
 			++nTryTimes;
 			if (nTryTimes > nTryMax)
@@ -197,8 +198,25 @@ void CRouterRunner::CreateHosts(int nHostCount, int nTryMax)
 			}
 			nA = rand() % nPointCount;
 			nB = rand() % nPointCount;
-			m_pDoc->m_pRoadNet->RouteTwoRoadPoints(*pHost, m_pDoc->m_pRoadNet->m_allPoints[nA], m_pDoc->m_pRoadNet->m_allPoints[nB], pHost->m_schedule);
+			m_pDoc->m_pRoadNet->RouteTwoRoadPoints(*pHost, m_pDoc->m_pRoadNet->m_allPoints[nA], m_pDoc->m_pRoadNet->m_allPoints[nB], schedule1);
 		}
+		pHost->m_schedule = schedule1;
+
+		nTryTimes = 0;
+		CHostRouteTable schedule2;
+		while (!schedule2.IsScheduleAvailable())
+		{
+			++nTryTimes;
+			if (nTryTimes > nTryMax)
+			{
+				return;
+			}
+			nA = rand() % nPointCount;
+			m_pDoc->m_pRoadNet->RouteTwoRoadPoints(*pHost, m_pDoc->m_pRoadNet->m_allPoints[nB], m_pDoc->m_pRoadNet->m_allPoints[nA], schedule2);
+		}
+		schedule2.m_fStartSecond = 15;
+		pHost->m_schedule += schedule2;
+
 		pHost->m_nId = nCreatedCount;
 		m_pDoc->m_pRoadNet->m_allHosts.Add(pHost);
 		++nCreatedCount;
