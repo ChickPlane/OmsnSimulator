@@ -5,8 +5,8 @@
 #include "EngineEvent.h"
 #include "TransmitionRecord.h"
 #include "HostGui.h"
-#include "RoutingStatisticsInfo.h"
 #include "TestTimer.h"
+#include "StatisticSummary.h"
 
 class CRoadNet;
 class CMapGui;
@@ -55,12 +55,13 @@ public:
 	void WriteLog(const CString & strLog);
 	int GetSpeed() const;
 	int GetActualSpeed() const;
-	void RecordPackageStateChange(int nDataId, const CMsgInsideInfo & msgInfo, int nState);
 	CRoadNet * GetRoadNet();
 	void RegisterUser(CEngineUser * pUser);
+	void ChangeSummary(const CStatisticSummary & summary);
+	CStatisticSummary & GetSummary();
 
-	double GetAveSurroundingHosts(double fRadius, int nComment);
-	int GetSourceOnRing(double fInside, double fOutside);
+	//double GetAveSurroundingHosts(double fRadius, int nComment);
+	//int GetSourceOnRing(double fInside, double fOutside);
 	CHost * GetHost(int nHostId) const;
 	void SetCommunicationRadius(double fRadius) { m_fCommunicationRadius = fRadius; }
 
@@ -94,7 +95,6 @@ protected:
 	void RefreshUi();
 	void RefreshUiDirectly(CArray<CHostGui> * pMessage, const CDoublePoint & lt, const CDoublePoint & rb);
 	bool RefreshUiOptimize(CArray<CHostGui> * pMessage, const CDoublePoint & lt, const CDoublePoint & rb);
-	void ReportMessageStatisticsChanged();
 	int GetSurringNodesCount(CDoublePoint currentLocation, double fRadius);
 
 	CMsgCntJudgeReceiverReport * GetUnicastReport(const CTransmitionRecord & tr);
@@ -134,10 +134,10 @@ private:
 	CList<CEngineUser *> m_NotifyList;
 	int m_nTransmitCount;
 
-	CMap<int, int, CRoutingStatisticsInfo *, CRoutingStatisticsInfo *> m_SendingMsgs;
 	double m_fCommunicationRadius;
 
 	CTestTimer m_tt;
+	CStatisticSummary m_Summary;
 };
 
 

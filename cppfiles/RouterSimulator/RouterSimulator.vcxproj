@@ -229,9 +229,7 @@
     <ClInclude Include="MarkPoint.h" />
     <ClInclude Include="MobileSocialNetworkHost.h" />
     <ClInclude Include="MsgCntJudgeReceiverReport.h" />
-    <ClInclude Include="MsgHopInfo.h" />
     <ClInclude Include="MsgInfo.h" />
-    <ClInclude Include="MsgInsideInfo.h" />
     <ClInclude Include="MsgShowInfo.h" />
     <ClInclude Include="NearbyNodeEntry.h" />
     <ClInclude Include="OutputWnd.h" />
@@ -263,20 +261,22 @@
     <ClInclude Include="RouteTableItem.h" />
     <ClInclude Include="RoutingProcess.h" />
     <ClInclude Include="RoutingProcessAptCard.h" />
+    <ClInclude Include="RoutingProcessBsw.h" />
+    <ClInclude Include="RoutingProcessHello.h" />
     <ClInclude Include="RoutingProtocol.h" />
     <ClInclude Include="RoutingProtocolAptCard.h" />
-    <ClInclude Include="RoutingStatisticsInfo.h" />
+    <ClInclude Include="RoutingProtocolBsw.h" />
     <ClInclude Include="Sentence.h" />
     <ClInclude Include="SentenceAptCard.h" />
     <ClInclude Include="SimulatorCfg.h" />
     <ClInclude Include="SimulatorCommon.h" />
-    <ClInclude Include="StatisticsReport.h" />
     <ClInclude Include="StatisticSummary.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="streethead.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="TestRecord.h" />
     <ClInclude Include="TestRecordAptCard.h" />
+    <ClInclude Include="TestRecordBsw.h" />
     <ClInclude Include="TestSession.h" />
     <ClInclude Include="TestSessionAptCard.h" />
     <ClInclude Include="TestSessionBsw.h" />
@@ -330,9 +330,7 @@
     <ClCompile Include="MarkPoint.cpp" />
     <ClCompile Include="MobileSocialNetworkHost.cpp" />
     <ClCompile Include="MsgCntJudgeReceiverReport.cpp" />
-    <ClCompile Include="MsgHopInfo.cpp" />
     <ClCompile Include="MsgInfo.cpp" />
-    <ClCompile Include="MsgInsideInfo.cpp" />
     <ClCompile Include="MsgShowInfo.cpp" />
     <ClCompile Include="NearbyNodeEntry.cpp" />
     <ClCompile Include="OutputWnd.cpp" />
@@ -363,13 +361,14 @@
     <ClCompile Include="RouteTableItem.cpp" />
     <ClCompile Include="RoutingProcess.cpp" />
     <ClCompile Include="RoutingProcessAptCard.cpp" />
+    <ClCompile Include="RoutingProcessBsw.cpp" />
+    <ClCompile Include="RoutingProcessHello.cpp" />
     <ClCompile Include="RoutingProtocol.cpp" />
     <ClCompile Include="RoutingProtocolAptCard.cpp" />
-    <ClCompile Include="RoutingStatisticsInfo.cpp" />
+    <ClCompile Include="RoutingProtocolBsw.cpp" />
     <ClCompile Include="Sentence.cpp" />
     <ClCompile Include="SentenceAptCard.cpp" />
     <ClCompile Include="SimulatorCfg.cpp" />
-    <ClCompile Include="StatisticsReport.cpp" />
     <ClCompile Include="StatisticSummary.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -379,6 +378,7 @@
     </ClCompile>
     <ClCompile Include="TestRecord.cpp" />
     <ClCompile Include="TestRecordAptCard.cpp" />
+    <ClCompile Include="TestRecordBsw.cpp" />
     <ClCompile Include="TestSession.cpp" />
     <ClCompile Include="TestSessionAptCard.cpp" />
     <ClCompile Include="TestSessionBsw.cpp" />

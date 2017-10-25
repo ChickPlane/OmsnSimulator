@@ -34,7 +34,6 @@ public:
 	CEdit * m_pAveLatency;
 	CEdit * m_pAveAnonyDistance;
 	CEdit * m_pAveAnonyTime;
-	CStatisticSummary m_Summare;
 
 
 // 操作
@@ -45,7 +44,7 @@ public:
 	virtual void OnEngineTimer(int nCommandId);
 	virtual void OnEngineSpeedChanged();
 	virtual void OnEngineTimeChanged(SIM_TIME lnCurrentTime);
-	virtual void OnEngineMessageStatisticsChanged(const CStatisticsReport & report);
+	virtual void ChangeSummary(const CStatisticSummary & summary);
 	virtual void OnDraw(CDC* pDC);  // 重写以绘制该视图
 	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
 protected:

@@ -2,6 +2,7 @@
 #include "RoutingProtocolBsw.h"
 #include "TestRecordBsw.h"
 #include "Yell.h"
+#include "HostEngine.h"
 
 
 CRoutingProtocolBsw::CRoutingProtocolBsw()
@@ -103,8 +104,8 @@ void CRoutingProtocolBsw::OnBswPkgReachDestination(CRoutingProcessBsw * pCallBy,
 	if (pCallBy == GetQueryProcess())
 	{
 		// LBS REPLY
-		strLog.Format(_T("\n%d Delievery to %d"), pPkg->m_pTestSession->m_nSessionId, GetHostId());
-		WriteLog(strLog);
+// 		strLog.Format(_T("\n%d Delievery to %d"), pPkg->m_pTestSession->m_nSessionId, GetHostId());
+// 		WriteLog(strLog);
 
 		SetMissionRecord(pPkg->m_pTestSession->m_nSessionId, REC_ST_REACH);
 		SetMissionRecord(pPkg->m_pTestSession->m_nSessionId, REC_ST_REP_LEAVE);
@@ -182,9 +183,40 @@ BOOL CRoutingProtocolBsw::SetMissionRecord(int nSessionId, int nEventId)
 			strLog.Format(_T("PKG %d: E%d T(%d) TG(%d)"), nSessionId, nEventId, pRecord->m_lnTimes[nEventId], pRecord->m_lnTimes[nEventId] - pRecord->m_lnTimes[REC_ST_GENERATE]);
 		}
 		WriteLog(strLog);
+		UpdateSummary();
 		return TRUE;
 	}
 	return FALSE;
 }
 
 CMap<int, int, CTestRecordBsw *, CTestRecordBsw *> CRoutingProtocolBsw::gm_allSessions;
+
+void CRoutingProtocolBsw::UpdateSummary()
+{
+	CStatisticSummary & summary = GetEngine()->GetSummary();
+	if (summary.m_RealData.GetSize() != REC_ST_MAX)
+	{
+		summary.m_RealData.SetSize(REC_ST_MAX);
+	}
+
+	for (int i = 0; i < REC_ST_MAX; ++i)
+	{
+		summary.m_RealData[i] = 0;
+	}
+
+	POSITION pos = gm_allSessions.GetStartPosition();
+	while (pos)
+	{
+		CTestRecordBsw * pRecord = NULL;
+		int nId = 0;
+		gm_allSessions.GetNextAssoc(pos, nId, pRecord);
+		for (int i = 0; i < REC_ST_MAX; ++i)
+		{
+			if (pRecord->m_lnTimes[i] >= 0)
+			{
+				summary.m_RealData[i]++;
+			}
+		}
+	}
+	GetEngine()->ChangeSummary(summary);
+}

@@ -4,6 +4,7 @@
 #include "QueryMission.h"
 #include "MsgShowInfo.h"
 #include "RoutingProcess.h"
+#include "DoublePoint.h"
 
 class CHost;
 class CHostEngine;
@@ -38,7 +39,6 @@ public:
 	CDoublePoint GetHostPostion(SIM_TIME lnTime) const;
 	virtual int AddProcess(CRoutingProcess * pProcess);
 
-	CMsgHopInfo GetMsgHopInfo(int nComment, HOP_INFO_TYPE eType) const;
 	virtual void TransmitMessage(CRoutingProtocol * pTo, CYell * pMsg);
 	virtual void TransmitSingleSentence(CSentence * pSentence);
 	virtual int GetProcessId(CRoutingProcess * pProcess);

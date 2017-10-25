@@ -28,19 +28,9 @@ void CEngineUser::OnEngineTimeChanged(SIM_TIME lnCurrentTime)
 
 }
 
-void CEngineUser::OnEngineMessageStatisticsChanged(const CStatisticsReport & report)
-{
-
-}
-
 void CEngineUser::SetEngine(CHostEngine * pEngine)
 {
 	m_pEngine = pEngine;
-}
-
-void CEngineUser::EngineRecordPackage(int nDataId, const CMsgInsideInfo & msgInfo, int nState)
-{
-	m_pEngine->RecordPackageStateChange(nDataId, msgInfo, nState);
 }
 
 SIM_TIME CEngineUser::GetSimTime() const

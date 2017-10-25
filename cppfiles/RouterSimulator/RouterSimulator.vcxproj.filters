@@ -228,9 +228,6 @@
     <ClInclude Include="RouteTable.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="RoutingStatisticsInfo.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="HostStateWnd.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -241,9 +238,6 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="ListCtrlMessages.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="MsgInsideInfo.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="RoutingProcess.h">
@@ -258,13 +252,7 @@
     <ClInclude Include="StatisticSummary.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="MsgHopInfo.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="SimulatorCfg.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="StatisticsReport.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="RoutingProcessAptCard.h">
@@ -319,6 +307,18 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="CommonFunctions.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="RoutingProcessBsw.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="RoutingProcessHello.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="RoutingProtocolBsw.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="TestRecordBsw.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
@@ -515,9 +515,6 @@
     <ClCompile Include="RouteTable.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="RoutingStatisticsInfo.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="HostStateWnd.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
@@ -528,9 +525,6 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="ListCtrlMessages.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="MsgInsideInfo.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="RoutingProcess.cpp">
@@ -545,13 +539,7 @@
     <ClCompile Include="StatisticSummary.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="MsgHopInfo.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="SimulatorCfg.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="StatisticsReport.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="RoutingProcessAptCard.cpp">
@@ -606,6 +594,18 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="CommonFunctions.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="RoutingProcessBsw.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="RoutingProcessHello.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="RoutingProtocolBsw.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="TestRecordBsw.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

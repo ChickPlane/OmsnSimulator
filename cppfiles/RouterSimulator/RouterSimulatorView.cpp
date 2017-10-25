@@ -104,22 +104,18 @@ void CRouterSimulatorView::OnEngineTimeChanged(SIM_TIME lnCurrentTime)
 	m_pEditActualSpeed->SetWindowText(strActualSpeed);
 }
 
-void CRouterSimulatorView::OnEngineMessageStatisticsChanged(const CStatisticsReport & report)
+void CRouterSimulatorView::ChangeSummary(const CStatisticSummary & summary)
 {
-	m_Summare.m_nMsgCount = report.m_nStartedPackages;
-	m_Summare.m_nDeliveryCount = report.m_nDeliveredPackages;
-	m_Summare.m_fLatency = (int)(report.m_fAveLatency);
-	m_Summare.m_fAveInterHopCount = report.m_fAveTotalHops;
-
-	m_Summare.m_nAnonymityStartCount = report.m_nStartAnonyCount;
-	m_Summare.m_nAnonymityEndCount = report.m_nFinishAnonyCount;
-	m_Summare.m_nAnonymityTimeCost = (int)(report.m_fAveAnonyTimeCost / 1000);
-	m_Summare.m_fAnonymityDistance = report.m_fAveAnonyDistance;
-	m_Summare.m_fAveObfuscationNum = report.m_fAveObfuscationNum;
-	m_Summare.m_fAnonymityMaxDistance = report.m_fMaxAnonyDistance;
-
-	CString strStatistic = m_Summare.GetUiString();
-	m_pEditMsgStatistic->SetWindowText(strStatistic);
+	CString strSummary;
+	summary.m_RealData.GetSize();
+	for (int i = 0; i < summary.m_RealData.GetSize(); ++i)
+	{
+		double fRd = summary.m_RealData[i];
+		CString strTmp;
+		strTmp.Format(_T("%f"), fRd);
+		strSummary += strTmp + _T(" ; ");
+	}
+	m_pEditMsgStatistic->SetWindowText(strSummary);
 }
 
 // CRouterSimulatorView »æÖÆ
@@ -184,8 +180,9 @@ void CRouterSimulatorView::InitHostProtocol(int nCopyCount, char * strProtocolNa
 	fLow /= 100.0;
 	CRouterSimulatorDoc * pDoc = GetDocument();
 	int nLength = pDoc->m_pRoadNet->m_allHosts.GetSize();
-	m_Summare.m_ProtocolName = strProtocolName;
-	m_Summare.m_nRandomSeed = theApp.nRandSeed;
+	CStatisticSummary & summary = m_pEngine->GetSummary();
+	summary.m_ProtocolName = strProtocolName;
+	summary.m_nRandomSeed = theApp.nRandSeed;
 	m_pEngine->SetCommunicationRadius(fCommunicateRadius);
 	//if (TRUE || strcmp(strProtocolName, PROTOCOL_NAME_APTCARD) == 0)
 	if(FALSE)
@@ -246,7 +243,7 @@ void CRouterSimulatorView::OnButtonCreateMsgs()
 	CQueryMission mission;
 	CHost * pHostFrom = NULL;
 	CHost * pHostTo = pRoadNet->m_allHosts.GetAt(0);
-	SIM_TIME lnTimeOut = m_pEngine->GetSimTime() + nTimeOut;
+	SIM_TIME lnTimeOut = m_pEngine->GetSimTime() + nTimeOut * 1000;
 	BOOL bReverse = CCommonFunctions::PickMFromNDisorder(nNum, pEmpty, nHostCount);
 	int nCmpNum = bReverse ? 0 : 1;
 
@@ -267,41 +264,42 @@ void CRouterSimulatorView::OnButtonCreateMsgs()
 
 void CRouterSimulatorView::OnButtonCpySummary()
 {
-	if (OpenClipboard())
-	{
-		CRouterSimulatorDoc * pDoc = GetDocument();
-		m_Summare.m_nTrustValue = pDoc->m_Cfg.m_fPrivacyHigh;
-		m_Summare.m_nAnonymityK = pDoc->m_Cfg.m_nK;
-		m_Summare.m_nTotleNodeCount = pDoc->m_Cfg.m_nNodeCount;
-		m_Summare.m_fRadius = pDoc->m_Cfg.m_fCommunicateRadius;
-		m_Summare.m_fAveAnonySurroundingCount = m_pEngine->GetAveSurroundingHosts(pDoc->m_Cfg.m_nK * pDoc->m_Cfg.m_fCommunicateRadius, MSG_HOP_STATE_BSW_BEGIN);
-		m_Summare.m_fAveRealSurrounding = m_pEngine->GetAveSurroundingHosts(pDoc->m_Cfg.m_nK * pDoc->m_Cfg.m_fCommunicateRadius, MSG_HOP_STATE_ANONYMITY_END);
-		double fInsideCount = 0, fOutsideCount = 0;
-		fInsideCount = m_pEngine->GetAveSurroundingHosts(pDoc->m_Cfg.m_fAnonyRadius, MSG_HOP_STATE_ANONYMITY_END);
-		fOutsideCount = m_pEngine->GetAveSurroundingHosts(m_Summare.m_fAnonymityMaxDistance, MSG_HOP_STATE_ANONYMITY_END);
-		m_Summare.m_fAveRingCount = fOutsideCount - fInsideCount;
-		m_Summare.m_nOnRingCount = m_pEngine->GetSourceOnRing(pDoc->m_Cfg.m_fAnonyRadius, m_Summare.m_fAnonymityMaxDistance);
-		HGLOBAL clipbuffer;
-		char   *   buffeclipbufferr;
-		EmptyClipboard();
-		char * pOut = new char[300];
-		m_Summare.GetString(pOut);
-		clipbuffer = GlobalAlloc(GMEM_DDESHARE, strlen(pOut) + 1);
-		buffeclipbufferr = (char*)GlobalLock(clipbuffer);
-		int a = 9;
-		strcpy_s(buffeclipbufferr, strlen(pOut) + 1, pOut);
-		GlobalUnlock(clipbuffer);
-		SetClipboardData(CF_TEXT, clipbuffer);
-		CloseClipboard();
-
-		std::ofstream fout;
-		fout.open("statistics.txt", std::ofstream::out | std::ofstream::app);
-		string strOutFile(pOut);
-		fout << strOutFile << endl;
-		fout.close();
-
-		delete[] pOut;
-	}
+	return;
+// 	if (OpenClipboard())
+// 	{
+// 		CRouterSimulatorDoc * pDoc = GetDocument();
+// 		m_Summare.m_nTrustValue = pDoc->m_Cfg.m_fPrivacyHigh;
+// 		m_Summare.m_nAnonymityK = pDoc->m_Cfg.m_nK;
+// 		m_Summare.m_nTotleNodeCount = pDoc->m_Cfg.m_nNodeCount;
+// 		m_Summare.m_fRadius = pDoc->m_Cfg.m_fCommunicateRadius;
+// 		m_Summare.m_fAveAnonySurroundingCount = m_pEngine->GetAveSurroundingHosts(pDoc->m_Cfg.m_nK * pDoc->m_Cfg.m_fCommunicateRadius, MSG_HOP_STATE_BSW_BEGIN);
+// 		m_Summare.m_fAveRealSurrounding = m_pEngine->GetAveSurroundingHosts(pDoc->m_Cfg.m_nK * pDoc->m_Cfg.m_fCommunicateRadius, MSG_HOP_STATE_ANONYMITY_END);
+// 		double fInsideCount = 0, fOutsideCount = 0;
+// 		fInsideCount = m_pEngine->GetAveSurroundingHosts(pDoc->m_Cfg.m_fAnonyRadius, MSG_HOP_STATE_ANONYMITY_END);
+// 		fOutsideCount = m_pEngine->GetAveSurroundingHosts(m_Summare.m_fAnonymityMaxDistance, MSG_HOP_STATE_ANONYMITY_END);
+// 		m_Summare.m_fAveRingCount = fOutsideCount - fInsideCount;
+// 		m_Summare.m_nOnRingCount = m_pEngine->GetSourceOnRing(pDoc->m_Cfg.m_fAnonyRadius, m_Summare.m_fAnonymityMaxDistance);
+// 		HGLOBAL clipbuffer;
+// 		char   *   buffeclipbufferr;
+// 		EmptyClipboard();
+// 		char * pOut = new char[300];
+// 		m_Summare.GetString(pOut);
+// 		clipbuffer = GlobalAlloc(GMEM_DDESHARE, strlen(pOut) + 1);
+// 		buffeclipbufferr = (char*)GlobalLock(clipbuffer);
+// 		int a = 9;
+// 		strcpy_s(buffeclipbufferr, strlen(pOut) + 1, pOut);
+// 		GlobalUnlock(clipbuffer);
+// 		SetClipboardData(CF_TEXT, clipbuffer);
+// 		CloseClipboard();
+// 
+// 		std::ofstream fout;
+// 		fout.open("statistics.txt", std::ofstream::out | std::ofstream::app);
+// 		string strOutFile(pOut);
+// 		fout << strOutFile << endl;
+// 		fout.close();
+// 
+// 		delete[] pOut;
+// 	}
 }
 
 // CRouterSimulatorView Õï¶Ï
@@ -466,6 +464,7 @@ void CRouterSimulatorView::OnSize(UINT nType, int cx, int cy)
 	nMostRight = rectClient.left;
 	if (m_pEditLabel)
 	{
+		nWidth = 80;
 		m_pEditLabel->MoveWindow(nMostRight, nMostTop, nWidth, 30);
 		nMostRight += nWidth + 5;
 	}
@@ -524,7 +523,7 @@ LRESULT CRouterSimulatorView::OnDataPrepareFinished(WPARAM wParam, LPARAM lParam
 #endif
 
 	CString strLabel;
-	strLabel.Format(_T("/%d Time Out: "), pDoc->m_pRoadNet->m_allHosts.GetSize() - SERVER_NODE_COUNT);
+	strLabel.Format(_T("Mobile Host:%d"), pDoc->m_pRoadNet->m_allHosts.GetSize() - SERVER_NODE_COUNT);
 	m_pEditLabel->SetWindowText(strLabel);
 
 	return 0;

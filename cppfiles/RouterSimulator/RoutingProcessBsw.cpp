@@ -43,6 +43,7 @@ void CRoutingProcessBsw::InitNewPackage(CPkgBswData * pPkg)
 
 void CRoutingProcessBsw::OnEncounterUser(CRoutingProtocol * pTheOther, CList<CSentence *> & SendingList, const CSentence * pTriger)
 {
+	CleanTimeoutData();
 	CList<int> toBeRemoved;
 	POSITION pos = m_DataMap.GetStartPosition();
 	while (pos)
@@ -52,6 +53,11 @@ void CRoutingProcessBsw::OnEncounterUser(CRoutingProtocol * pTheOther, CList<CSe
 		int rKey;
 		CPkgBswData * pPkg = NULL;
 		m_DataMap.GetNextAssoc(pos, rKey, pPkg);
+		if (pPkg->m_lnTimeOut < GetSimTime())
+		{
+			bSent = false;
+			continue;
+		}
 
 		if (m_pUser->IsTheLastHop(this, pPkg, pTheOther, pTriger))
 		{
@@ -169,7 +175,12 @@ void CRoutingProcessBsw::CleanTimeoutData()
 		const CBswIdAndTimeout& tmpDTL = m_DataTimeoutList.GetNext(pos);
 		if (tmpDTL.m_lnTimeout < lnTime)
 		{
-			m_DataMap.RemoveKey(tmpDTL.m_nBswId);
+			CPkgBswData * pValue = NULL;
+			if (m_DataMap.Lookup(tmpDTL.m_nBswId, pValue))
+			{
+				delete pValue;
+				m_DataMap.RemoveKey(tmpDTL.m_nBswId);
+			}
 			m_DataTimeoutList.RemoveAt(prevpos);
 		}
 		else

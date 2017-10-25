@@ -123,20 +123,6 @@ void CRoutingProtocol::Turn(BOOL bOn)
 	}
 }
 
-CMsgHopInfo CRoutingProtocol::GetMsgHopInfo(int nComment, HOP_INFO_TYPE eType) const
-{
-	CMsgHopInfo ret;
-	ret.m_Time = GetSimTime();
-	if (GetHost())
-	{
-		ret.m_Location = GetHost()->GetPosition(ret.m_Time);
-	}
-	ret.m_pProtocol = this;
-	ret.m_nComment = nComment;
-	ret.m_eInfoType = eType;
-	return ret;
-}
-
 void CRoutingProtocol::TransmitMessage(CRoutingProtocol * pTo, CYell * pMsg)
 {
 	if (GetEngine())

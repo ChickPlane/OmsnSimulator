@@ -34,6 +34,7 @@ protected:
 
 public:
 	static CMap<int, int, CTestRecordBsw *, CTestRecordBsw *> gm_allSessions;
+	void UpdateSummary();
 
 private:
 	int m_nHelloProcessId;

@@ -179,37 +179,6 @@ int CHostEngine::GetActualSpeed() const
 	return m_lnExpectSimMillisecPerActSec * lnActualPass / (lnExpectPass*1000.0) + 0.5;
 }
 
-void CHostEngine::RecordPackageStateChange(int nDataId, const CMsgInsideInfo & msgInfo, int nState)
-{
-	int nHopIndex = msgInfo.GetStateIndex(nState);
-	ASSERT(nHopIndex != -1);
-
-	const CMsgHopInfo & info = msgInfo.GetTailRecord();
-	int nHostId = info.m_pProtocol->GetHostId();
-	CString strCommon = GetCommonName(info.m_nComment);
-	if (!strCommon.IsEmpty())
-	{
-		CString strLog;
-		strLog.Format(_T("[%6d] H(%3d) %s"), nDataId, nHostId, strCommon.GetBuffer(0));
-		WriteLog(strLog);
-	}
-
-	CRoutingStatisticsInfo * pLookupResult = NULL;
-	if (!m_SendingMsgs.Lookup(nDataId, pLookupResult))
-	{
-		pLookupResult = new CRoutingStatisticsInfo();
-		pLookupResult->SetHopInfo(msgInfo);
-		m_SendingMsgs[nDataId] = pLookupResult;
-	}
-	else
-	{
-		ASSERT(msgInfo.IsAnExtent(pLookupResult->GetHopInfo()));
-		pLookupResult->SetHopInfo(msgInfo);
-	}
-
-	ReportMessageStatisticsChanged();
-}
-
 CRoadNet * CHostEngine::GetRoadNet()
 {
 	return m_pRoadNet;
@@ -227,6 +196,21 @@ void CHostEngine::RegisterUser(CEngineUser * pUser)
 		}
 	}
 	m_NotifyList.AddTail(pUser);
+}
+
+void CHostEngine::ChangeSummary(const CStatisticSummary & summary)
+{
+	m_Summary = summary;
+	POSITION pos = m_NotifyList.GetHeadPosition();
+	while (pos)
+	{
+		m_NotifyList.GetNext(pos)->ChangeSummary(summary);
+	}
+}
+
+CStatisticSummary & CHostEngine::GetSummary()
+{
+	return m_Summary;
 }
 
 void CHostEngine::OnEveryPeriod()
@@ -348,102 +332,6 @@ bool CHostEngine::RefreshUiOptimize(CArray<CHostGui> * pMessage, const CDoublePo
 	return false;
 }
 
-void CHostEngine::ReportMessageStatisticsChanged()
-{
-	int StateStatistics[MSG_HOP_STATE_MAX] = { 0 };
-	double fTotalAnonyDistance = 0;
-	double fTotalObfuscationNum = 0;
-	double fMaxAnonyDistance = 0;
-	SIM_TIME lnTotalAnonyTime = 0, lnTotalLatency = 0;
-	int nInterHopCountTotle = 0;
-
-	int rKey;
-	CRoutingStatisticsInfo * rValue;
-	POSITION posMsg = m_SendingMsgs.GetStartPosition();
-
-	while (posMsg)
-	{
-		m_SendingMsgs.GetNextAssoc(posMsg, rKey, rValue);
-		bool bHasSource = false;
-		bool bHasAnonyStart = false;
-		CMsgHopInfo info;
-		for (int i = 0; i < MSG_HOP_STATE_MAX; ++i)
-		{
-			StateStatistics[i] += rValue->m_CnP[i].nCount;
-			if (rValue->m_CnP[i].nCount == 0)
-			{
-				continue;
-			}
-			switch (i)
-			{
-			case MSG_HOP_STATE_SOURCE:
-			{
-				ASSERT(rValue->m_CnP[i].nCount == 1);
-				break;
-			}
-			case MSG_HOP_STATE_ANONYMITY_END:
-			{
-				ASSERT(rValue->m_CnP[i].nCount == 1);
-				ASSERT(rValue->m_CnP[MSG_HOP_STATE_SOURCE].nCount == 1);
-
-				const CMsgInsideInfo & cntInfo = rValue->GetHopInfo();
-				CDoublePoint dpAnonymityBegin = cntInfo.GetRecordAt(rValue->m_CnP[MSG_HOP_STATE_ANONYMITY_BEGIN].pos).m_Location;
-				CDoublePoint dpAnonymityEnd = cntInfo.GetRecordAt(rValue->m_CnP[MSG_HOP_STATE_ANONYMITY_END].pos).m_Location;
-				double fCurrentAnonyDistance = CDoublePoint::GetDistance(
-						dpAnonymityBegin,
-						dpAnonymityEnd
-				);
-				fTotalAnonyDistance += fCurrentAnonyDistance;
-				if (fCurrentAnonyDistance > fMaxAnonyDistance)
-				{
-					fMaxAnonyDistance = fCurrentAnonyDistance;
-				}
-				fTotalObfuscationNum += rValue->m_CnP[MSG_HOP_STATE_ANONYMITY_TRANS].nCount;
-				ASSERT(rValue->m_CnP[MSG_HOP_STATE_ANONYMITY_TRANS].nCount > 0);
-
-				SIM_TIME lnSourceTime = cntInfo.GetRecordAt(rValue->m_CnP[MSG_HOP_STATE_SOURCE].pos).m_Time;
-				SIM_TIME lnAnonyEndTime = cntInfo.GetRecordAt(rValue->m_CnP[MSG_HOP_STATE_ANONYMITY_END].pos).m_Time;
-				SIM_TIME lnAnonyTimeCost = lnAnonyEndTime - lnSourceTime;
-				lnTotalAnonyTime += lnAnonyTimeCost;
-				break;
-			}
-			case MSG_HOP_STATE_DESTINATION:
-			{
-				ASSERT(rValue->m_CnP[MSG_HOP_STATE_SOURCE].nCount == 1);
-
-				const CMsgInsideInfo & cntInfo = rValue->GetHopInfo();
-
-				SIM_TIME lnSourceTime = cntInfo.GetRecordAt(rValue->m_CnP[MSG_HOP_STATE_SOURCE].pos).m_Time;
-				SIM_TIME lnDestinationTime = cntInfo.GetRecordAt(rValue->m_CnP[MSG_HOP_STATE_DESTINATION].pos).m_Time;
-				SIM_TIME lnLatency = lnDestinationTime - lnSourceTime;
-				lnTotalLatency += lnLatency;
-
-				nInterHopCountTotle += cntInfo.GetHopCount();
-				break;
-			}
-			}
-		}
-	}
-
-	CStatisticsReport report;
-	report.m_nStartedPackages = StateStatistics[MSG_HOP_STATE_SOURCE];
-	report.m_nDeliveredPackages = StateStatistics[MSG_HOP_STATE_DESTINATION];
-	report.m_nStartAnonyCount = StateStatistics[MSG_HOP_STATE_ANONYMITY_BEGIN];
-	report.m_nFinishAnonyCount = StateStatistics[MSG_HOP_STATE_ANONYMITY_END];
-	report.m_fAveTotalHops = nInterHopCountTotle * 1.0 / (report.m_nDeliveredPackages == 0 ? 1 : report.m_nDeliveredPackages);
-	report.m_fAveLatency = lnTotalLatency * 0.001 / (report.m_nDeliveredPackages == 0 ? 1 : report.m_nDeliveredPackages);
-	report.m_fAveAnonyDistance = fTotalAnonyDistance / (report.m_nFinishAnonyCount == 0 ? 1 : report.m_nFinishAnonyCount);
-	report.m_fAveObfuscationNum = fTotalObfuscationNum / (report.m_nFinishAnonyCount == 0 ? 1 : report.m_nFinishAnonyCount);
-	report.m_fMaxAnonyDistance = fMaxAnonyDistance;
-	report.m_fAveAnonyTimeCost = lnTotalAnonyTime * 0.001 / (report.m_nFinishAnonyCount == 0 ? 1 : report.m_nFinishAnonyCount);
-
-	POSITION pos = m_NotifyList.GetHeadPosition();
-	while (pos)
-	{
-		m_NotifyList.GetNext(pos)->OnEngineMessageStatisticsChanged(report);
-	}
-}
-
 int CHostEngine::GetSurringNodesCount(CDoublePoint currentLocation, double fRadius)
 {
 	SIM_TIME current = GetSimTime();
@@ -502,63 +390,63 @@ void CHostEngine::NotifyTimeChange()
 	}
 }
 
-double CHostEngine::GetAveSurroundingHosts(double fRadius, int nComment)
-{
-	double fTotalHosts = 0;
-	int nAnonyEndCount = 0;
-	
-	int rKey;
-	CRoutingStatisticsInfo * rValue;
-	POSITION posMsg = m_SendingMsgs.GetStartPosition();
-
-	while (posMsg)
-	{
-		m_SendingMsgs.GetNextAssoc(posMsg, rKey, rValue);
-		POSITION findResult = rValue->GetHopInfo().GetRecordWith(nComment);
-		if (findResult)
-		{
-			++nAnonyEndCount;
-			const CMsgHopInfo & findInfo = rValue->GetHopInfo().GetRecordAt(findResult);
-			int nHostNumber = m_pRoadNet->GetHostNumberInRange(findInfo.m_Location, fRadius, findInfo.m_Time);
-			fTotalHosts += nHostNumber;
-		}
-	}
-	double fRet = fTotalHosts / nAnonyEndCount;
-	return fRet;
-}
-
-int CHostEngine::GetSourceOnRing(double fInside, double fOutside)
-{
-	int nRet = 0;
-
-	int rKey;
-	CRoutingStatisticsInfo * rValue;
-	POSITION posMsg = m_SendingMsgs.GetStartPosition();
-
-	while (posMsg)
-	{
-		m_SendingMsgs.GetNextAssoc(posMsg, rKey, rValue);
-		if (rValue->m_CnP[MSG_HOP_STATE_ANONYMITY_END].nCount == 1)
-		{
-			ASSERT(rValue->m_CnP[MSG_HOP_STATE_ANONYMITY_END].nCount == 1);
-			ASSERT(rValue->m_CnP[MSG_HOP_STATE_SOURCE].nCount == 1);
-			const CMsgInsideInfo & cntInfo = rValue->GetHopInfo();
-			CHost * pOriginalRequester = cntInfo.GetRecordAt(rValue->m_CnP[MSG_HOP_STATE_SOURCE].pos).m_pProtocol->GetHost();
-			CDoublePoint dpAnonymityEnd = cntInfo.GetRecordAt(rValue->m_CnP[MSG_HOP_STATE_ANONYMITY_END].pos).m_Location;
-			SIM_TIME lnEndTime = cntInfo.GetRecordAt(rValue->m_CnP[MSG_HOP_STATE_ANONYMITY_END].pos).m_Time;
-			CDoublePoint dpReqerLocation = pOriginalRequester->GetPosition(lnEndTime);
-			double fDistance = CDoublePoint::GetDistance(
-				dpReqerLocation,
-				dpAnonymityEnd
-			);
-			if (fDistance >= fInside && fDistance <= fOutside)
-			{
-				nRet++;
-			}
-		}
-	}
-	return nRet;
-}
+// double CHostEngine::GetAveSurroundingHosts(double fRadius, int nComment)
+// {
+// 	double fTotalHosts = 0;
+// 	int nAnonyEndCount = 0;
+// 	
+// 	int rKey;
+// 	CRoutingStatisticsInfo * rValue;
+// 	POSITION posMsg = m_SendingMsgs.GetStartPosition();
+// 
+// 	while (posMsg)
+// 	{
+// 		m_SendingMsgs.GetNextAssoc(posMsg, rKey, rValue);
+// 		POSITION findResult = rValue->GetHopInfo().GetRecordWith(nComment);
+// 		if (findResult)
+// 		{
+// 			++nAnonyEndCount;
+// 			const CMsgHopInfo & findInfo = rValue->GetHopInfo().GetRecordAt(findResult);
+// 			int nHostNumber = m_pRoadNet->GetHostNumberInRange(findInfo.m_Location, fRadius, findInfo.m_Time);
+// 			fTotalHosts += nHostNumber;
+// 		}
+// 	}
+// 	double fRet = fTotalHosts / nAnonyEndCount;
+// 	return fRet;
+// }
+// 
+// int CHostEngine::GetSourceOnRing(double fInside, double fOutside)
+// {
+// 	int nRet = 0;
+// 
+// 	int rKey;
+// 	CRoutingStatisticsInfo * rValue;
+// 	POSITION posMsg = m_SendingMsgs.GetStartPosition();
+// 
+// 	while (posMsg)
+// 	{
+// 		m_SendingMsgs.GetNextAssoc(posMsg, rKey, rValue);
+// 		if (rValue->m_CnP[MSG_HOP_STATE_ANONYMITY_END].nCount == 1)
+// 		{
+// 			ASSERT(rValue->m_CnP[MSG_HOP_STATE_ANONYMITY_END].nCount == 1);
+// 			ASSERT(rValue->m_CnP[MSG_HOP_STATE_SOURCE].nCount == 1);
+// 			const CMsgInsideInfo & cntInfo = rValue->GetHopInfo();
+// 			CHost * pOriginalRequester = cntInfo.GetRecordAt(rValue->m_CnP[MSG_HOP_STATE_SOURCE].pos).m_pProtocol->GetHost();
+// 			CDoublePoint dpAnonymityEnd = cntInfo.GetRecordAt(rValue->m_CnP[MSG_HOP_STATE_ANONYMITY_END].pos).m_Location;
+// 			SIM_TIME lnEndTime = cntInfo.GetRecordAt(rValue->m_CnP[MSG_HOP_STATE_ANONYMITY_END].pos).m_Time;
+// 			CDoublePoint dpReqerLocation = pOriginalRequester->GetPosition(lnEndTime);
+// 			double fDistance = CDoublePoint::GetDistance(
+// 				dpReqerLocation,
+// 				dpAnonymityEnd
+// 			);
+// 			if (fDistance >= fInside && fDistance <= fOutside)
+// 			{
+// 				nRet++;
+// 			}
+// 		}
+// 	}
+// 	return nRet;
+// }
 
 CHost * CHostEngine::GetHost(int nHostId) const
 {

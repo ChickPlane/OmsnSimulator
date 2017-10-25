@@ -6,6 +6,10 @@ public:
 	CStatisticSummary(const CStatisticSummary & src);
 	CStatisticSummary & operator = (const CStatisticSummary & src);
 	virtual ~CStatisticSummary();
+
+	CArray<double> m_RealData;
+	CArray<CString> m_StringData;
+
 	CString m_ProtocolName;
 	int m_nRandomSeed;
 	int m_nTotleNodeCount;
