@@ -19,6 +19,7 @@
 #include "RoutingProtocolAptCard.h"
 #include "RoutingProtocolBSW.h"
 #include "CommonFunctions.h"
+#include "MainFrm.h"
 using namespace std;
 
 #ifdef _DEBUG
@@ -26,7 +27,7 @@ using namespace std;
 #endif
 
 #ifdef DEBUG
-#define AUTO_RUN_TEST 0
+#define AUTO_RUN_TEST 1
 #else
 #define AUTO_RUN_TEST 1
 #endif
@@ -179,40 +180,47 @@ void CRouterSimulatorView::DestroyEngine()
 	}
 }
 
-void CRouterSimulatorView::InitHostProtocol(int nCopyCount, char * strProtocolName, double fCommunicateRadius, int nK, double fHigh, double fLow, double fAnonymityRadius)
+void CRouterSimulatorView::InitHostProtocol(const CSimulatorCfg & Cfg)
 {
-	fHigh /= 100.0;
-	fLow /= 100.0;
+	double fHigh = Cfg.m_fPrivacyHigh / 100.0;
+	double fLow = Cfg.m_fPrivacyLow / 100.0;
 	CRouterSimulatorDoc * pDoc = GetDocument();
 	int nLength = pDoc->m_pRoadNet->m_allHosts.GetSize();
 	CStatisticSummary & summary = m_pEngine->GetSummary();
-	summary.m_ProtocolName = strProtocolName;
+	summary.m_ProtocolName = Cfg.m_strProtocolName;
 	summary.m_nRandomSeed = theApp.nRandSeed;
-	summary.m_fCommuRadius = fCommunicateRadius;
+	summary.m_fCommuRadius = Cfg.m_fCommunicateRadius;
 	summary.m_fTrust = fHigh;
-	m_pEngine->SetCommunicationRadius(fCommunicateRadius);
-	if (TRUE || strcmp(strProtocolName, PROTOCOL_NAME_APTCARD) == 0)
+	m_pEngine->SetCommunicationRadius(Cfg.m_fCommunicateRadius);
+
+	CMainFrame * pMainFrame = (CMainFrame*)AfxGetMainWnd();
+
+	if (strcmp(Cfg.m_strProtocolName, PROTOCOL_NAME_APTCARD) == 0)
 	{
-		CRoutingProtocolAptCard::SetStaticParameters(nK, 3, fHigh, 2 * 5 * 60000);
+		summary.m_pComments = new char[200];
+		strcpy_s(summary.m_pComments, 199, "Improve_Mark");
+		pMainFrame->WriteLog(_T("APTCARD"));
+		CRoutingProtocolAptCard::SetStaticParameters(Cfg.m_nK, 3, fHigh, 3 * Cfg.m_nTimeOutSecond * 1000);
 		for (int i = 0; i < nLength; ++i)
 		{
 			CMobileSocialNetworkHost * pHost = (CMobileSocialNetworkHost *)pDoc->m_pRoadNet->m_allHosts[i];
 			CRoutingProtocolAptCard * pAptCard = new CRoutingProtocolAptCard();
-			pAptCard->SetCommunicateRadius(fCommunicateRadius);
+			pAptCard->SetCommunicateRadius(Cfg.m_fCommunicateRadius);
 			pAptCard->SetEnvironment(pHost, m_pEngine);
-			pAptCard->SetLocalParameters(nCopyCount);
+			pAptCard->SetLocalParameters(Cfg.m_nBswCopyCount);
 			pDoc->m_pRoadNet->m_allHosts[i]->m_pProtocol = pAptCard;
 		}
 	}
 	else
 	{
+		pMainFrame->WriteLog(_T("BSW"));
 		for (int i = 0; i < nLength; ++i)
 		{
 			CMobileSocialNetworkHost * pHost = (CMobileSocialNetworkHost *)pDoc->m_pRoadNet->m_allHosts[i];
 			CRoutingProtocolBsw * pBsw = new CRoutingProtocolBsw();
-			pBsw->SetCommunicateRadius(fCommunicateRadius);
+			pBsw->SetCommunicateRadius(Cfg.m_fCommunicateRadius);
 			pBsw->SetEnvironment(pHost, m_pEngine);
-			pBsw->SetLocalParameters(nCopyCount);
+			pBsw->SetLocalParameters(Cfg.m_nBswCopyCount);
 			pDoc->m_pRoadNet->m_allHosts[i]->m_pProtocol = pBsw;
 		}
 	}
@@ -524,8 +532,8 @@ afx_msg LRESULT CRouterSimulatorView::OnAfteronedijnode(WPARAM wParam, LPARAM lP
 LRESULT CRouterSimulatorView::OnDataPrepareFinished(WPARAM wParam, LPARAM lParam)
 {
 	CRouterSimulatorDoc * pDoc = GetDocument();
-	InitHostProtocol(pDoc->m_Cfg.m_nBswCopyCount, pDoc->m_Cfg.m_strProtocolName, pDoc->m_Cfg.m_fCommunicateRadius, pDoc->m_Cfg.m_nK, pDoc->m_Cfg.m_fPrivacyHigh, pDoc->m_Cfg.m_fPrivacyLow, pDoc->m_Cfg.m_fAnonyRadius);
-
+	//InitHostProtocol(pDoc->m_Cfg.m_nBswCopyCount, pDoc->m_Cfg.m_strProtocolName, pDoc->m_Cfg.m_fCommunicateRadius, pDoc->m_Cfg.m_nK, pDoc->m_Cfg.m_fPrivacyHigh, pDoc->m_Cfg.m_fPrivacyLow, pDoc->m_Cfg.m_fAnonyRadius);
+	InitHostProtocol(pDoc->m_Cfg);
 	m_pMapGui->PostMessage(MSG_ID_INIT_OK, AUTO_RUN_TEST);
 
 	CString strLabel;

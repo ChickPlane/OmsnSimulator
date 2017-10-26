@@ -35,9 +35,11 @@ public:
 	virtual BOOL IsPackageForMe(CRoutingProcessBsw * pCallBy, const CPkgBswData * pPkg);
 	virtual CPkgBswData * CopyPackage(CRoutingProcessBsw * pCallBy, const CPkgBswData * pPkg);
 	virtual void OnBswPkgReachDestination(CRoutingProcessBsw * pCallBy, const CPkgBswData * pPkg);
+	virtual void OnPackageFirstSent(CRoutingProcessBsw * pCallBy, const CPkgBswData * pPkg);
 
 	// APT CARD User
 	virtual void OnGetNewCards(CRoutingProcessAptCard * pCallBy, const CPkgAptCardCards * pPkg);
+	virtual void OnGetNoneCards(CRoutingProcessAptCard * pCallBy, const CPkgAptCardCards * pPkg);
 private:
 	BOOL IsFriend(const CRoutingProtocol * pOther) const;
 	BOOL IsLongTimeNoSee(const CRoutingProtocol * pOther) const;
@@ -58,6 +60,9 @@ private:
 	void ResetAll();
 
 	virtual CPkgAptCardReply * SwitchToNextAgency(const CPkgAptCardReply * pReply);
+	BOOL SetMissionRecord(int nSessionId, int nEventId);
+	void UpdateSummary();
+	void SendQueries(CRoutingProtocol * pTheOther);
 
 public:
 	static CMap<int, int, CTestRecordAptCard *, CTestRecordAptCard *> gm_allSessions;

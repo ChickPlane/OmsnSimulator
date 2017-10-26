@@ -14,6 +14,7 @@ class CRoutingProcessACUser
 {
 public:
 	virtual void OnGetNewCards(CRoutingProcessAptCard * pCallBy, const CPkgAptCardCards * pPkg) = 0;
+	virtual void OnGetNoneCards(CRoutingProcessAptCard * pCallBy, const CPkgAptCardCards * pPkg) = 0;
 };
 
 class CRoutingProcessAptCard :

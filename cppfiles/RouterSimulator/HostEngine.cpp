@@ -30,9 +30,14 @@ CHostEngine::CHostEngine()
 	, m_lnLastForecastSimTime(INT_MIN)
 	, m_lnLastForecastedSimTime(INT_MIN)
 	, m_nMsgId(0)
-	, m_nJudgeMax(1)
+	, m_nJudgeMax(3)
+#ifdef DEBUG
 	, m_bEnableMonitor(TRUE)
 	, m_blimitedSpeed(TRUE)
+#else
+	, m_bEnableMonitor(FALSE)
+	, m_blimitedSpeed(FALSE)
+#endif
 	, m_bWaitingActualTime(TRUE)
 {
 	m_lnEventCheckBoundary = GetPeriodDefaultInterval();

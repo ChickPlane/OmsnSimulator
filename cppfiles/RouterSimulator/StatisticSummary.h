@@ -20,6 +20,7 @@ public:
 	int m_nRandomSeed;
 	double m_fCommuRadius;
 	double m_fTrust;
+	char * m_pComments;
 
 private:
 	SIM_TIME m_lnTestStartTime;

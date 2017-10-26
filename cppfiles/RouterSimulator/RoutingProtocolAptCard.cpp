@@ -4,6 +4,7 @@
 #include "TrustValue.h"
 #include "MobileSocialNetworkHost.h"
 #include "SentenceAptCard.h"
+#include "HostEngine.h"
 
 
 CRoutingProtocolAptCard::CRoutingProtocolAptCard()
@@ -229,6 +230,9 @@ void CRoutingProtocolAptCard::OnBswPkgReachDestination(CRoutingProcessBsw * pCal
 		GetReplyProcess()->MarkProcessIdToSentences(pNewReply);
 
 		TransmitSingleSentence(pNewReply);
+
+		SetMissionRecord(pQuery->m_pTestSession->m_nSessionId, REC_AC_ST_REACH);
+		SetMissionRecord(pQuery->m_pTestSession->m_nSessionId, REC_AC_ST_REP_LEAVE);
 		return;
 	}
 	if (pCallBy == GetReplyProcess())
@@ -250,22 +254,30 @@ void CRoutingProtocolAptCard::OnBswPkgReachDestination(CRoutingProcessBsw * pCal
 			strLog.Format(_T("\nOri req %d"), GetHostId());
 			WriteLog(strLog);
 			RemovePsedunym(pReply->m_Next);
+			SetMissionRecord(pReply->m_pTestSession->m_nSessionId, REC_AC_ST_REP_RETURN);
 		}
 		return;
 	}
 	ASSERT(0);
 }
 
+void CRoutingProtocolAptCard::OnPackageFirstSent(CRoutingProcessBsw * pCallBy, const CPkgBswData * pPkg)
+{
+	if (pCallBy == GetQueryProcess())
+	{
+		SetMissionRecord(pPkg->m_pTestSession->m_nSessionId, REC_AC_ST_FIRSTSEND);
+	}
+}
+
 void CRoutingProtocolAptCard::OnGetNewCards(CRoutingProcessAptCard * pCallBy, const CPkgAptCardCards * pPkg)
 {
 	PrepareAllWaitingQueries();
+	SendQueries(pPkg->m_pSender);
+}
 
-	CList<CSentence *> sendingList;
-	// BSW Query
-	GetQueryProcess()->OnEncounterUser(pPkg->m_pSender, sendingList, NULL);
-	CYell * pNewYell = new CYell();
-	CRoutingProtocol * pTo = pNewYell->SetSentences(sendingList);
-	TransmitMessage(pTo, pNewYell);
+void CRoutingProtocolAptCard::OnGetNoneCards(CRoutingProcessAptCard * pCallBy, const CPkgAptCardCards * pPkg)
+{
+	SendQueries(pPkg->m_pSender);
 }
 
 BOOL CRoutingProtocolAptCard::IsFriend(const CRoutingProtocol * pOther) const
@@ -380,6 +392,8 @@ void CRoutingProtocolAptCard::PrepareQuery(const CQueryMission * pMission, CAppo
 	newPseudoPair.m_lnTimeOut = pMission->m_lnTimeOut;
 	CleanPseudonyms();
 	m_PseduonymPairs.AddTail(newPseudoPair);
+
+	SetMissionRecord(pMission->m_nMissionId, REC_AC_ST_GENERATE);
 }
 
 void CRoutingProtocolAptCard::CleanPseudonyms()
@@ -458,6 +472,72 @@ CPkgAptCardReply * CRoutingProtocolAptCard::SwitchToNextAgency(const CPkgAptCard
 		ASSERT(0);
 		return NULL;
 	}
+}
+
+BOOL CRoutingProtocolAptCard::SetMissionRecord(int nSessionId, int nEventId)
+{
+	CTestRecordAptCard * pRecord = NULL;
+	gm_allSessions.Lookup(nSessionId, pRecord);
+	if (pRecord)
+	{
+		pRecord->m_lnTimes[nEventId] = GetSimTime();
+#ifdef DEBUG
+		CString strLog;
+		if (nEventId == REC_AC_ST_GENERATE)
+		{
+			strLog.Format(_T("PKG %d: E%d T(%d)"), nSessionId, nEventId, pRecord->m_lnTimes[nEventId]);
+		}
+		else
+		{
+			strLog.Format(_T("PKG %d: E%d T(%d) TG(%d)"), nSessionId, nEventId, pRecord->m_lnTimes[nEventId], pRecord->m_lnTimes[nEventId] - pRecord->m_lnTimes[REC_AC_ST_GENERATE]);
+		}
+		WriteLog(strLog);
+#endif
+		UpdateSummary();
+		return TRUE;
+	}
+	return FALSE;
+}
+
+void CRoutingProtocolAptCard::UpdateSummary()
+{
+	CStatisticSummary & summary = GetEngine()->GetSummary();
+	if (summary.m_RealData.GetSize() != REC_AC_ST_MAX)
+	{
+		summary.m_RealData.SetSize(REC_AC_ST_MAX);
+	}
+
+	for (int i = 0; i < REC_AC_ST_MAX; ++i)
+	{
+		summary.m_RealData[i] = 0;
+	}
+
+	POSITION pos = gm_allSessions.GetStartPosition();
+	while (pos)
+	{
+		CTestRecordAptCard * pRecord = NULL;
+		int nId = 0;
+		gm_allSessions.GetNextAssoc(pos, nId, pRecord);
+		for (int i = 0; i < REC_AC_ST_MAX; ++i)
+		{
+			if (pRecord->m_lnTimes[i] >= 0)
+			{
+				summary.m_RealData[i]++;
+			}
+		}
+	}
+	GetEngine()->ChangeSummary(summary);
+}
+
+void CRoutingProtocolAptCard::SendQueries(CRoutingProtocol * pTheOther)
+{
+
+	CList<CSentence *> sendingList;
+	// BSW Query
+	GetQueryProcess()->OnEncounterUser(pTheOther, sendingList, NULL);
+	CYell * pNewYell = new CYell();
+	CRoutingProtocol * pTo = pNewYell->SetSentences(sendingList);
+	TransmitMessage(pTo, pNewYell);
 }
 
 CMap<int, int, CTestRecordAptCard *, CTestRecordAptCard *> CRoutingProtocolAptCard::gm_allSessions;

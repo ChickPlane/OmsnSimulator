@@ -903,10 +903,11 @@ void CMapGui::CreateRandomPackages(int nNumber, SIM_TIME lnTimeOut)
 	CQueryMission mission;
 	CHost * pHostFrom = NULL;
 	CHost * pHostTo = m_pRoadNet->m_allHosts.GetAt(0);
-	SIM_TIME lnTime = m_pEngine->GetSimTime() + lnTimeOut;
-	m_lnExpectEndTime = lnTime + 10000;
+	SIM_TIME lnCurrentST = m_pEngine->GetSimTime();
+	SIM_TIME lnTimeEnd = lnCurrentST + lnTimeOut;
+	m_lnExpectEndTime = lnTimeEnd + 10000;
 
-	m_pEngine->GetSummary().StartTest(m_pEngine->GetSimTime(), lnTimeOut, 1 * 60 * 1000);
+	m_pEngine->GetSummary().StartTest(lnCurrentST, lnTimeEnd, 1 * 60 * 1000);
 	char * pEmpty = new char[nHostCount];
 	BOOL bReverse = CCommonFunctions::PickMFromNDisorder(nNum, pEmpty, nHostCount);
 
@@ -919,12 +920,16 @@ void CMapGui::CreateRandomPackages(int nNumber, SIM_TIME lnTimeOut)
 			pHostFrom = m_pRoadNet->m_allHosts[i];
 			mission.m_SenderId = pHostFrom->m_nId;
 			mission.m_RecverId = pHostTo->m_nId;
-			mission.m_lnTimeOut = lnTime;
+			mission.m_lnTimeOut = lnTimeEnd;
 			mission.ChangeID();
 			pHostFrom->m_pProtocol->CreateQueryMission(&mission);
 		}
 	}
 	delete[] pEmpty;
+	CString strLog;
+	strLog.Format(_T("Start:%d To %d"), lnCurrentST, lnTimeEnd);
+	CMainFrame * pMainFrame = (CMainFrame*)AfxGetMainWnd();
+	pMainFrame->WriteLog(strLog);
 }
 
 void CMapGui::BitBlt(CDC * pDC)
@@ -1344,11 +1349,11 @@ LRESULT CMapGui::OnAllInitOk(WPARAM wParam, LPARAM lParam)
 	m_BackgroundColor = RGB(234, 234, 234);
 	RefreshUi(true);
 	OnEngineRun();
-	SetTimer(MAP_GUI_TIMER_ID_CHECK_WORKING, 5000, NULL);
+	//SetTimer(MAP_GUI_TIMER_ID_CHECK_WORKING, 5000, NULL);
 	if (wParam != 0)
 	{
+		SetTimer(MAP_GUI_TIMER_ID_START_TEST, 1000, NULL);
 		SetTimer(MAP_GUI_TIMER_ID_CHECK_TIMEOUT, 5000, NULL);
-		CreateRandomPackages(100, m_Cfg.m_nTimeOutSecond * 1000);
 	}
 	return 0;
 }
@@ -1371,20 +1376,6 @@ void CMapGui::OnTimer(UINT_PTR nIDEvent)
 	// TODO: 在此添加消息处理程序代码和/或调用默认值
 	switch (nIDEvent)
 	{
-	case MAP_GUI_TIMER_ID_CHECK_WORKING:
-	{
-// 		if (m_lnLastEngineTime == m_pEngine->GetSimTime() && m_bEngineShouldBeRunning)
-// 		{
-// 			OnEngineRun();
-// 			m_nRestartTimes++;
-// 			if (m_nRestartTimes > 5)
-// 			{
-// 				PostQuitMessage(0);
-// 			}
-// 		}
-// 		m_lnLastEngineTime = m_pEngine->GetSimTime();
-		break;
-	}
 	case MAP_GUI_TIMER_ID_CHECK_TIMEOUT:
 	{
 		if (m_lnExpectEndTime != 0)
@@ -1395,9 +1386,14 @@ void CMapGui::OnTimer(UINT_PTR nIDEvent)
 				m_pView->PostMessage(MSG_ID_TEST_COMPLETE, 0, 0);
 			}
 		}
-		else
+		break;
+	}
+	case MAP_GUI_TIMER_ID_START_TEST:
+	{
+		if (m_pEngine->GetSimTime() > 400000)
 		{
 			KillTimer(nIDEvent);
+			CreateRandomPackages(100, m_Cfg.m_nTimeOutSecond * 1000);
 		}
 		break;
 	}

@@ -5,6 +5,7 @@ using namespace std;
 
 CStatisticSummary::CStatisticSummary()
 	: m_bEnd(TRUE)
+	, m_pComments(NULL)
 {
 }
 
@@ -21,6 +22,10 @@ CStatisticSummary & CStatisticSummary::operator=(const CStatisticSummary & src)
 
 CStatisticSummary::~CStatisticSummary()
 {
+	if (m_pComments)
+	{
+		delete[] m_pComments;
+	}
 }
 
 void CStatisticSummary::StartTest(SIM_TIME lnStartTime, SIM_TIME lnTestEndTime, SIM_TIME Interval)
@@ -65,18 +70,29 @@ void CStatisticSummary::AddTag(SIM_TIME lnStartTime)
 
 void CStatisticSummary::OutputResult()
 {
+	int len = WideCharToMultiByte(CP_ACP, 0, m_ProtocolName, -1, NULL, 0, NULL, NULL);
+	char *pProtocolName = new char[len + 10];
+	WideCharToMultiByte(CP_ACP, 0, m_ProtocolName, -1, pProtocolName, len, NULL, NULL);
+
 	ofstream fout;
 	char filename[200] = {};
 	for (int i = 0; i < m_nMaxSize; ++i)
 	{
-		sprintf_s(filename, "ANALY_%s_E%02d_C%d_T%d.csv", m_ProtocolName.GetBuffer(0), i, (int)m_fCommuRadius, (int)(m_fTrust * 100));
+		if (m_pComments)
+		{
+			sprintf_s(filename, "ANALY_%s_E%02d_C%d_%s.csv", pProtocolName, i, (int)m_fCommuRadius, m_pComments);
+		}
+		else
+		{
+			sprintf_s(filename, "ANALY_%s_E%02d_C%d_%s.csv", pProtocolName, i, (int)m_fCommuRadius, m_pComments);
+		}
 		fout.open(filename, ios::app);
-		fout << m_nRandomSeed << ";\t";
+		fout << m_nRandomSeed << ";,";
 		for (int j = 0; j < m_nTagIndex; ++j)
 		{
 			if (m_Tags[j].GetSize() > i)
 			{
-				fout << m_Tags[j][i] << "\t";
+				fout << m_Tags[j][i] << ",";
 			}
 			else
 			{
@@ -86,4 +102,5 @@ void CStatisticSummary::OutputResult()
 		fout << endl;
 		fout.close();
 	}
+	delete[] pProtocolName;
 }

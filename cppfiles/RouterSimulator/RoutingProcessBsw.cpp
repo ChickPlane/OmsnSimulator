@@ -135,7 +135,7 @@ void CRoutingProcessBsw::OnReceivePkgFromNetwork(const CSentence * pPkg, CList<C
 		}
 		else
 		{
-			ASSERT(0);
+			OutputDebugString(_T("\nBSW RECEIVE WRONG MSG."));
 		}
 	}
 	else

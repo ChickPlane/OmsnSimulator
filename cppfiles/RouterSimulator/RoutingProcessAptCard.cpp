@@ -317,7 +317,14 @@ void CRoutingProcessAptCard::PrepareToSend(USERID nNextUser, CList<CAppointmentC
 		CAptCardAgencyRecord newRecord;
 		newRecord.InitByAptCard(pCurrentAC);
 		newRecord.m_bTheLastRelay = IsTheLastCardRelay(pCurrentAC);
-		newRecord.m_nExchangeTo = nNextUser;
+		if (!newRecord.m_bTheLastRelay)
+		{
+			newRecord.m_nExchangeTo = nNextUser;
+		}
+		else
+		{
+			newRecord.m_nExchangeTo = -1;
+		}
 		newRecord.n_nAAptNew = GetUniqueRandomNumber(lnCurrentSimTime + gm_lnAptCardsTimeout);
 
 		CAptCardFromSameAgency * pFindResult = NULL;
@@ -523,6 +530,10 @@ void CRoutingProcessAptCard::OnReceivedCards(const CPkgAptCardCards * pCards)
 	{
 		m_pUser->OnGetNewCards(this, pCards);
 	}
+	else
+	{
+		m_pUser->OnGetNoneCards(this, pCards);
+	}
 }
 
 // Clean All AC in Sending List
@@ -597,13 +608,18 @@ int CRoutingProcessAptCard::GetMark()
 
 double CRoutingProcessAptCard::TestAptCardMark(CAppointmentCard * pCard, SIM_TIME lnTimeout)
 {
-	if (pCard->m_lnTimeout < lnTimeout)
+	SIM_TIME lnCT = GetSimTime();
+	if (lnTimeout <= lnCT)
+	{
+		ASSERT(0);
+		return 0;
+	}
+	if (pCard->m_lnTimeout <= lnTimeout)
 	{
 		return 0;
 	}
 
-	SIM_TIME lnCT = GetSimTime();
-	SIM_TIME lnRemained = pCard->m_lnTimeout - lnCT;
+	SIM_TIME lnRemained = lnTimeout - lnCT;
 	double nMark = lnRemained / 1000;
 	if (nMark <= 0)
 	{
