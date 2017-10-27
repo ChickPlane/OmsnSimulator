@@ -70,19 +70,62 @@ void CConnectionJudge::OnFinishedOneForecast(WPARAM wParam, LPARAM lParam)
 void CConnectionJudge::OnNewSend(WPARAM wParam, LPARAM lParam)
 {
 	CMsgNewSendJudge * pMsg = (CMsgNewSendJudge *)wParam;
+	if (pMsg->m_Items.GetSize() == 0)
+	{
+		return;
+	}
+	double fSecondId = pMsg->GetSecondId();
+	POSITION posOccupyReport = NULL;
+	CMsgPosFrcstReport * pReport = m_pForecast->GetReport(fSecondId, LONG_MAX, posOccupyReport);
+	if (!pReport)
+	{
+		ASSERT(NULL);
+		return;
+	}
+	SIM_TIME rpttime = pReport->m_lnSimTime;
+	BOOL bO = m_pForecast->IsOccupied(posOccupyReport);
+
+	CMsgCntJudgeReceiverReport * pJRR = new CMsgCntJudgeReceiverReport();
+	pJRR->m_lnTime = fSecondId;
+	pJRR->m_bFullReport = pMsg->m_bFullJudge;
+
+	POSITION pos = pMsg->m_Items.GetHeadPosition();
+	while (pos)
+	{
+		CMsgNewJudgeItem & item = pMsg->m_Items.GetNext(pos);
+		CReceiverReportItem reportItem;
+		if (!pJRR->m_Items.Lookup(item.m_pHost, reportItem))
+		{
+			JudgeItem(item, pReport, reportItem);
+			pJRR->m_Items.SetAt(item.m_pHost, reportItem);
+		}
+	}
+
+	m_pForecast->GiveBackReport(posOccupyReport);
+
+	if (m_pEngine)
+	{
+		m_pEngine->PostThreadMessage(MSG_ID_ENGINE_JUDGE_OK, (WPARAM)pJRR, 0);
+	}
+
+	delete pMsg;
+}
+
+void CConnectionJudge::JudgeItem(const CMsgNewJudgeItem & item, CMsgPosFrcstReport * pReport, CReceiverReportItem & ret)
+{
+	ret.m_Hosts.RemoveAll();
 
 	int nBlockCount;
 	SIM_TIME lnPredictTime;
 	SIM_TIME lnHalfBlockTime;
 	double fCommunicationRadius;
-	m_pData->CalculateBlockAndPredictTime(nBlockCount, lnPredictTime, lnHalfBlockTime, pMsg->m_fRadius);
+	m_pData->CalculateBlockAndPredictTime(nBlockCount, lnPredictTime, lnHalfBlockTime, item.m_fRadius);
 
-	CMsgPosFrcstReport * pReport = m_pForecast->GetReport(pMsg->m_fSecondId, LONG_MAX);
 	if (!pReport)
 	{
 		ASSERT(NULL);
 	}
-	SIM_TIME lnDiffer = pMsg->m_fSecondId - pReport->m_lnSimTime;
+	SIM_TIME lnDiffer = item.m_fSecondId - pReport->m_lnSimTime;
 	int nLimit = nBlockCount - 1;
 	ASSERT(nLimit >= 0);
 	if (lnDiffer > lnPredictTime)
@@ -92,9 +135,7 @@ void CConnectionJudge::OnNewSend(WPARAM wParam, LPARAM lParam)
 	ASSERT(nLimit <= 3);
 
 
-	CDoublePoint centerPosition = pMsg->m_pHost->m_schedule.GetPosition(pMsg->m_fSecondId);
-	CMsgCntJudgeReceiverReport * pRet = new CMsgCntJudgeReceiverReport();
-	pRet->m_nMsgId = pMsg->m_nMsgId;
+	CDoublePoint centerPosition = item.m_pHost->m_schedule.GetPosition(item.m_fSecondId);
 	for (int i = -nLimit; i <= nLimit; ++i)
 	{
 		for (int j = -nLimit; j <= nLimit; ++j)
@@ -109,23 +150,17 @@ void CConnectionJudge::OnNewSend(WPARAM wParam, LPARAM lParam)
 				while (pos)
 				{
 					CHostGui tmpTarget = tmpReference.m_Hosts.GetNext(pos);
-					CDoublePoint targetPosition = tmpTarget.m_pHost->GetPosition(pMsg->m_fSecondId);
+					CDoublePoint targetPosition = tmpTarget.m_pHost->GetPosition(item.m_fSecondId);
 					double fDistance = CDoublePoint::GetDistance(targetPosition, centerPosition);
-					if (fDistance <= pMsg->m_fRadius)
+					if (fDistance <= item.m_fRadius)
 					{
 						tmpTarget.m_Position = targetPosition;
-						pRet->m_Hosts.AddTail(tmpTarget);
+						ret.m_Hosts.AddTail(tmpTarget);
 					}
 				}
 			}
 		}
 	}
-	if (m_pEngine)
-	{
-		m_pEngine->PostThreadMessage(MSG_ID_ENGINE_JUDGE_OK, (WPARAM)pRet, 0);
-	}
-
-	delete pMsg;
 }
 
 BEGIN_MESSAGE_MAP(CConnectionJudge, CWinThread)
@@ -135,3 +170,24 @@ END_MESSAGE_MAP()
 
 
 // CConnectionJudge 消息处理程序
+
+double CMsgNewSendJudge::GetSecondId()
+{
+	if (m_Items.GetSize() == 0)
+	{
+		ASSERT(0);
+		return 0;
+	}
+
+	double fSecondId = m_Items.GetHead().m_fSecondId;
+	POSITION pos = m_Items.GetHeadPosition();
+	while (pos)
+	{
+		if (fSecondId != m_Items.GetNext(pos).m_fSecondId)
+		{
+			ASSERT(0);
+			return 0;
+		}
+	}
+	return fSecondId;
+}

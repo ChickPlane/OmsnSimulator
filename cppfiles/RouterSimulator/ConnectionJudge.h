@@ -1,19 +1,33 @@
 #pragma once
 #include "PositionForecastUser.h"
+#include "MsgCntJudgeReceiverReport.h"
 
 class CRoadNet;
 class CHost;
 class CPositionForecast;
 class CHostEngine;
+class CMsgPosFrcstReport;
+
+class CMsgNewJudgeItem
+{
+public:
+	CHost * m_pHost;
+	double m_fSecondId;
+	double m_fRadius;
+};
 
 class CMsgNewSendJudge
 {
 public:
-	CMsgNewSendJudge() :m_pHost(NULL), m_fSecondId(0), m_fRadius(0), m_nMsgId(0) {}
-	CHost * m_pHost;
-	double m_fSecondId;
-	double m_fRadius;
-	int m_nMsgId;
+	CMsgNewSendJudge() :m_bFullJudge(FALSE) {}
+	double GetSecondId();
+	BOOL m_bFullJudge;
+	CList<CMsgNewJudgeItem> m_Items;
+// 	CMsgNewSendJudge() :m_pHost(NULL), m_fSecondId(0), m_fRadius(0), m_nMsgId(0) {}
+// 	CHost * m_pHost;
+// 	double m_fSecondId;
+// 	double m_fRadius;
+// 	int m_nMsgId;
 };
 
 enum {
@@ -45,6 +59,8 @@ protected:
 	void OnFinishedOneForecast(WPARAM wParam, LPARAM lParam);
 	void OnNewSend(WPARAM wParam, LPARAM lParam);
 
+protected:
+	void JudgeItem(const CMsgNewJudgeItem & item, CMsgPosFrcstReport * pReport, CReceiverReportItem & ret);
 protected:
 	CRoadNet * m_pData;
 	CPositionForecast * m_pForecast;

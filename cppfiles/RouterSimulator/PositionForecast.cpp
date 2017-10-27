@@ -76,6 +76,7 @@ CMsgPosFrcstReport & CMsgPosFrcstReport::operator=(const CMsgPosFrcstReport & sr
 IMPLEMENT_DYNCREATE(CPositionForecast, CWinThread)
 
 CPositionForecast::CPositionForecast()
+	: nTestMutex(0)
 {
 }
 
@@ -103,10 +104,12 @@ void CPositionForecast::SetData(CRoadNet * pNet)
 void CPositionForecast::LockReports()
 {
 	m_MutexReport.Lock();
+	ASSERT(nTestMutex++ == 0);
 }
 
 void CPositionForecast::UnlockReports()
 {
+	--nTestMutex;
 	m_MutexReport.Unlock();
 }
 
@@ -146,15 +149,18 @@ void CPositionForecast::DelUser(CPositionForecastUser * pUser)
 	m_MutexReport.Unlock();
 }
 
-CMsgPosFrcstReport * CPositionForecast::GetReport(SIM_TIME lnSimTime, SIM_TIME lnDiffer)
+CMsgPosFrcstReport * CPositionForecast::GetReport(SIM_TIME lnSimTime, SIM_TIME lnDiffer, POSITION & posRet)
 {
 	LockReports();
-	POSITION pos = m_Reports.GetHeadPosition();
+// 	int nSize = m_Reports.GetSize();
+// 	ASSERT(nSize < 60);
+	POSITION pos = m_Reports.GetHeadPosition(), posLast;
 	CMsgPosFrcstReport * pRet = NULL;
 	SIM_TIME lnMinDiffer = INT_MAX;
 	while (pos)
 	{
 		CMsgPosFrcstReport * pCurrent = NULL;
+		posLast = pos;
 		pCurrent = m_Reports.GetNext(pos);
 		if (lnSimTime >= pCurrent->m_lnSimTime)
 		{
@@ -162,6 +168,7 @@ CMsgPosFrcstReport * CPositionForecast::GetReport(SIM_TIME lnSimTime, SIM_TIME l
 			{
 				lnMinDiffer = lnSimTime - pCurrent->m_lnSimTime;
 				pRet = pCurrent;
+				posRet = posLast;
 			}
 		}
 		else
@@ -170,18 +177,48 @@ CMsgPosFrcstReport * CPositionForecast::GetReport(SIM_TIME lnSimTime, SIM_TIME l
 			{
 				lnMinDiffer = lnSimTime - pCurrent->m_lnSimTime;
 				pRet = pCurrent;
+				posRet = posLast;
 			}
 		}
 	}
-	UnlockReports();
 	if (lnMinDiffer > lnDiffer)
 	{
+		UnlockReports();
 		return NULL;
 	}
 	else
 	{
+		int mapValue;
+		if (m_OccupyRecord.Lookup(posRet, mapValue))
+		{
+			m_OccupyRecord[posRet] = ++mapValue;
+		}
+		else
+		{
+			m_OccupyRecord[posRet] = 1;
+		}
+		UnlockReports();
 		return pRet;
 	}
+}
+
+void CPositionForecast::GiveBackReport(POSITION pos)
+{
+	LockReports();
+	int mapValue;
+	if (m_OccupyRecord.Lookup(pos, mapValue))
+	{
+		m_OccupyRecord[pos] = mapValue - 1;
+		if (mapValue == 1)
+		{
+			m_OccupyRecord.RemoveKey(pos);
+		}
+	}
+	else
+	{
+		ASSERT(0);
+	}
+	UnlockReports();
 }
 
 void CPositionForecast::OnForecastNewTime(WPARAM wParam, LPARAM lParam)
@@ -193,10 +230,15 @@ void CPositionForecast::OnForecastNewTime(WPARAM wParam, LPARAM lParam)
 		return;
 	}
 
-	CMsgPosFrcstReport * pReport = GetReport(pMsg->m_lnSimTime, 0);
+	POSITION pos = NULL;
+	CMsgPosFrcstReport * pReport = GetReport(pMsg->m_lnSimTime, 0, pos);
 	if (!pReport)
 	{
 		DoNewForecast(pMsg->m_lnSimTime);
+	}
+	else
+	{
+		GiveBackReport(pos);
 	}
 	delete pMsg;
 }
@@ -238,6 +280,10 @@ void CPositionForecast::DeleteRecords(SIM_TIME lnSimTimeBefore)
 		pNext = m_Reports.GetAt(pos);
 		if (lnSimTimeBefore - pNext->m_lnSimTime > 0)
 		{
+			if (IsOccupied(posLast))
+			{
+				continue;
+			}
 			delete pToBeDelete;
 			m_Reports.RemoveAt(posLast);
 		}
@@ -276,6 +322,19 @@ void CPositionForecast::DoNewForecast(SIM_TIME lnSimTime)
 	{
 		CPositionForecastUser * pUser = m_Users.GetNext(pos);
 		pUser->OnFinishedForecastOnce(pNewReport->m_lnSimTime);
+	}
+}
+
+BOOL CPositionForecast::IsOccupied(POSITION pos)
+{
+	int mapValue;
+	if (m_OccupyRecord.Lookup(pos, mapValue))
+	{
+		return TRUE;
+	}
+	else
+	{
+		return FALSE;
 	}
 }
 

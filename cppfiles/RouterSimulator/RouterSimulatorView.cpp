@@ -202,6 +202,7 @@ void CRouterSimulatorView::InitHostProtocol(const CSimulatorCfg & Cfg)
 	if (strcmp(Cfg.m_strProtocolName, PROTOCOL_NAME_APTCARD) == 0)
 	{
 		SIM_TIME lnSearchInterval = 1000 * Cfg.m_fCommunicateRadius / (2 * fSpeedLimit);
+		//SIM_TIME lnSearchInterval = 1000;
 		summary.m_pComments = new char[200];
 		strcpy_s(summary.m_pComments, 199, "Improve_Mark");
 		pMainFrame->WriteLog(_T("APTCARD"));

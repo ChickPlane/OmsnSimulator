@@ -37,3 +37,8 @@ CTransmitionRecord & CTransmitionRecord::operator=(const CTransmitionRecord & sr
 CTransmitionRecord::~CTransmitionRecord()
 {
 }
+
+BOOL CTransmitionRecord::IsUnicast() const
+{
+	return m_pTo != NULL;
+}

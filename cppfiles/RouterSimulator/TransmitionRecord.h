@@ -13,6 +13,8 @@ public:
 	CTransmitionRecord & operator = (const CTransmitionRecord & src);
 	~CTransmitionRecord();
 
+	BOOL IsUnicast() const;
+
 	CRoutingProtocol * m_pFrom;
 	CRoutingProtocol * m_pTo;
 	CYell * m_pMsg;

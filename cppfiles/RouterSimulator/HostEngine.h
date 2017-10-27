@@ -13,6 +13,8 @@ class CMapGui;
 class CPositionForecast;
 class CConnectionJudge;
 class CMsgCntJudgeReceiverReport;
+class CMsgNewSendJudge;
+
 enum {
 	MSG_ID_ENGINE_START = WM_USER + 3050,
 	MSG_ID_ENGINE_PAUSE,
@@ -65,11 +67,12 @@ public:
 	CHost * GetHost(int nHostId) const;
 	void SetCommunicationRadius(double fRadius) { m_fCommunicationRadius = fRadius; }
 
-	static VOID CALLBACK timerFunEE(HWND wnd, UINT msg, UINT_PTR id, DWORD d);
 protected:
+	void RegisterTimer(int nCommandId, CEngineUser * pUser, SIM_TIME lnLaterMilliseconds, BOOL bStack);
 	void OnEveryPeriod();
 	int CheckEventList();
 	void OnCommonTimer(UINT_PTR nIDEvent);
+
 	DECLARE_MESSAGE_MAP()
 	void OnStartEngine(WPARAM wParam, LPARAM lParam);
 	void OnResetEngine(WPARAM wParam, LPARAM lParam);
@@ -89,12 +92,12 @@ protected:
 	BOOL SendForecastCommand(SIM_TIME lnSimTime);
 	void DeleteForecastsBefore(int nBeforeSecond);
 	void StartJudgeProcess(const CTransmitionRecord & transmitionData, int nFrom);
+	void StartJudgeUnicastProcess(const CTransmitionRecord & transmitionData);
 
 	SIM_TIME GetForecastThreshhold(int nExtraBlock) const;
 	SIM_TIME GetPeriodDefaultInterval();
 	void RefreshUi();
 	void RefreshUiDirectly(CArray<CHostGui> * pMessage, const CDoublePoint & lt, const CDoublePoint & rb);
-	bool RefreshUiOptimize(CArray<CHostGui> * pMessage, const CDoublePoint & lt, const CDoublePoint & rb);
 	int GetSurringNodesCount(CDoublePoint currentLocation, double fRadius);
 
 	CMsgCntJudgeReceiverReport * GetUnicastReport(const CTransmitionRecord & tr);
@@ -102,6 +105,11 @@ protected:
 	SIM_TIME GetBoundary() const;
 	void NotifyTimeChange();
 	void UpdateStartTick();
+	void JudgeAllUnicastOk();
+	void JudgeAllBroadcast(const CMsgCntJudgeReceiverReport * pMsg);
+	void PreJudgeAllHosts(SIM_TIME lnTime);
+	BOOL DeletePreFullJudge(SIM_TIME lnTime);
+	void SendEventChangeMsg();
 
 private:
 	SIM_TIME m_lnSimTimeMillisecond;
@@ -128,8 +136,9 @@ private:
 	SIM_TIME m_lnLastForecastedSimTime;
 
 	CList<CEngineEvent> m_EventList;
-	CList<CTransmitionRecord> m_TransmitionWaitingList;
-	CMap<int, int, CTransmitionRecord, CTransmitionRecord&> m_TransmitionMap;
+	//CMap<int, int, CTransmitionRecord, CTransmitionRecord&> m_TransmitionMap;
+	CList<CTransmitionRecord> m_TransmitionUnicast;
+	CList<CTransmitionRecord> m_TransmitionBroadcast;
 	int m_nMsgId;
 	ULONGLONG m_llLastUpdateTime;
 	CList<CEngineUser *> m_NotifyList;
@@ -140,7 +149,13 @@ private:
 	CTestTimer m_tt;
 	CStatisticSummary m_Summary;
 	SIM_TIME m_ulLastNotifyTime;
+	BOOL m_bCheckingEvents;
+	CMsgNewSendJudge * m_pJudgeMsg;
+	int m_nJudgeRunTime;
+	BOOL m_bJudgingUnicast;
+	CMap<SIM_TIME, SIM_TIME, const CMsgCntJudgeReceiverReport*, const CMsgCntJudgeReceiverReport*> m_FullJudgeRecord;
 
+	int m_nMsgCount;
 private:
 	ULONGLONG m_aaa;
 

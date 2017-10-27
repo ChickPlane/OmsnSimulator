@@ -59,7 +59,9 @@ public:
 	void AddUser(CPositionForecastUser * pUser);
 	void DelUser(CPositionForecastUser * pUser);
 
-	CMsgPosFrcstReport * GetReport(SIM_TIME lnSimTime, SIM_TIME lnDiffer);
+	CMsgPosFrcstReport * GetReport(SIM_TIME lnSimTime, SIM_TIME lnDiffer, POSITION & posRet);
+	void GiveBackReport(POSITION pos);
+	BOOL IsOccupied(POSITION pos);
 
 protected:
 	DECLARE_MESSAGE_MAP()
@@ -76,6 +78,8 @@ protected:
 	CMutex m_MutexReport;
 	CMutex m_MutexUser;
 	CList<CPositionForecastUser *> m_Users;
+	CMap<POSITION, POSITION, int, int> m_OccupyRecord;
+	int nTestMutex;
 };
 
 
