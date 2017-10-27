@@ -15,7 +15,7 @@ public:
 	virtual ~CRoutingProtocolAptCard();
 
 	virtual void CreateQueryMission(const CQueryMission * pMission);
-	static void SetStaticParameters(int nK, int nSeg, double fTrust, SIM_TIME lnAcTimeout);
+	static void SetStaticParameters(SIM_TIME lnSearchIntervalMS, int nK, int nSeg, double fTrust, SIM_TIME lnAcTimeout);
 	virtual void SetLocalParameters(int nBswCopyCount);
 	virtual COLORREF GetInportantLevel() const;
 	virtual int GetInfoList(CMsgShowInfo & allMessages) const;
@@ -38,6 +38,7 @@ public:
 	virtual void OnPackageFirstSent(CRoutingProcessBsw * pCallBy, const CPkgBswData * pPkg);
 
 	// APT CARD User
+	virtual BOOL IsTrustful(CRoutingProcessAptCard * pCallBy, const CRoutingProtocol * pOther) const;
 	virtual void OnGetNewCards(CRoutingProcessAptCard * pCallBy, const CPkgAptCardCards * pPkg);
 	virtual void OnGetNoneCards(CRoutingProcessAptCard * pCallBy, const CPkgAptCardCards * pPkg);
 private:

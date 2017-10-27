@@ -21,6 +21,7 @@ public:
 	double m_fCommuRadius;
 	double m_fTrust;
 	char * m_pComments;
+	char * m_pWorkPath;
 
 private:
 	SIM_TIME m_lnTestStartTime;

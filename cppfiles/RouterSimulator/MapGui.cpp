@@ -21,6 +21,7 @@
 #include "MobileSocialNetworkHost.h"
 #include "CommonFunctions.h"
 
+#define START_TEST_SIM_TIME 800000
 
 void CMapGui::SetScale(int nScaleIndex)
 {
@@ -909,13 +910,11 @@ void CMapGui::CreateRandomPackages(int nNumber, SIM_TIME lnTimeOut)
 
 	m_pEngine->GetSummary().StartTest(lnCurrentST, lnTimeEnd, 1 * 60 * 1000);
 	char * pEmpty = new char[nHostCount];
-	BOOL bReverse = CCommonFunctions::PickMFromNDisorder(nNum, pEmpty, nHostCount);
-
-	int nCmpNum = bReverse ? 0 : 1;
+	CCommonFunctions::PickMFromNDisorder(nNum, pEmpty, nHostCount);
 
 	for (int i = SERVER_NODE_COUNT; i < nHostCount + SERVER_NODE_COUNT; ++i)
 	{
-		if (pEmpty[i - SERVER_NODE_COUNT] == nCmpNum)
+		if (pEmpty[i - SERVER_NODE_COUNT] == 1)
 		{
 			pHostFrom = m_pRoadNet->m_allHosts[i];
 			mission.m_SenderId = pHostFrom->m_nId;
@@ -1390,7 +1389,7 @@ void CMapGui::OnTimer(UINT_PTR nIDEvent)
 	}
 	case MAP_GUI_TIMER_ID_START_TEST:
 	{
-		if (m_pEngine->GetSimTime() > 400000)
+		if (m_pEngine->GetSimTime() > START_TEST_SIM_TIME)
 		{
 			KillTimer(nIDEvent);
 			CreateRandomPackages(100, m_Cfg.m_nTimeOutSecond * 1000);

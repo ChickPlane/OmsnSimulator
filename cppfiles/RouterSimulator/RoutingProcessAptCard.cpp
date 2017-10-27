@@ -6,6 +6,7 @@
 #include "RoadNet.h"
 #include "TrustValue.h"
 #include "MobileSocialNetworkHost.h"
+#include "CommonFunctions.h"
 
 
 CRoutingProcessAptCard::CRoutingProcessAptCard()
@@ -34,7 +35,8 @@ CPkgAptCardCards * CRoutingProcessAptCard::GetSendingList(BOOL bNeedReady, int n
 	PickDispensedCards(pTo->GetHostId(), cardList);
 	if (bNeedReady)
 	{
-		PickReadyCards(nHoldingCount, cardList);
+		PickReadyAndTrustCards(nHoldingCount, cardList);
+		//PickReadyCards(nHoldingCount, cardList);
 	}
 	PrepareToSend(pTo->GetHostId(), cardList);
 
@@ -81,12 +83,6 @@ void CRoutingProcessAptCard::SetParameters(int nK, int nSeg, SIM_TIME lnAcTimeou
 	gm_lnAptCardsTimeout = lnAcTimeout;
 }
 
-void CRoutingProcessAptCard::GetCardCount(int & nDispenseCount, int & nReadyCount)
-{
-	nDispenseCount = m_DispensedCards.GetSize();
-	nReadyCount = m_ReadyCards.GetSize();
-}
-
 BOOL CRoutingProcessAptCard::GetAndRemoveAgencyRecord(USERID uOldId, int nOldApt, CAptCardAgencyRecord & retRecord)
 {
 	CAptCardFromSameAgency * pFindAgencyRecord = NULL;
@@ -126,11 +122,6 @@ int CRoutingProcessAptCard::GetInfoList(CMsgShowInfo & allMessages) const
 COLORREF CRoutingProcessAptCard::GetInportantLevel() const
 {
 	return RGB(50, 50, 50);
-}
-
-int CRoutingProcessAptCard::GetReadyCount() const
-{
-	return m_ReadyCards.GetSize();
 }
 
 int CRoutingProcessAptCard::GetCreatedCount() const
@@ -231,73 +222,63 @@ int CRoutingProcessAptCard::GetLastAcHopCardNumber(const CList<CAppointmentCard*
 }
 
 // Pick ready apt cards.
-void CRoutingProcessAptCard::PickReadyCards(int nTheOtherReadyNumber, CList<CAppointmentCard*> & SendingList)
+void CRoutingProcessAptCard::PickReadyAndTrustCards(int nTheOtherReadyNumber, CList<CAppointmentCard*> & SendingList)
 {
-	int nEQLen = m_ReadyCards.GetSize();
-	int nNumberOfK_1 = GetLastAcHopCardNumber(SendingList);
-	if (nNumberOfK_1 + nTheOtherReadyNumber >= nEQLen)
+	int nEQLen = GetReadyCount();
+	if (nTheOtherReadyNumber >= nEQLen)
 	{
 		return;
 	}
-	int nSr = (nEQLen - nNumberOfK_1 - nTheOtherReadyNumber) / 2;
-
+	int nSr = (nEQLen - nTheOtherReadyNumber) / 2;
 	char * pRandom = new char[nEQLen];
-	BOOL bReverse = PickMNumberFromNArr(nSr, pRandom, nEQLen);
-	char cPick = (bReverse ? 0 : 1);
-
-	POSITION pos = m_ReadyCards.GetHeadPosition();
-	int nListIndex = 0;
-	while (pos)
-	{
-		POSITION posMove = pos;
-		CAppointmentCard * pPicked = m_ReadyCards.GetNext(pos);
-		if (pRandom[nListIndex++] == cPick)
-		{
-			SendingList.AddTail(pPicked);
-			m_ReadyCards.RemoveAt(posMove);
-		}
-	}
-}
-
-BOOL CRoutingProcessAptCard::PickMNumberFromNArr(int nM, char * pArr, int nN)
-{
 	BOOL bReverse = FALSE;
-	if (2 * nM > nN)
+	char cPick = 0;
+	int nReadySize = GetReadyListSize();
+	int nTrustSize = GetTrustListSize();
+	if (nSr < nReadySize)
 	{
-		bReverse = TRUE;
-		nM = nN - nM;
-	}
-
-	memset(pArr, 0, sizeof(char) * nN);
-	int nIndex = rand() % nN;
-	for (int i = 0; i < nM; ++i)
-	{
-		int nRand = rand() % (nN - i);
-		int j = 0;
-		while (TRUE)
+		CCommonFunctions::PickMFromNDisorder(nSr, pRandom, nReadySize);
+		POSITION pos = m_ReadyCards.GetHeadPosition();
+		int nListIndex = 0;
+		while (pos)
 		{
-			if (pArr[nIndex] != 0)
+			POSITION posMove = pos;
+			CAppointmentCard * pPicked = m_ReadyCards.GetNext(pos);
+			if (pRandom[nListIndex++] != 0)
 			{
-				nIndex = (nIndex + 1) % nN;
-				continue;
+				SendingList.AddTail(pPicked);
+				m_ReadyCards.RemoveAt(posMove);
 			}
-			else
+		}
+	}
+	else
+	{
+		POSITION pos = m_ReadyCards.GetHeadPosition();
+		while (pos)
+		{
+			CAppointmentCard * pPicked = m_ReadyCards.GetNext(pos);
+			SendingList.AddTail(pPicked);
+		}
+		m_ReadyCards.RemoveAll();
+
+		if (nSr > nReadySize)
+		{
+			CCommonFunctions::PickMFromNDisorder(nSr - nReadySize, pRandom, nTrustSize);
+			POSITION pos = m_TrustCards.GetHeadPosition();
+			int nListIndex = 0;
+			while (pos)
 			{
-				if (j == nRand)
+				POSITION posMove = pos;
+				CAppointmentCard * pPicked = m_TrustCards.GetNext(pos);
+				if (pRandom[nListIndex++] != 0)
 				{
-					pArr[nIndex] = 1;
-					nIndex = (nIndex + 1) % nN;
-					break;
-				}
-				else
-				{
-					++j;
-					nIndex = (nIndex + 1) % nN;
+					SendingList.AddTail(pPicked);
+					m_TrustCards.RemoveAt(posMove);
 				}
 			}
 		}
 	}
-	return bReverse;
+	delete[] pRandom;
 }
 
 // The Last Step Before Send AC Out
@@ -420,25 +401,25 @@ void CRoutingProcessAptCard::SweepExsitingAptNumber()
 
 CAppointmentCard * CRoutingProcessAptCard::SelectMaxMarkAptCardForQuery(SIM_TIME lnTimeout)
 {
-	double nMaxMark = 0;
+	double nMaxMark = INT_MAX;
 	POSITION posMax = NULL;
 	CAppointmentCard * pRet = NULL;
-	POSITION pos = m_ReadyCards.GetHeadPosition();
+	POSITION pos = m_TrustCards.GetHeadPosition();
 	while (pos)
 	{
-		CAppointmentCard * pCard = m_ReadyCards.GetAt(pos);
+		CAppointmentCard * pCard = m_TrustCards.GetAt(pos);
 		double nTmpMark = TestAptCardMark(pCard, lnTimeout);
-		if (nTmpMark > nMaxMark)
+		if (nTmpMark < nMaxMark)
 		{
 			nMaxMark = nTmpMark;
 			posMax = pos;
 			pRet = pCard;
 		}
-		m_ReadyCards.GetNext(pos);
+		m_TrustCards.GetNext(pos);
 	}
 	if (pRet)
 	{
-		m_ReadyCards.RemoveAt(posMax);
+		m_TrustCards.RemoveAt(posMax);
 	}
 	return pRet;
 }
@@ -486,6 +467,18 @@ void CRoutingProcessAptCard::CleanTimeOutData()
 		}
 	}
 
+	pos = m_TrustCards.GetHeadPosition();
+	while (pos)
+	{
+		posLast = pos;
+		CAppointmentCard * pCard = m_TrustCards.GetNext(pos);
+		if (pCard->m_lnTimeout < lnTime)
+		{
+			delete pCard;
+			m_TrustCards.RemoveAt(posLast);
+		}
+	}
+
 	CleanTimeoutAgencyList();
 
 	SIM_TIME lnEarliesTime = GetSimTime() - gm_lnAptCardsTimeout * 2;
@@ -518,7 +511,16 @@ void CRoutingProcessAptCard::OnReceivedCards(const CPkgAptCardCards * pCards)
 		CAppointmentCard * pNewCard = new CAppointmentCard(pCards->m_pCards[i]);
 		if (pNewCard->IsFinal())
 		{
-			m_ReadyCards.AddTail(pNewCard);
+			if (m_pUser->IsTrustful(this, pCards->m_pSender))
+			{
+				pNewCard->m_ReceiveTime = GetSimTime();
+				m_TrustCards.AddTail(pNewCard);
+			}
+			else
+			{
+				pNewCard->m_ReceiveTime = GetSimTime();
+				m_ReadyCards.AddTail(pNewCard);
+			}
 		}
 		else
 		{
@@ -563,6 +565,13 @@ void CRoutingProcessAptCard::ResetAll()
 		delete m_ReadyCards.GetNext(pos);
 	}
 	m_ReadyCards.RemoveAll();
+
+	pos = m_TrustCards.GetHeadPosition();
+	while (pos)
+	{
+		delete m_TrustCards.GetNext(pos);
+	}
+	m_TrustCards.RemoveAll();
 }
 
 void CRoutingProcessAptCard::CleanTimeoutAgencyList()
@@ -619,6 +628,8 @@ double CRoutingProcessAptCard::TestAptCardMark(CAppointmentCard * pCard, SIM_TIM
 		return 0;
 	}
 
+	return pCard->m_ReceiveTime - pCard->m_lnTimeout + gm_lnAptCardsTimeout;
+
 	SIM_TIME lnRemained = lnTimeout - lnCT;
 	double nMark = lnRemained / 1000;
 	if (nMark <= 0)
@@ -645,6 +656,11 @@ void CRoutingProcessAptCard::CheckAptCards(const CAppointmentCard * pCard)
 		strTmp += m_pProtocol->GetEngine()->GetRoadNet()->m_allHosts[tmpid]->m_pProtocol->GetDebugString();
 		OutputDebugString(strTmp);
 	}
+}
+
+int CRoutingProcessAptCard::GetReadyCount() const
+{
+	return m_ReadyCards.GetSize() + m_TrustCards.GetSize();
 }
 
 int CRoutingProcessAptCard::gm_nK;

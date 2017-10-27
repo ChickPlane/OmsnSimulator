@@ -15,6 +15,8 @@
 #include "WktParse.h"
 #include "RoadNet.h"
 #include "RouterRunner.h"
+#include <direct.h>
+#include "CommonFunctions.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -162,6 +164,7 @@ BOOL CRouterSimulatorDoc::OnOpenDocument(LPCTSTR lpszPathName)
 	m_Cfg.ReadFromFile(filename);
 	delete[] filename;
 
+	_mkdir(m_Cfg.m_strWorkFolder);
 
 	double fLeft = DBL_MAX, fRight = 0.0, fTop = DBL_MAX, fBottom = 0.0;
 	m_pLineInMap = CWktParse::Parse(m_Cfg.m_strMapName, fLeft, fRight, fTop, fBottom);

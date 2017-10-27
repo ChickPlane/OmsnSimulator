@@ -6,7 +6,6 @@
 
 CRoutingProcessHello::CRoutingProcessHello()
 	: m_bIsSearching(FALSE)
-	, m_lnSearchInterval(1000)
 {
 }
 
@@ -96,6 +95,8 @@ void CRoutingProcessHello::SendHelloPackage()
 		ASSERT(0);
 	}
 }
+
+SIM_TIME CRoutingProcessHello::m_lnSearchInterval = 1000;
 
 void CRoutingProcessHelloUser::OnHearHelloFromOthers(CRoutingProcessHello * pCallBy, const CPkgHello * pPkg)
 {

@@ -6,6 +6,8 @@
 #include "SentenceAptCard.h"
 #include "HostEngine.h"
 
+#define JUST_HELLO
+
 
 CRoutingProtocolAptCard::CRoutingProtocolAptCard()
 {
@@ -42,10 +44,11 @@ void CRoutingProtocolAptCard::CreateQueryMission(const CQueryMission * pMission)
 	}
 }
 
-void CRoutingProtocolAptCard::SetStaticParameters(int nK, int nSeg, double fTrust, SIM_TIME lnAcTimeout)
+void CRoutingProtocolAptCard::SetStaticParameters(SIM_TIME lnSearchIntervalMS, int nK, int nSeg, double fTrust, SIM_TIME lnAcTimeout)
 {
 	gm_fTrust = fTrust;
 	CRoutingProcessAptCard::SetParameters(nK, nSeg, lnAcTimeout);
+	CRoutingProcessHello::SetInterval(lnSearchIntervalMS);
 }
 
 void CRoutingProtocolAptCard::SetLocalParameters(int nBswCopyCount)
@@ -56,8 +59,14 @@ void CRoutingProtocolAptCard::SetLocalParameters(int nBswCopyCount)
 
 COLORREF CRoutingProtocolAptCard::GetInportantLevel() const
 {
-	CRoutingProcessAptCard * pAptCardProcess = (CRoutingProcessAptCard*)m_Processes[m_nAptCardProcessId];
-
+	if (GetAptCardProcess()->GetTrustListSize() == 0)
+	{
+		return RGB(255, 0, 0);
+	}
+	else
+	{
+		return RGB(0, 0, 0);
+	}
 	if (GetReplyProcess()->GetDataMapSize() > 0)
 	{
 		return RGB(0, 0, 255);
@@ -74,12 +83,13 @@ COLORREF CRoutingProtocolAptCard::GetInportantLevel() const
 
 int CRoutingProtocolAptCard::GetInfoList(CMsgShowInfo & allMessages) const
 {
-	int nDispense = 0, nReady = 0;
-	GetAptCardProcess()->GetCardCount(nDispense, nReady);
+	CRoutingProcessAptCard * pACProcess = GetAptCardProcess();
 	CMsgShowRow row;
-	row.m_Item0.Format(_T("Dispense %d"), nDispense);
+	row.m_Item0.Format(_T("Dispense %d"), pACProcess->GetDispenseListSize());
 	allMessages.m_Rows.AddTail(row);
-	row.m_Item0.Format(_T("Ready %d"), nReady);
+	row.m_Item0.Format(_T("Ready %d"), pACProcess->GetReadyListSize());
+	allMessages.m_Rows.AddTail(row);
+	row.m_Item0.Format(_T("Trust %d"), pACProcess->GetTrustListSize());
 	allMessages.m_Rows.AddTail(row);
 	row.m_Item0.Format(_T("Query %d"), GetQueryProcess()->GetDataMapSize());
 	allMessages.m_Rows.AddTail(row);
@@ -106,11 +116,14 @@ CString CRoutingProtocolAptCard::GetDebugString() const
 
 void CRoutingProtocolAptCard::OnBuiltConnectWithOthers(CRoutingProcessHello * pCallBy, const CPkgAck * pPkg)
 {
+#ifdef JUST_HELLO
+	return;
+#endif
 	CList<CSentence *> sendingList;
 	CPkgAptCardAck * pACAck = (CPkgAptCardAck *)pPkg;
 
 	// APT CARD
-	CPkgAptCardCards * pNewCards = GetAptCardProcess()->GetSendingList(pACAck->m_bAskForCards, pACAck->m_nHoldingReadyNumber, pACAck->m_pSender);
+	CPkgAptCardCards * pNewCards = GetAptCardProcess()->GetSendingList(pACAck->m_bAskForCards, pACAck->m_nHoldingTrustNumber, pACAck->m_pSender);
 	sendingList.AddTail(pNewCards);
 
 	// BSW REPLY
@@ -129,6 +142,9 @@ CPkgHello * CRoutingProtocolAptCard::GetHelloPackage(CRoutingProcessHello * pCal
 
 CPkgAck * CRoutingProtocolAptCard::GetAckPackage(CRoutingProcessHello * pCallBy, CRoutingProtocol * pTo)
 {
+#ifdef JUST_HELLO
+	BOOL bAskForCard = FALSE;
+#else
 	BOOL bAskForCard = IsFriend(pTo);
 	if (bAskForCard)
 	{
@@ -142,12 +158,11 @@ CPkgAck * CRoutingProtocolAptCard::GetAckPackage(CRoutingProcessHello * pCallBy,
 			m_lastTimeExchange.SetAt(pTo, GetSimTime());
 		}
 	}
+#endif
 	CPkgAptCardAck * pNewAck = new CPkgAptCardAck();
 	pNewAck->m_bAskForCards = bAskForCard;
 	pNewAck->m_pSpeakTo = pTo;
-	int nDispense = 0, nReady = 0;
-	GetAptCardProcess()->GetCardCount(nDispense, nReady);
-	pNewAck->m_nHoldingReadyNumber = nReady;
+	pNewAck->m_nHoldingTrustNumber = GetAptCardProcess()->GetTrustListSize();
 	pNewAck->SetIds(m_PseduonymPairs);
 	return pNewAck;
 }
@@ -269,6 +284,11 @@ void CRoutingProtocolAptCard::OnPackageFirstSent(CRoutingProcessBsw * pCallBy, c
 	}
 }
 
+BOOL CRoutingProtocolAptCard::IsTrustful(CRoutingProcessAptCard * pCallBy, const CRoutingProtocol * pOther) const
+{
+	return IsFriend(pOther);
+}
+
 void CRoutingProtocolAptCard::OnGetNewCards(CRoutingProcessAptCard * pCallBy, const CPkgAptCardCards * pPkg)
 {
 	PrepareAllWaitingQueries();
@@ -348,11 +368,18 @@ CPkgAptCardReply * CRoutingProtocolAptCard::LbsPrepareReply(const CPkgAptCardQue
 
 void CRoutingProtocolAptCard::PrepareAllWaitingQueries()
 {
+	SIM_TIME lnCT = GetSimTime();
 	POSITION pos = m_WaitingMissions.GetHeadPosition(), posLast;
 	while (pos)
 	{
 		posLast = pos;
 		CQueryMission * pMission = m_WaitingMissions.GetNext(pos);
+		if (pMission->m_lnTimeOut < lnCT)
+		{
+			delete pMission;
+			m_WaitingMissions.RemoveAt(posLast);
+			continue;
+		}
 
 		CAppointmentCard * pSelectedAptCard = GetAptCardProcess()->SelectMaxMarkAptCardForQuery(pMission->m_lnTimeOut);
 		if (pSelectedAptCard == NULL)

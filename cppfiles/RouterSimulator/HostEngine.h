@@ -101,6 +101,7 @@ protected:
 	SIM_TIME GetActualSimMillisecPerActSec();
 	SIM_TIME GetBoundary() const;
 	void NotifyTimeChange();
+	void UpdateStartTick();
 
 private:
 	SIM_TIME m_lnSimTimeMillisecond;
@@ -138,6 +139,11 @@ private:
 
 	CTestTimer m_tt;
 	CStatisticSummary m_Summary;
+	SIM_TIME m_ulLastNotifyTime;
+
+private:
+	ULONGLONG m_aaa;
+
 };
 
 

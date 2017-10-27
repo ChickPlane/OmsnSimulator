@@ -34,7 +34,7 @@ public:
 	virtual void OnReceivePkgFromNetwork(const CSentence * pPkg, CList<CSentence*> & SendingList);
 	virtual void OnEngineTimer(int nCommandId);
 	virtual void StartWork(BOOL bStart);
-	virtual void SetInterval(SIM_TIME lnInterval) { m_lnSearchInterval = lnInterval; }
+	static void SetInterval(SIM_TIME lnInterval) { m_lnSearchInterval = lnInterval; }
 
 protected:
 	virtual void StartSearhing();
@@ -44,6 +44,6 @@ protected:
 private:
 	CRoutingProcessHelloUser * m_pUser;
 	BOOL m_bIsSearching;
-	SIM_TIME m_lnSearchInterval;
+	static SIM_TIME m_lnSearchInterval;
 };
 

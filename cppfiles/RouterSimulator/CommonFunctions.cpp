@@ -12,43 +12,18 @@ CCommonFunctions::~CCommonFunctions()
 {
 }
 
-BOOL CCommonFunctions::PickMFromNDisorder(int nM, char * pArr, int nN)
+char * CCommonFunctions::GetCharStringFromCString(const CString & str)
 {
-	BOOL bReverse = FALSE;
-	if (2 * nM > nN)
-	{
-		bReverse = TRUE;
-		nM = nN - nM;
-	}
+	int len = WideCharToMultiByte(CP_ACP, 0, str, -1, NULL, 0, NULL, NULL);
+	char *pret = new char[len + 1];
+	WideCharToMultiByte(CP_ACP, 0, str, -1, pret, len, NULL, NULL);
+	return pret;
+}
 
-	memset(pArr, 0, sizeof(char) * nN);
-	int nIndex = rand() % nN;
-	for (int i = 0; i < nM; ++i)
-	{
-		int nRand = rand() % (nN - i);
-		int j = 0;
-		while (TRUE)
-		{
-			if (pArr[nIndex] != 0)
-			{
-				nIndex = (nIndex + 1) % nN;
-				continue;
-			}
-			else
-			{
-				if (j == nRand)
-				{
-					pArr[nIndex] = 1;
-					nIndex = (nIndex + 1) % nN;
-					break;
-				}
-				else
-				{
-					++j;
-					nIndex = (nIndex + 1) % nN;
-				}
-			}
-		}
-	}
-	return bReverse;
+void CCommonFunctions::PickMFromNDisorder(int nM, char * pArr, int nN)
+{
+	memset(pArr, 1, sizeof(char) * nM);
+	memset(pArr + nM, 0, sizeof(char) * (nN - nM));
+
+	CCommonFunctions_T<char>::GetRandomDisorderArray(pArr, nN);
 }

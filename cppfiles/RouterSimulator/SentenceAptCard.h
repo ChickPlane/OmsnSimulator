@@ -30,7 +30,7 @@ public:
 	BOOL m_bAskForCards;
 	CPseudonymPair * m_pIDs;
 	int m_nIDNumber;
-	int m_nHoldingReadyNumber;
+	int m_nHoldingTrustNumber;
 };
 
 class CPkgAptCardQuery : public CPkgBswData

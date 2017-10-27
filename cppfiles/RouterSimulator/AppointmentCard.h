@@ -81,5 +81,6 @@ public:
 	int m_nDC;
 	USERID m_nPsd;
 	BOOL m_bIsReady;
+	SIM_TIME m_ReceiveTime;
 };
 

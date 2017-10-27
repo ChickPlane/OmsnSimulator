@@ -191,16 +191,21 @@ void CRouterSimulatorView::InitHostProtocol(const CSimulatorCfg & Cfg)
 	summary.m_nRandomSeed = theApp.nRandSeed;
 	summary.m_fCommuRadius = Cfg.m_fCommunicateRadius;
 	summary.m_fTrust = fHigh;
+	summary.m_pWorkPath = new char[200];
+	summary.m_pWorkPath[0] = 0;
+	strcpy_s(summary.m_pWorkPath, 200, Cfg.m_strWorkFolder);
 	m_pEngine->SetCommunicationRadius(Cfg.m_fCommunicateRadius);
+	double fSpeedLimit = pDoc->m_pRoadNet->GetSpeedLimit();
 
 	CMainFrame * pMainFrame = (CMainFrame*)AfxGetMainWnd();
 
 	if (strcmp(Cfg.m_strProtocolName, PROTOCOL_NAME_APTCARD) == 0)
 	{
+		SIM_TIME lnSearchInterval = 1000 * Cfg.m_fCommunicateRadius / (2 * fSpeedLimit);
 		summary.m_pComments = new char[200];
 		strcpy_s(summary.m_pComments, 199, "Improve_Mark");
 		pMainFrame->WriteLog(_T("APTCARD"));
-		CRoutingProtocolAptCard::SetStaticParameters(Cfg.m_nK, 3, fHigh, 3 * Cfg.m_nTimeOutSecond * 1000);
+		CRoutingProtocolAptCard::SetStaticParameters(lnSearchInterval, Cfg.m_nK, 3, fHigh, 3 * Cfg.m_nTimeOutSecond * 1000);
 		for (int i = 0; i < nLength; ++i)
 		{
 			CMobileSocialNetworkHost * pHost = (CMobileSocialNetworkHost *)pDoc->m_pRoadNet->m_allHosts[i];
@@ -261,12 +266,11 @@ void CRouterSimulatorView::OnButtonCreateMsgs()
 
 	m_pEngine->GetSummary().StartTest(m_pEngine->GetSimTime(), lnTimeOut, 1*60*1000);
 
-	BOOL bReverse = CCommonFunctions::PickMFromNDisorder(nNum, pEmpty, nHostCount);
-	int nCmpNum = bReverse ? 0 : 1;
+	CCommonFunctions::PickMFromNDisorder(nNum, pEmpty, nHostCount);
 
 	for (int i = SERVER_NODE_COUNT; i < nHostCount + SERVER_NODE_COUNT; ++i)
 	{
-		if (pEmpty[i - SERVER_NODE_COUNT] == nCmpNum)
+		if (pEmpty[i - SERVER_NODE_COUNT] == 1)
 		{
 			pHostFrom = pRoadNet->m_allHosts[i];
 			mission.m_SenderId = pHostFrom->m_nId;

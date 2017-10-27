@@ -83,7 +83,8 @@ void CConnectionJudge::OnNewSend(WPARAM wParam, LPARAM lParam)
 		ASSERT(NULL);
 	}
 	SIM_TIME lnDiffer = pMsg->m_fSecondId - pReport->m_lnSimTime;
-	int nLimit = nBlockCount;
+	int nLimit = nBlockCount - 1;
+	ASSERT(nLimit >= 0);
 	if (lnDiffer > lnPredictTime)
 	{
 		nLimit += (lnDiffer - lnPredictTime) / lnHalfBlockTime;

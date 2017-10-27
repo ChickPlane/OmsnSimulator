@@ -32,8 +32,8 @@ CHostEngine::CHostEngine()
 	, m_nMsgId(0)
 	, m_nJudgeMax(3)
 #ifdef DEBUG
-	, m_bEnableMonitor(TRUE)
-	, m_blimitedSpeed(TRUE)
+	, m_bEnableMonitor(FALSE)
+	, m_blimitedSpeed(FALSE)
 #else
 	, m_bEnableMonitor(FALSE)
 	, m_blimitedSpeed(FALSE)
@@ -236,9 +236,18 @@ void CHostEngine::OnEveryPeriod()
 // 	{
 // 		nSum += m_pRoadNet->m_allHosts[i]->m_pProtocol->GetDebugNumber(0);
 // 	}
+
+#if 0
 	CString strOut;
-	strOut.Format(_T("\n%d\t%d"), lnCurrentTime, GetTickCount64() - m_ulStartTickCount);
+	ULONGLONG timepass = GetTickCount64() - m_ulStartTickCount;
+	strOut.Format(_T("\n%d\t%d\t%f"), m_aaa, timepass, m_aaa * 1.0 / timepass);
 	OutputDebugString(strOut);
+
+	if (m_lnSimTimeMillisecond - m_lnSimTimeTickCountStart > 2 * 60000)
+	{
+		UpdateStartTick();
+	}
+#endif
 }
 
 void CHostEngine::RefreshUi()
@@ -390,11 +399,23 @@ SIM_TIME CHostEngine::GetBoundary() const
 
 void CHostEngine::NotifyTimeChange()
 {
+	if (abs(m_ulLastNotifyTime - m_lnSimTimeMillisecond) < 1000)
+	{
+		return;
+	}
+	m_ulLastNotifyTime = m_lnSimTimeMillisecond;
 	POSITION pos = m_NotifyList.GetHeadPosition();
 	while (pos)
 	{
 		m_NotifyList.GetNext(pos)->OnEngineTimeChanged(m_lnSimTimeMillisecond);
 	}
+}
+
+void CHostEngine::UpdateStartTick()
+{
+	m_lnSimTimeTickCountStart = m_lnSimTimeMillisecond;
+	m_ulStartTickCount = GetTickCount64();
+	m_aaa = 0;
 }
 
 // double CHostEngine::GetAveSurroundingHosts(double fRadius, int nComment)
@@ -490,6 +511,7 @@ int CHostEngine::CheckEventList()
 				NotifyTimeChange();
 				m_Summary.AddTag(m_lnSimTimeMillisecond);
 			}
+			ULONGLONG runstart = GetTickCount64();
 			m_lnSimTimeMillisecond = FirstEvent.m_lnSimTime;
 			if (FirstEvent.m_pUser)
 			{
@@ -500,6 +522,9 @@ int CHostEngine::CheckEventList()
 			{
 				OnEveryPeriod();
 			}
+			ULONGLONG runend = GetTickCount64();
+			ULONGLONG BBB = runend - runstart;
+			m_aaa += BBB;
 		}
 	}
 	return 0;
@@ -543,6 +568,7 @@ void CHostEngine::OnStartEngine(WPARAM wParam, LPARAM lParam)
 void CHostEngine::OnResetEngine(WPARAM wParam, LPARAM lParam)
 {
 	m_ulStartTickCount = GetTickCount64();
+	m_aaa = 0;
 	KillCommonTimer(TIMER_ID_PERIOD);
 	WriteLog(_T("RESET"));
 	m_bPaused = true;
@@ -565,8 +591,7 @@ void CHostEngine::OnResumeEngine(WPARAM wParam, LPARAM lParam)
 	if (m_bPaused)
 	{
 		m_bPaused = false;
-		m_lnSimTimeTickCountStart = m_lnSimTimeMillisecond;
-		m_ulStartTickCount = GetTickCount64();
+		UpdateStartTick();
 	}
 }
 
@@ -638,6 +663,7 @@ SIM_TIME CHostEngine::GetPeriodDefaultInterval()
 
 void CHostEngine::OnJudgeOk(WPARAM wParam, LPARAM lParam)
 {
+	ULONGLONG runstart = GetTickCount64();
 	CMsgCntJudgeReceiverReport * pMsg = (CMsgCntJudgeReceiverReport*)wParam;
 	CTransmitionRecord judgedRecord = m_TransmitionMap[pMsg->m_nMsgId];
 	ASSERT(judgedRecord.m_pMsg != NULL);
@@ -664,8 +690,7 @@ void CHostEngine::OnEventListChanged(WPARAM wParam, LPARAM lParam)
 
 void CHostEngine::IncreaseSpeed(WPARAM wParam, LPARAM lParam)
 {
-	m_lnSimTimeTickCountStart = m_lnSimTimeMillisecond;
-	m_ulStartTickCount = GetTickCount64();
+	UpdateStartTick();
 	m_lnExpectSimMillisecPerActSec *= 1.5;
 	POSITION pos = m_NotifyList.GetHeadPosition();
 	while (pos)
@@ -676,8 +701,7 @@ void CHostEngine::IncreaseSpeed(WPARAM wParam, LPARAM lParam)
 
 void CHostEngine::DecreaseSpeed(WPARAM wParam, LPARAM lParam)
 {
-	m_lnSimTimeTickCountStart = m_lnSimTimeMillisecond;
-	m_ulStartTickCount = GetTickCount64();
+	UpdateStartTick();
 	m_lnExpectSimMillisecPerActSec /= 1.5;
 	POSITION pos = m_NotifyList.GetHeadPosition();
 	while (pos)

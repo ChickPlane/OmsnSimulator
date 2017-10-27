@@ -5,7 +5,8 @@ public:
 	CCommonFunctions();
 	virtual ~CCommonFunctions();
 
-	static BOOL PickMFromNDisorder(int nM, char * pArr, int nN);
+	static char * GetCharStringFromCString(const CString & str);
+	static void PickMFromNDisorder(int nM, char * pArr, int nN);
 };
 
 template<class TKey, class TValue>

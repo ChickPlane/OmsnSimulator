@@ -6,6 +6,7 @@ using namespace std;
 CStatisticSummary::CStatisticSummary()
 	: m_bEnd(TRUE)
 	, m_pComments(NULL)
+	, m_pWorkPath(NULL)
 {
 }
 
@@ -25,6 +26,10 @@ CStatisticSummary::~CStatisticSummary()
 	if (m_pComments)
 	{
 		delete[] m_pComments;
+	}
+	if (m_pWorkPath)
+	{
+		delete[] m_pWorkPath;
 	}
 }
 
@@ -80,13 +85,16 @@ void CStatisticSummary::OutputResult()
 	{
 		if (m_pComments)
 		{
-			sprintf_s(filename, "ANALY_%s_E%02d_C%d_%s.csv", pProtocolName, i, (int)m_fCommuRadius, m_pComments);
+			sprintf_s(filename, "\\ANALY_%s_E%02d_C%d_%s.csv", pProtocolName, i, (int)m_fCommuRadius, m_pComments);
 		}
 		else
 		{
-			sprintf_s(filename, "ANALY_%s_E%02d_C%d_%s.csv", pProtocolName, i, (int)m_fCommuRadius, m_pComments);
+			sprintf_s(filename, "\\ANALY_%s_E%02d_C%d_%s.csv", pProtocolName, i, (int)m_fCommuRadius, m_pComments);
 		}
-		fout.open(filename, ios::app);
+		char filepath[200] = {};
+		strcpy_s(filepath, m_pWorkPath);
+		strcat_s(filepath, filename);
+		fout.open(filepath, ios::app);
 		fout << m_nRandomSeed << ";,";
 		for (int j = 0; j < m_nTagIndex; ++j)
 		{

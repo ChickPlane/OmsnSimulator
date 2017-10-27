@@ -39,7 +39,7 @@ CPkgAptCardAck & CPkgAptCardAck::operator=(const CPkgAptCardAck & src)
 {
 	CPkgAck::operator=(src);
 	m_bAskForCards = src.m_bAskForCards;
-	m_nHoldingReadyNumber = src.m_nHoldingReadyNumber;
+	m_nHoldingTrustNumber = src.m_nHoldingTrustNumber;
 	CleanIds();
 	m_nIDNumber = src.m_nIDNumber;
 	if (m_nIDNumber > 0)

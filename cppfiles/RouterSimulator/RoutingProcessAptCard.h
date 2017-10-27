@@ -13,6 +13,8 @@ class CRoutingProcessAptCard;
 class CRoutingProcessACUser
 {
 public:
+	virtual BOOL IsTrustful(CRoutingProcessAptCard * pCallBy, const CRoutingProtocol * pOther) const = 0;
+
 	virtual void OnGetNewCards(CRoutingProcessAptCard * pCallBy, const CPkgAptCardCards * pPkg) = 0;
 	virtual void OnGetNoneCards(CRoutingProcessAptCard * pCallBy, const CPkgAptCardCards * pPkg) = 0;
 };
@@ -32,27 +34,26 @@ public:
 	static void CleanSendingList(CList<CAppointmentCard*> & SendingList);
 	virtual void OnReceivedCards(const CPkgAptCardCards * pCards);
 
+	virtual int GetTrustListSize() const { return m_TrustCards.GetSize(); }
 	virtual int GetReadyListSize() const { return m_ReadyCards.GetSize(); }
 	virtual int GetDispenseListSize() const { return m_DispensedCards.GetSize(); }
 
 	virtual void OnEngineTimer(int nCommandId);
 	virtual int GetCarryingMessages(CMsgShowInfo & allMessages) const;
 	static void SetParameters(int nK, int nSeg, SIM_TIME lnAcTimeout);
-	virtual void GetCardCount(int & nDispenseCount, int & nReadyCount);
 	virtual BOOL GetAndRemoveAgencyRecord(USERID uOldId, int nOldApt, CAptCardAgencyRecord & retRecord);
 
 public:
 	virtual int GetInfoList(CMsgShowInfo & allMessages) const;
 	virtual COLORREF GetInportantLevel() const;
-	virtual int GetReadyCount() const;
 	virtual int GetCreatedCount() const;
 	virtual CString GetAgencyListString() const;
 
 protected:
 	void PickDispensedCards(USERID nNextUser, CList<CAppointmentCard*> & SendingList);
 	void CreateNewAptCards(CList<CAppointmentCard*> & SendingList);
-	void PickReadyCards(int nTheOtherReadyNumber, CList<CAppointmentCard*> & SendingList);
-	BOOL PickMNumberFromNArr(int nM, char * pArr, int nN);
+	void PickReadyAndTrustCards(int nTheOtherReadyNumber, CList<CAppointmentCard*> & SendingList);
+	
 	static int GetLastAcHopCardNumber(const CList<CAppointmentCard*> & SendingList);
 	void PrepareToSend(USERID nNextUser, CList<CAppointmentCard*> & SendingList);
 
@@ -70,6 +71,7 @@ protected:
 	int GetMark();
 	double TestAptCardMark(CAppointmentCard * pCard, SIM_TIME lnTimeout);
 	void CheckAptCards(const CAppointmentCard * pCard);
+	int GetReadyCount() const;
 
 protected:
 	static int gm_nK;
@@ -78,6 +80,7 @@ protected:
 
 	CList<CAppointmentCard*> m_DispensedCards;
 	CList<CAppointmentCard*> m_ReadyCards;
+	CList<CAppointmentCard*> m_TrustCards;
 	CMap<USERID, USERID, CAptCardFromSameAgency*, CAptCardFromSameAgency*> m_AgencyList;
 	int m_nNeededCardNumber;
 	SIM_TIME m_lnLastCreateAptCardTime;
