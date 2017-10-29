@@ -266,6 +266,8 @@ void CPositionForecast::OnForecastRemoveAll(WPARAM wParam, LPARAM lParam)
 void CPositionForecast::DeleteRecords(SIM_TIME lnSimTimeBefore)
 {
 	LockReports();
+	int nsize = m_Reports.GetSize();
+	ASSERT(nsize < 30);
 	POSITION pos = m_Reports.GetHeadPosition(), posLast;
 	CMsgPosFrcstReport * pNext = NULL;
 	CMsgPosFrcstReport * pToBeDelete = NULL;

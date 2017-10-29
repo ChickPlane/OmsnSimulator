@@ -106,10 +106,13 @@ protected:
 	void NotifyTimeChange();
 	void UpdateStartTick();
 	void JudgeAllUnicastOk();
+	void JudgeAllFullForcast();
 	void JudgeAllBroadcast(const CMsgCntJudgeReceiverReport * pMsg);
-	void PreJudgeAllHosts(SIM_TIME lnTime);
+	BOOL PreJudgeAllHosts(SIM_TIME lnTime);
 	BOOL DeletePreFullJudge(SIM_TIME lnTime);
 	void SendEventChangeMsg();
+	void SendJudgeOkMsg();
+	void SendJudgeMsgToThread(CMsgNewSendJudge * pJudgeMsg);
 
 private:
 	SIM_TIME m_lnSimTimeMillisecond;
@@ -156,6 +159,8 @@ private:
 	CMap<SIM_TIME, SIM_TIME, const CMsgCntJudgeReceiverReport*, const CMsgCntJudgeReceiverReport*> m_FullJudgeRecord;
 
 	int m_nMsgCount;
+	int m_nJudgeOkMsgCount;
+	int m_nBusyJudgeThreadCount;
 private:
 	ULONGLONG m_aaa;
 

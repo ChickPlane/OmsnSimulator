@@ -30,7 +30,7 @@ CHostEngine::CHostEngine()
 	, m_lnLastForecastSimTime(INT_MIN)
 	, m_lnLastForecastedSimTime(INT_MIN)
 	, m_nMsgId(0)
-	, m_nJudgeMax(16)
+	, m_nJudgeMax(8)
 #ifdef DEBUG
 	, m_bEnableMonitor(FALSE)
 	, m_blimitedSpeed(FALSE)
@@ -44,6 +44,8 @@ CHostEngine::CHostEngine()
 	, m_nJudgeRunTime(0)
 	, m_bJudgingUnicast(FALSE)
 	, m_nMsgCount(0)
+	, m_nJudgeOkMsgCount(0)
+	, m_nBusyJudgeThreadCount(0)
 {
 	m_lnEventCheckBoundary = GetPeriodDefaultInterval();
 }
@@ -110,6 +112,8 @@ void CHostEngine::BreakMapGui()
 
 void CHostEngine::TransmitMessage(CRoutingProtocol * pFrom, CRoutingProtocol * pTo, CYell * pMsg)
 {
+	delete pMsg;
+	return;
 	++m_nMsgId;
 	ASSERT(pMsg != NULL);
 	CTransmitionRecord newRecord(pFrom, pTo, pMsg, m_nMsgId);
@@ -132,19 +136,28 @@ void CHostEngine::StartJudgeProcess(const CTransmitionRecord & transmitionData, 
 	item.m_fRadius = transmitionData.m_pFrom->GetCommunicateRadius();
 	item.m_fSecondId = GetSimTime();
 	item.m_pHost = transmitionData.m_pFrom->GetHost();
+	m_TransmitionBroadcast.AddTail(transmitionData);
+
+	const CMsgCntJudgeReceiverReport * rValue;
+	if (m_FullJudgeRecord.Lookup(GetSimTime(), rValue))
+	{
+		if (rValue)
+		{
+			SendJudgeOkMsg();
+		}
+		return;
+	}
 
 	if (!m_pJudgeMsg)
 	{
 		m_pJudgeMsg = new CMsgNewSendJudge();
 	}
 	m_pJudgeMsg->m_Items.AddTail(item);
-	m_TransmitionBroadcast.AddTail(transmitionData);
 
 	if (!m_bCheckingEvents)
 	{
 		ASSERT(transmitionData.m_pMsg != NULL);
-		CConnectionJudge * pJudge = m_JudgeList[m_nJudgeRunTime++%m_nJudgeMax];
-		pJudge->PostThreadMessage(MSG_ID_JUDGE_NEW_SEND, (WPARAM)m_pJudgeMsg, nFrom);
+		SendJudgeMsgToThread(m_pJudgeMsg);
 		m_pJudgeMsg = NULL;
 	}
 
@@ -165,47 +178,53 @@ void CHostEngine::StartJudgeUnicastProcess(const CTransmitionRecord & transmitio
 		m_TransmitionUnicast.AddTail(transmitionData);
 		if (!m_bJudgingUnicast)
 		{
-			PostThreadMessage(MSG_ID_ENGINE_JUDGE_OK, 0, 1);
+			SendJudgeOkMsg();
 		}
 	}
 }
 
 void CHostEngine::RegisterTimer(int nCommandId, CEngineUser * pUser, SIM_TIME lnLaterMilliseconds)
 {
+	ULONGLONG a = GetTickCount64();
 	RegisterTimer(nCommandId, pUser, lnLaterMilliseconds, FALSE);
-	SIM_TIME rKey;
-	const CMsgCntJudgeReceiverReport * pValue;
+	ULONGLONG b = GetTickCount64();
+// 	SendEventChangeMsg();
+// 	return;
+	BOOL bDoPredict = FALSE;
+	int nDoCount = 0;
 	int nEmptyBlock = 0;
-	POSITION pos = m_FullJudgeRecord.GetStartPosition();
-	while (pos)
+	if (!pUser)
 	{
-		m_FullJudgeRecord.GetNextAssoc(pos, rKey, pValue);
-		if (pValue == NULL)
+		const CMsgCntJudgeReceiverReport * pValue;
+		nEmptyBlock = m_nBusyJudgeThreadCount;
+		int nAddCount = 0;
+		int nAddMax = m_nJudgeMax - nEmptyBlock;
+		for (int i = 0; i < 7; ++i)
 		{
-			nEmptyBlock++;
+// 			if (nAddCount >= nAddMax)
+// 			{
+// 				break;
+// 			}
+// 			++nAddCount;
+			SIM_TIME increase = lnLaterMilliseconds * (i + 1);
+			SIM_TIME tmpTime = GetSimTime() + increase;
+
+			if (PreJudgeAllHosts(tmpTime))
+			{
+				RegisterTimer(nCommandId, NULL, increase, TRUE);
+				bDoPredict = TRUE;
+				++nDoCount;
+			}
+
 		}
 	}
-
-	int nAddCount = 0;
-	int nAddMax = m_nJudgeMax - nEmptyBlock;
-	for (int i = 0; i < m_nJudgeMax; ++i)
+	ULONGLONG c = GetTickCount64();
+	if (nEmptyBlock > 1 && bDoPredict)
 	{
-		if (nAddCount >= nAddMax)
-		{
-			break;
-		}
-		++nAddCount;
-		SIM_TIME increase = lnLaterMilliseconds * (i + 1);
-		SIM_TIME tmpTime = GetSimTime() + increase;
-		if (m_FullJudgeRecord.Lookup(tmpTime, pValue))
-		{
-			continue;
-		}
-		if (pUser)
-		{
-			RegisterTimer(nCommandId, pUser, increase, TRUE);
-			PreJudgeAllHosts(tmpTime);
-		}
+		float ddd = 1.0*(c - b) / 1;
+		CString strOut;
+		strOut.Format(_T("\nD: %d %d %d"), nDoCount, nEmptyBlock, m_lnSimTimeMillisecond);
+		OutputDebugString(strOut);
 	}
 	SendEventChangeMsg();
 }
@@ -298,7 +317,7 @@ void CHostEngine::OnEveryPeriod()
 	SIM_TIME lnCurrentTime = GetSimTime();
 	SendForecastCommand(lnCurrentTime);
 #ifdef DEBUG
-	RefreshUi();
+	//RefreshUi();
 #endif
 	DeleteForecastsBefore(lnCurrentTime);
 
@@ -307,7 +326,12 @@ void CHostEngine::OnEveryPeriod()
 	{
 		Interval = 200;
 	}
-// 	Interval = 150;
+	else if (Interval > 10000)
+	{
+		Interval = 100000;
+	}
+ 	Interval = GetPeriodDefaultInterval();
+	Interval = 150;
 	RegisterTimer(0, NULL, Interval);
 }
 
@@ -427,7 +451,6 @@ void CHostEngine::UpdateStartTick()
 {
 	m_lnSimTimeTickCountStart = m_lnSimTimeMillisecond;
 	m_ulStartTickCount = GetTickCount64();
-	m_aaa = 0;
 }
 
 // double CHostEngine::GetAveSurroundingHosts(double fRadius, int nComment)
@@ -495,6 +518,18 @@ CHost * CHostEngine::GetHost(int nHostId) const
 
 int CHostEngine::CheckEventList()
 {
+	static int nRunTimes = 0;
+	static int nWaitTimes = 0;
+	static int nPeriod = 0;
+
+	++nRunTimes;
+	
+	double x = nWaitTimes * 1.0 / nRunTimes;
+
+	if (GetSimTime() > 1000000)
+	{
+		ASSERT(0);
+	}
 	if (m_bPaused)
 	{
 		SendEventChangeMsg();
@@ -502,6 +537,8 @@ int CHostEngine::CheckEventList()
 	}
 	int nUnicast = m_TransmitionUnicast.GetSize();
 	int nBroadcast = m_TransmitionBroadcast.GetSize();
+	int nSizeEvent = m_EventList.GetSize();
+	ASSERT(nSizeEvent < 150);
 	if (nUnicast == 0 && nBroadcast == 0)
 	{
 		if (!m_EventList.IsEmpty())
@@ -517,6 +554,7 @@ int CHostEngine::CheckEventList()
 			{
 				if (!DeletePreFullJudge(m_lnSimTimeMillisecond))
 				{
+					nWaitTimes++;
 					SendEventChangeMsg();
 					return 0;
 				}
@@ -534,7 +572,6 @@ int CHostEngine::CheckEventList()
 				}
 				m_EventList.RemoveHead();
 
-				ULONGLONG runstart = GetTickCount64();
 				if (HeadEvent.m_pUser)
 				{
 					HeadEvent.m_pUser->OnEngineTimer(HeadEvent.m_nCommandId);
@@ -543,12 +580,10 @@ int CHostEngine::CheckEventList()
 				{
 					if (!HeadEvent.m_bForecastStack)
 					{
+						++nPeriod;
 						OnEveryPeriod();
 					}
 				}
-				ULONGLONG runend = GetTickCount64();
-				ULONGLONG BBB = runend - runstart;
-				m_aaa += BBB;
 			} while (m_EventList.GetSize()>0);
 		}
 	}
@@ -593,7 +628,6 @@ void CHostEngine::OnStartEngine(WPARAM wParam, LPARAM lParam)
 void CHostEngine::OnResetEngine(WPARAM wParam, LPARAM lParam)
 {
 	m_ulStartTickCount = GetTickCount64();
-	m_aaa = 0;
 	KillCommonTimer(TIMER_ID_PERIOD);
 	WriteLog(_T("RESET"));
 	m_bPaused = true;
@@ -628,17 +662,7 @@ void CHostEngine::OnFinishedOneForecast(WPARAM wParam, LPARAM lParam)
 
 	SIM_TIME lnNxtForecastSimTime = lnCurrentTime + lnDiffer;
 	BOOL bRet = SendForecastCommand(lnNxtForecastSimTime);
-// 
-// 	if (lnNxtForecastSimTime <= m_lnEventCheckBoundary || !m_blimitedSpeed)
-// 	{
-// 		BOOL bRet = SendForecastCommand(lnNxtForecastSimTime);
-// 		ASSERT(bRet == TRUE);
-// 	}
-// 	else
-// 	{
-// 		BOOL bRet = SendForecastCommand(m_lnEventCheckBoundary);
-// 		ASSERT(bRet == TRUE);
-// 	}
+
 	delete pMsg;
 	pMsg = NULL;
 	if (m_bFinishFirstForecast == FALSE)
@@ -693,10 +717,57 @@ void CHostEngine::JudgeAllUnicastOk()
 	{
 		CTransmitionRecord head = m_TransmitionUnicast.GetHead();
 		m_TransmitionUnicast.RemoveHead();
-		head.m_pTo->GetHost()->OnHearMsg(head.m_pMsg);
+		//head.m_pTo->GetHost()->OnHearMsg(head.m_pMsg);
 		delete head.m_pMsg;
 	}
 	m_bJudgingUnicast = FALSE;
+}
+
+void CHostEngine::JudgeAllFullForcast()
+{
+	const CMsgCntJudgeReceiverReport * pMsg = NULL;
+	if (m_FullJudgeRecord.Lookup(GetSimTime(), pMsg))
+	{
+		if (pMsg == NULL)
+		{
+			return;
+		}
+		else
+		{
+			POSITION pos = m_TransmitionBroadcast.GetHeadPosition(), posLast;
+			while (pos)
+			{
+				int nSize = m_TransmitionBroadcast.GetSize();
+				int nsss = m_FullJudgeRecord.GetSize();
+				
+				posLast = pos;
+				CTransmitionRecord rValue = m_TransmitionBroadcast.GetNext(pos);
+
+				CReceiverReportItem reportItem;
+				if (!pMsg->m_Items.Lookup(rValue.m_pFrom->GetHost(), reportItem))
+				{
+					continue;
+				}
+				ASSERT(rValue.m_pMsg != NULL);
+				POSITION posReport = reportItem.m_Hosts.GetHeadPosition();
+				while (posReport)
+				{
+					CHost * pHost = reportItem.m_Hosts.GetNext(posReport).m_pHost;
+					//pHost->OnHearMsg(rValue.m_pMsg);
+				}
+				delete rValue.m_pMsg;
+				m_TransmitionBroadcast.RemoveAt(posLast);
+			}
+
+			int nSrrize = m_TransmitionBroadcast.GetSize();
+			int nrrsss = m_FullJudgeRecord.GetSize();
+			ASSERT(nSrrize == 0);
+		}
+	}
+	else
+	{
+		return;
+	}
 }
 
 void CHostEngine::JudgeAllBroadcast(const CMsgCntJudgeReceiverReport * pMsg)
@@ -721,19 +792,20 @@ void CHostEngine::JudgeAllBroadcast(const CMsgCntJudgeReceiverReport * pMsg)
 		POSITION posReport = reportItem.m_Hosts.GetHeadPosition();
 		while (posReport)
 		{
-			reportItem.m_Hosts.GetNext(posReport).m_pHost->OnHearMsg(rValue.m_pMsg);
+			CHost * pHost = reportItem.m_Hosts.GetNext(posReport).m_pHost;
+			//pHost->OnHearMsg(rValue.m_pMsg);
 		}
 		delete rValue.m_pMsg;
 		m_TransmitionBroadcast.RemoveAt(posLast);
 	}
 }
 
-void CHostEngine::PreJudgeAllHosts(SIM_TIME lnTime)
+BOOL CHostEngine::PreJudgeAllHosts(SIM_TIME lnTime)
 {
 	const CMsgCntJudgeReceiverReport * value;
 	if (m_FullJudgeRecord.Lookup(lnTime, value))
 	{
-		return;
+		return FALSE;
 	}
 	else
 	{
@@ -745,23 +817,21 @@ void CHostEngine::PreJudgeAllHosts(SIM_TIME lnTime)
 		item.m_fSecondId = lnTime;
 
 		int nHostCount = m_pRoadNet->m_allHosts.GetSize();
-		for (int i = SERVER_NODE_COUNT; i < nHostCount; ++i)
+		for (int i = 0; i < nHostCount; ++i)
 		{
 			CHost * pHost = m_pRoadNet->m_allHosts.GetAt(i);
 			item.m_pHost = pHost;
 			pJudgeMsg->m_Items.AddTail(item);
 		}
-
-		CConnectionJudge * pJudge = m_JudgeList[m_nJudgeRunTime++%m_nJudgeMax];
-		pJudge->PostThreadMessage(MSG_ID_JUDGE_NEW_SEND, (WPARAM)pJudgeMsg, 0);
-
+		SendJudgeMsgToThread(pJudgeMsg);
+		return TRUE;
 	}
 }
 
 BOOL CHostEngine::DeletePreFullJudge(SIM_TIME lnTime)
 {
 	int nRecordLength = m_FullJudgeRecord.GetSize();
-	ASSERT(nRecordLength < 2 * m_nJudgeMax);
+	ASSERT(nRecordLength < 6 * m_nJudgeMax);
 	const CMsgCntJudgeReceiverReport * pReport = NULL;
 	if (m_FullJudgeRecord.Lookup(lnTime, pReport))
 	{
@@ -778,15 +848,40 @@ BOOL CHostEngine::DeletePreFullJudge(SIM_TIME lnTime)
 
 void CHostEngine::SendEventChangeMsg()
 {
-	if (m_nMsgCount <= 1)
+	if (m_nMsgCount == 0)
 	{
 		m_nMsgCount++;
 		PostThreadMessage(MSG_ID_ENGINE_EVENT_CHANGED, 0, 0);
 	}
 }
 
+void CHostEngine::SendJudgeOkMsg()
+{
+	if (m_nJudgeOkMsgCount == 0)
+	{
+		m_nJudgeOkMsgCount++;
+		PostThreadMessage(MSG_ID_ENGINE_JUDGE_OK, 0, 1);
+	}
+}
+
+void CHostEngine::SendJudgeMsgToThread(CMsgNewSendJudge * pJudgeMsg)
+{
+	++m_nBusyJudgeThreadCount;
+	CConnectionJudge * pJudge = m_JudgeList[m_nJudgeRunTime++%m_nJudgeMax];
+	pJudge->PostThreadMessage(MSG_ID_JUDGE_NEW_SEND, (WPARAM)pJudgeMsg, 0);
+}
+
 void CHostEngine::OnJudgeOk(WPARAM wParam, LPARAM lParam)
 {
+	if (!wParam)
+	{
+		--m_nJudgeOkMsgCount;
+	}
+	else
+	{
+		--m_nBusyJudgeThreadCount;
+		ASSERT(m_nBusyJudgeThreadCount >= 0);
+	}
 	JudgeAllUnicastOk();
 	CMsgCntJudgeReceiverReport * pMsg = (CMsgCntJudgeReceiverReport*)wParam;
 	if (pMsg)
@@ -797,6 +892,7 @@ void CHostEngine::OnJudgeOk(WPARAM wParam, LPARAM lParam)
 			delete pMsg;
 		}
 	}
+	JudgeAllFullForcast();
 
 	int nUnicast = m_TransmitionUnicast.GetSize();
 	int nBroadcast = m_TransmitionBroadcast.GetSize();
@@ -813,10 +909,10 @@ void CHostEngine::OnEventListChanged(WPARAM wParam, LPARAM lParam)
 	int nBroadcast = m_TransmitionBroadcast.GetSize();
 	m_bCheckingEvents = TRUE;
 	CheckEventList();
+	//SendEventChangeMsg();
 	if (m_pJudgeMsg)
 	{
-		CConnectionJudge * pJudge = m_JudgeList[m_nJudgeRunTime++%m_nJudgeMax];
-		pJudge->PostThreadMessage(MSG_ID_JUDGE_NEW_SEND, (WPARAM)m_pJudgeMsg, 0);
+		SendJudgeMsgToThread(m_pJudgeMsg);
 		m_pJudgeMsg = NULL;
 	}
 	m_bCheckingEvents = FALSE;
@@ -859,7 +955,7 @@ void CHostEngine::OnFirstForecastFinished()
 		CHost * pHost = m_pRoadNet->m_allHosts.GetAt(i);
 		if (pHost && pHost->m_pProtocol)
 		{
-			pHost->m_pProtocol->Turn(TRUE);
+			//pHost->m_pProtocol->Turn(TRUE);
 		}
 	}
 	m_bFinishFirstForecast = TRUE;
