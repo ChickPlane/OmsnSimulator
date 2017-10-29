@@ -38,6 +38,7 @@ public:
 	CMsgPosFrcstReport & operator = (const CMsgPosFrcstReport & src);
 	SIM_TIME m_lnSimTime;
 	CMap<int, int, CHostReference, CHostReference &> m_Reference;
+	int FindHost(CHost * pHost, CHostGui & hostGui);
 };
 
 // CPositionForecast

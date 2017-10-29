@@ -7,6 +7,7 @@
 #include "HostGui.h"
 #include "TestTimer.h"
 #include "StatisticSummary.h"
+#include "HostConnection.h"
 
 class CRoadNet;
 class CMapGui;
@@ -25,7 +26,7 @@ enum {
 	MSG_ID_ENGINE_EVENT_CHANGED,
 	MSG_ID_ENGINE_SPEED_UP,
 	MSG_ID_ENGINE_SPEED_DOWN,
-	MSG_ID_ENGINE_WATCH_TIME
+	MSG_ID_ENGINE_WATCH_TIME,
 };
 
 enum {
@@ -113,6 +114,11 @@ protected:
 	void SendEventChangeMsg();
 	void SendJudgeOkMsg();
 	void SendJudgeMsgToThread(CMsgNewSendJudge * pJudgeMsg);
+	BOOL NotifyConnections();
+	SIM_TIME GetDetectConnectInterval();
+	const CMsgCntJudgeReceiverReport * GetFullJudgeReport(SIM_TIME lnTime);
+	void PreJudgeSeveralPeriods(SIM_TIME lnInterval);
+	void PeriodForcastAndJudge();
 
 private:
 	SIM_TIME m_lnSimTimeMillisecond;
@@ -161,6 +167,9 @@ private:
 	int m_nMsgCount;
 	int m_nJudgeOkMsgCount;
 	int m_nBusyJudgeThreadCount;
+
+	CHostConnection m_Connections;
+	ULONGLONG m_ullLastUiTick;
 private:
 	ULONGLONG m_aaa;
 

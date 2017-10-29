@@ -19,6 +19,10 @@ CConnectionJudge::CConnectionJudge()
 	: m_pData(NULL)
 	, m_pForecast(NULL)
 	, m_pEngine(NULL)
+	, OutRangeCount(0)
+	, m_timeCost(0)
+	, m_timeCost1(0)
+	, nTimes(0)
 {
 }
 
@@ -69,6 +73,7 @@ void CConnectionJudge::OnFinishedOneForecast(WPARAM wParam, LPARAM lParam)
 
 void CConnectionJudge::OnNewSend(WPARAM wParam, LPARAM lParam)
 {
+	ULONGLONG a = GetTickCount64();
 	CMsgNewSendJudge * pMsg = (CMsgNewSendJudge *)wParam;
 	if (pMsg->m_Items.GetSize() == 0)
 	{
@@ -85,6 +90,7 @@ void CConnectionJudge::OnNewSend(WPARAM wParam, LPARAM lParam)
 	SIM_TIME rpttime = pReport->m_lnSimTime;
 	BOOL bO = m_pForecast->IsOccupied(posOccupyReport);
 
+	ULONGLONG b = GetTickCount64();
 	CMsgCntJudgeReceiverReport * pJRR = new CMsgCntJudgeReceiverReport();
 	pJRR->m_lnTime = fSecondId;
 	pJRR->m_bFullReport = pMsg->m_bFullJudge;
@@ -94,11 +100,18 @@ void CConnectionJudge::OnNewSend(WPARAM wParam, LPARAM lParam)
 	{
 		CMsgNewJudgeItem & item = pMsg->m_Items.GetNext(pos);
 		CReceiverReportItem reportItem;
-		if (!pJRR->m_Items.Lookup(item.m_pHost, reportItem))
-		{
-			JudgeItem(item, pReport, reportItem);
-			pJRR->m_Items.SetAt(item.m_pHost, reportItem);
-		}
+		JudgeItem(item, pReport, reportItem);
+		pJRR->m_Items.SetAt(item.m_pHost, reportItem);
+
+// 		if (!pJRR->m_Items.Lookup(item.m_pHost, reportItem))
+// 		{
+// 			JudgeItem(item, pReport, reportItem);
+// 			pJRR->m_Items.SetAt(item.m_pHost, reportItem);
+// 		}
+// 		else
+// 		{
+// 			ASSERT(0);
+// 		}
 	}
 
 	m_pForecast->GiveBackReport(posOccupyReport);
@@ -109,6 +122,17 @@ void CConnectionJudge::OnNewSend(WPARAM wParam, LPARAM lParam)
 	}
 
 	delete pMsg;
+	ULONGLONG c = GetTickCount64();
+	nTimes++;
+	m_timeCost += (b - a);
+	m_timeCost1 += (c - b);
+	ULONGLONG AVE1 = m_timeCost / nTimes;
+	ULONGLONG AVE2 = m_timeCost1 / nTimes;
+	int k = c - b;
+	if (nTimes > 400)
+	{
+		int lll = 3;
+	}
 }
 
 void CConnectionJudge::JudgeItem(const CMsgNewJudgeItem & item, CMsgPosFrcstReport * pReport, CReceiverReportItem & ret)
@@ -126,23 +150,44 @@ void CConnectionJudge::JudgeItem(const CMsgNewJudgeItem & item, CMsgPosFrcstRepo
 		ASSERT(NULL);
 	}
 	SIM_TIME lnDiffer = item.m_fSecondId - pReport->m_lnSimTime;
-	int nLimit = nBlockCount - 1;
+	int nLimit = nBlockCount;
 	ASSERT(nLimit >= 0);
 	if (lnDiffer > lnPredictTime)
 	{
-		nLimit += (lnDiffer - lnPredictTime) / lnHalfBlockTime;
+		nLimit += (lnDiffer - lnPredictTime) / lnHalfBlockTime + 1;
 	}
-	ASSERT(nLimit <= 3);
+	//ASSERT(nLimit <= 1);
+	if (nLimit > 1)
+	{
+		++OutRangeCount;
+	}
+	//ASSERT(OutRangeCount < 1000);
+	if (nTimes > 1100)
+	{
+		//ASSERT(nLimit <= 2);
+	}
+	//nLimit = 0;
 
 
 	CDoublePoint centerPosition = item.m_pHost->m_schedule.GetPosition(item.m_fSecondId);
+	DWORD OriHashValue = m_pData->GetHashValue(centerPosition.m_X, centerPosition.m_Y);
+	if (!m_pData->HasHash(centerPosition))
+	{
+		item.m_pHost->m_schedule.GetPosition(item.m_fSecondId);
+	}
+	BOOL bFindSelf = FALSE;
 	for (int i = -nLimit; i <= nLimit; ++i)
 	{
 		for (int j = -nLimit; j <= nLimit; ++j)
 		{
-			double fX = centerPosition.m_X + i * m_pData->GetHashInterval();
-			double fY = centerPosition.m_Y + j * m_pData->GetHashInterval();
-			DWORD HashValue = m_pData->GetHashValue(fX, fY);
+			CDoublePoint testPosition;
+			testPosition.m_X = centerPosition.m_X + i * m_pData->GetHashInterval();
+			testPosition.m_Y = centerPosition.m_Y + j * m_pData->GetHashInterval();
+			if (!m_pData->HasHash(testPosition))
+			{
+				continue;
+			}
+			DWORD HashValue = m_pData->GetHashValue(testPosition.m_X, testPosition.m_Y);
 			CHostReference tmpReference;
 			if (pReport->m_Reference.Lookup(HashValue, tmpReference))
 			{
@@ -154,13 +199,25 @@ void CConnectionJudge::JudgeItem(const CMsgNewJudgeItem & item, CMsgPosFrcstRepo
 					double fDistance = CDoublePoint::GetDistance(targetPosition, centerPosition);
 					if (fDistance <= item.m_fRadius)
 					{
+						if (tmpTarget.m_pHost == item.m_pHost)
+						{
+							bFindSelf = TRUE;
+						}
 						tmpTarget.m_Position = targetPosition;
 						ret.m_Hosts.AddTail(tmpTarget);
 					}
 				}
 			}
+
 		}
 	}
+// 	if (bFindSelf == FALSE)
+// 	{
+// 		CHost * pLookingFor = item.m_pHost;
+// 		CHostGui findGui;
+// 		int nKey = pReport->FindHost(pLookingFor, findGui);
+// 		int k = 3;
+// 	}
 }
 
 BEGIN_MESSAGE_MAP(CConnectionJudge, CWinThread)

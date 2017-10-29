@@ -14,6 +14,7 @@ public:
 	virtual void SetLocalParameters(int nBswCopyCount);
 	virtual void Turn(BOOL bOn);
 	virtual COLORREF GetInportantLevel() const;
+	virtual void OnEngineConnection(const CList<CHostGui> & m_Hosts);
 
 public:
 	// Hello User

@@ -32,13 +32,12 @@ public:
 	virtual void SetBasicParameters(int nProcessID, CRoutingProtocol * pProtocol);
 	virtual void SetProcessUser(CRoutingProcessHelloUser * pUser) { m_pUser = pUser; }
 	virtual void OnReceivePkgFromNetwork(const CSentence * pPkg, CList<CSentence*> & SendingList);
-	virtual void OnEngineTimer(int nCommandId);
+	virtual void OnSomeoneNearby();
 	virtual void StartWork(BOOL bStart);
 	static void SetInterval(SIM_TIME lnInterval) { m_lnSearchInterval = lnInterval; }
 
 protected:
 	virtual void StartSearhing();
-	virtual void ContinueSearching();
 	virtual void SendHelloPackage();
 
 private:

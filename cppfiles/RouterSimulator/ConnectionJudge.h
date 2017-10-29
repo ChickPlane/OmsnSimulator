@@ -65,6 +65,12 @@ protected:
 	CRoadNet * m_pData;
 	CPositionForecast * m_pForecast;
 	CHostEngine * m_pEngine;
+
+private:
+	int OutRangeCount;
+	ULONGLONG m_timeCost1;
+	ULONGLONG m_timeCost;
+	int nTimes;
 };
 
 

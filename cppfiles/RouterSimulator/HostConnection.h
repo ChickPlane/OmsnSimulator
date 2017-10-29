@@ -1,0 +1,30 @@
+#pragma once
+#include "Host.h"
+#include "MsgCntJudgeReceiverReport.h"
+
+class CHostConnectionEntry
+{
+public:
+	CHostConnectionEntry();
+	CHostConnectionEntry(const CHostConnectionEntry & src);
+	CHostConnectionEntry & operator = (const CHostConnectionEntry & src);
+	CHost * m_pNeighbor;
+	SIM_TIME m_lnLastUpdate;
+	int m_nUpdateTimes;
+};
+
+class CHostConnection
+{
+public:
+	CHostConnection();
+	virtual ~CHostConnection();
+	void Reset(int nRecordCount);
+	int UpdateByJudgeReport(const CMsgCntJudgeReceiverReport * pReport);
+	CArray<CMap<int, int, CHostConnectionEntry, CHostConnectionEntry&>> m_Records;
+
+protected:
+	int UpdateSingleHost(CHost * pHost, const CReceiverReportItem & item, SIM_TIME lnUpdateTime);
+private:
+	SIM_TIME m_lnLastUpdate;
+};
+

@@ -45,6 +45,14 @@ void CHost::OnHearMsg(const CYell * pYell)
 	}
 }
 
+void CHost::OnConnection(const CList<CHostGui> & m_Hosts)
+{
+	if (m_pProtocol)
+	{
+		m_pProtocol->OnEngineConnection(m_Hosts);
+	}
+}
+
 void CHost::OnPackageArrived(const CQueryMission * pMission)
 {
 	m_nReceivedMsgs[pMission->m_nMissionId] = 1;

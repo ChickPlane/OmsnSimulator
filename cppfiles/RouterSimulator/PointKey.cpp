@@ -22,7 +22,14 @@ DWORD CPointKey::GetHashValue(double fX, double fY)
 {
 	unsigned int nX = (fX - m_lefttop.m_X) / m_fInterval + 0.00000000005;
 	unsigned int nY = (fY - m_lefttop.m_Y) / m_fInterval + 0.00000000005;
-	DWORD ret = nY << 16 | nX;
+#if 0
+	DWORD ret = nX ^ nY;
+	ret |= ret << 16;
+	ret ^= ret << 8;
+#else
+	DWORD ret = (nY << 18) | (nX << 4);
+	//ret ^= (ret << 7);
+#endif
 	return ret;
 }
 

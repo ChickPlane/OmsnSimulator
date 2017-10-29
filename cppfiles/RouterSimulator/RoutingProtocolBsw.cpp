@@ -76,6 +76,11 @@ COLORREF CRoutingProtocolBsw::GetInportantLevel() const
 	}
 }
 
+void CRoutingProtocolBsw::OnEngineConnection(const CList<CHostGui> & m_Hosts)
+{
+	GetHelloProcess()->OnSomeoneNearby();
+}
+
 void CRoutingProtocolBsw::OnBuiltConnectWithOthers(CRoutingProcessHello * pCallBy, const CPkgAck * pPkg)
 {
 	CList<CSentence *> sendingList;

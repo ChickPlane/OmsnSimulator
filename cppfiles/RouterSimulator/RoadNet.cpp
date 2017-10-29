@@ -46,9 +46,9 @@ CRoadNet::~CRoadNet()
 
 bool CRoadNet::HasHash(const CDoublePoint & testPoint) const
 {
-	if (testPoint.m_X < m_lefttop.m_X || testPoint.m_X > m_rightbottom.m_X)
+	if (testPoint.m_X < m_lefttop.m_X)
 		return false;
-	if (testPoint.m_Y < m_lefttop.m_Y || testPoint.m_Y > m_rightbottom.m_Y)
+	if (testPoint.m_Y < m_lefttop.m_Y)
 		return false;
 	return true;
 }
@@ -59,7 +59,7 @@ void CRoadNet::Init(const CList<CLineInMap>& lines, double & l, double & r, doub
 	m_lefttop.m_Y = t;
 	m_rightbottom.m_X = r;
 	m_rightbottom.m_Y = b;
-	if (m_PointHash.SetValue(m_lefttop, m_rightbottom, 100) != 100)
+	if (m_PointHash.SetValue(m_lefttop, m_rightbottom, 20) != 20)
 	{
 		ASSERT(false);
 	}

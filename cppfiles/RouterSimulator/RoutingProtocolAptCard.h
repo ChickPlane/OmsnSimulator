@@ -22,6 +22,7 @@ public:
 	virtual void Turn(BOOL bOn);
 	virtual int GetDebugNumber(int nParam);
 	CString GetDebugString() const;
+	virtual void OnEngineConnection(const CList<CHostGui> & m_Hosts);
 
 public:
 	// Hello User

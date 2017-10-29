@@ -5,6 +5,7 @@
 #include "MsgShowInfo.h"
 #include "RoutingProcess.h"
 #include "DoublePoint.h"
+#include "HostGui.h"
 
 class CHost;
 class CHostEngine;
@@ -21,6 +22,7 @@ public:
 
 	virtual void CreateQueryMission(const CQueryMission * pMission) = 0;
 	virtual void OnReceivedMsg(const CYell * pMsg);
+	virtual void OnEngineConnection(const CList<CHostGui> & m_Hosts);
 	virtual void SetEnvironment(CHost * pHost, CHostEngine * pEngine);
 	virtual void OnEngineTimer(int nCommandId);
 	virtual void GetAllCarryingMessages(CMsgShowInfo & allMessages) const;

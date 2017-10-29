@@ -51,9 +51,9 @@ void CRoutingProcessHello::OnReceivePkgFromNetwork(const CSentence * pPkg, CList
 	}
 }
 
-void CRoutingProcessHello::OnEngineTimer(int nCommandId)
+void CRoutingProcessHello::OnSomeoneNearby()
 {
-	ContinueSearching();
+	SendHelloPackage();
 }
 
 void CRoutingProcessHello::StartWork(BOOL bStart)
@@ -66,17 +66,6 @@ void CRoutingProcessHello::StartSearhing()
 	if (m_bIsSearching == FALSE)
 	{
 		m_bIsSearching = TRUE;
-		SendHelloPackage();
-		EngineRegisterTimer(HELLO_TIMER_CMD_SEARCH, this, m_lnSearchInterval);
-	}
-}
-
-void CRoutingProcessHello::ContinueSearching()
-{
-	if (m_bIsSearching)
-	{
-		SendHelloPackage();
-		EngineRegisterTimer(HELLO_TIMER_CMD_SEARCH, this, m_lnSearchInterval);
 	}
 }
 

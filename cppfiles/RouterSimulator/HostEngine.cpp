@@ -30,7 +30,7 @@ CHostEngine::CHostEngine()
 	, m_lnLastForecastSimTime(INT_MIN)
 	, m_lnLastForecastedSimTime(INT_MIN)
 	, m_nMsgId(0)
-	, m_nJudgeMax(8)
+	, m_nJudgeMax(7)
 #ifdef DEBUG
 	, m_bEnableMonitor(FALSE)
 	, m_blimitedSpeed(FALSE)
@@ -103,6 +103,7 @@ void CHostEngine::SetValue(CRoadNet * pRoadNet, CMapGui * pMapGui)
 {
 	m_pRoadNet = pRoadNet;
 	m_pMapGui = pMapGui;
+	m_Connections.Reset(m_pRoadNet->m_allHosts.GetSize());
 }
 
 void CHostEngine::BreakMapGui()
@@ -112,8 +113,6 @@ void CHostEngine::BreakMapGui()
 
 void CHostEngine::TransmitMessage(CRoutingProtocol * pFrom, CRoutingProtocol * pTo, CYell * pMsg)
 {
-	delete pMsg;
-	return;
 	++m_nMsgId;
 	ASSERT(pMsg != NULL);
 	CTransmitionRecord newRecord(pFrom, pTo, pMsg, m_nMsgId);
@@ -185,47 +184,14 @@ void CHostEngine::StartJudgeUnicastProcess(const CTransmitionRecord & transmitio
 
 void CHostEngine::RegisterTimer(int nCommandId, CEngineUser * pUser, SIM_TIME lnLaterMilliseconds)
 {
-	ULONGLONG a = GetTickCount64();
 	RegisterTimer(nCommandId, pUser, lnLaterMilliseconds, FALSE);
-	ULONGLONG b = GetTickCount64();
-// 	SendEventChangeMsg();
-// 	return;
-	BOOL bDoPredict = FALSE;
-	int nDoCount = 0;
-	int nEmptyBlock = 0;
-	if (!pUser)
+	if (pUser)
 	{
-		const CMsgCntJudgeReceiverReport * pValue;
-		nEmptyBlock = m_nBusyJudgeThreadCount;
-		int nAddCount = 0;
-		int nAddMax = m_nJudgeMax - nEmptyBlock;
-		for (int i = 0; i < 7; ++i)
-		{
-// 			if (nAddCount >= nAddMax)
-// 			{
-// 				break;
-// 			}
-// 			++nAddCount;
-			SIM_TIME increase = lnLaterMilliseconds * (i + 1);
-			SIM_TIME tmpTime = GetSimTime() + increase;
-
-			if (PreJudgeAllHosts(tmpTime))
-			{
-				RegisterTimer(nCommandId, NULL, increase, TRUE);
-				bDoPredict = TRUE;
-				++nDoCount;
-			}
-
-		}
+		SIM_TIME increase = lnLaterMilliseconds;
+		SIM_TIME tmpTime = GetSimTime() + increase;
+		PreJudgeAllHosts(tmpTime);
 	}
-	ULONGLONG c = GetTickCount64();
-	if (nEmptyBlock > 1 && bDoPredict)
-	{
-		float ddd = 1.0*(c - b) / 1;
-		CString strOut;
-		strOut.Format(_T("\nD: %d %d %d"), nDoCount, nEmptyBlock, m_lnSimTimeMillisecond);
-		OutputDebugString(strOut);
-	}
+
 	SendEventChangeMsg();
 }
 
@@ -314,25 +280,22 @@ CStatisticSummary & CHostEngine::GetSummary()
 
 void CHostEngine::OnEveryPeriod()
 {
-	SIM_TIME lnCurrentTime = GetSimTime();
-	SendForecastCommand(lnCurrentTime);
+	PeriodForcastAndJudge();
+
+	NotifyConnections();
 #ifdef DEBUG
-	//RefreshUi();
+	ULONGLONG ullRecentTickCount = GetTickCount64();
+	if (ullRecentTickCount - m_ullLastUiTick > 50)
+	{
+		m_ullLastUiTick = ullRecentTickCount;
+		RefreshUi();
+	}
 #endif
+	SIM_TIME lnCurrentTime = GetSimTime();
 	DeleteForecastsBefore(lnCurrentTime);
 
-	SIM_TIME Interval = TIMER_LONG_PERIOD * GetActualSpeed();
-	if (Interval < 200)
-	{
-		Interval = 200;
-	}
-	else if (Interval > 10000)
-	{
-		Interval = 100000;
-	}
- 	Interval = GetPeriodDefaultInterval();
-	Interval = 150;
-	RegisterTimer(0, NULL, Interval);
+	SIM_TIME lnInterval = GetDetectConnectInterval();
+	RegisterTimer(0, NULL, lnInterval);
 }
 
 void CHostEngine::RefreshUi()
@@ -526,9 +489,9 @@ int CHostEngine::CheckEventList()
 	
 	double x = nWaitTimes * 1.0 / nRunTimes;
 
-	if (GetSimTime() > 1000000)
+	if (GetSimTime() > 2000000)
 	{
-		ASSERT(0);
+		//ASSERT(0);
 	}
 	if (m_bPaused)
 	{
@@ -541,6 +504,7 @@ int CHostEngine::CheckEventList()
 	ASSERT(nSizeEvent < 150);
 	if (nUnicast == 0 && nBroadcast == 0)
 	{
+		ASSERT(m_EventList.GetSize() < 2);
 		if (!m_EventList.IsEmpty())
 		{
 			CEngineEvent FirstEvent = m_EventList.GetHead();
@@ -555,6 +519,11 @@ int CHostEngine::CheckEventList()
 				if (!DeletePreFullJudge(m_lnSimTimeMillisecond))
 				{
 					nWaitTimes++;
+					SendEventChangeMsg();
+					return 0;
+				}
+				if (!GetFullJudgeReport(FirstEvent.m_lnSimTime))
+				{
 					SendEventChangeMsg();
 					return 0;
 				}
@@ -622,6 +591,7 @@ void CHostEngine::OnStartEngine(WPARAM wParam, LPARAM lParam)
 	m_bPaused = false;
 	m_bFinishFirstForecast = FALSE;
 	SendForecastCommand(0);
+	m_ullLastUiTick = GetTickCount64();
 	//UINT_PTR ret = SetCommonTimer(TIMER_ID_PERIOD, TIMER_LONG_PERIOD, TRUE);
 }
 
@@ -636,6 +606,7 @@ void CHostEngine::OnResetEngine(WPARAM wParam, LPARAM lParam)
 	m_lnSimTimeTickCountStart = m_lnSimTimeMillisecond;
 	m_lnEventCheckBoundary = GetPeriodDefaultInterval();
 	m_pForecastThread->PostThreadMessage(MSG_ID_POS_FRCST_REMOVEALL, 0, 0);
+	m_Connections.Reset(m_pRoadNet->m_allHosts.GetSize());
 }
 
 void CHostEngine::OnPauseEngine(WPARAM wParam, LPARAM lParam)
@@ -657,12 +628,13 @@ void CHostEngine::OnResumeEngine(WPARAM wParam, LPARAM lParam)
 void CHostEngine::OnFinishedOneForecast(WPARAM wParam, LPARAM lParam)
 {
 	SIM_TIME * pMsg = (SIM_TIME *)wParam;
-	SIM_TIME lnDiffer = GetForecastThreshhold(1);
-	SIM_TIME lnCurrentTime = GetSimTime();
+// 	SIM_TIME lnDiffer = GetForecastThreshhold(1);
+// 	SIM_TIME lnCurrentTime = GetSimTime();
+// 
+// 	SIM_TIME lnNxtForecastSimTime = lnCurrentTime + lnDiffer;
+// 	BOOL bRet = SendForecastCommand(lnNxtForecastSimTime);
 
-	SIM_TIME lnNxtForecastSimTime = lnCurrentTime + lnDiffer;
-	BOOL bRet = SendForecastCommand(lnNxtForecastSimTime);
-
+	m_lnLastForecastedSimTime = *pMsg;
 	delete pMsg;
 	pMsg = NULL;
 	if (m_bFinishFirstForecast == FALSE)
@@ -717,7 +689,7 @@ void CHostEngine::JudgeAllUnicastOk()
 	{
 		CTransmitionRecord head = m_TransmitionUnicast.GetHead();
 		m_TransmitionUnicast.RemoveHead();
-		//head.m_pTo->GetHost()->OnHearMsg(head.m_pMsg);
+		head.m_pTo->GetHost()->OnHearMsg(head.m_pMsg);
 		delete head.m_pMsg;
 	}
 	m_bJudgingUnicast = FALSE;
@@ -753,7 +725,7 @@ void CHostEngine::JudgeAllFullForcast()
 				while (posReport)
 				{
 					CHost * pHost = reportItem.m_Hosts.GetNext(posReport).m_pHost;
-					//pHost->OnHearMsg(rValue.m_pMsg);
+					pHost->OnHearMsg(rValue.m_pMsg);
 				}
 				delete rValue.m_pMsg;
 				m_TransmitionBroadcast.RemoveAt(posLast);
@@ -831,7 +803,7 @@ BOOL CHostEngine::PreJudgeAllHosts(SIM_TIME lnTime)
 BOOL CHostEngine::DeletePreFullJudge(SIM_TIME lnTime)
 {
 	int nRecordLength = m_FullJudgeRecord.GetSize();
-	ASSERT(nRecordLength < 6 * m_nJudgeMax);
+	//ASSERT(nRecordLength < 10 * m_nJudgeMax);
 	const CMsgCntJudgeReceiverReport * pReport = NULL;
 	if (m_FullJudgeRecord.Lookup(lnTime, pReport))
 	{
@@ -871,6 +843,69 @@ void CHostEngine::SendJudgeMsgToThread(CMsgNewSendJudge * pJudgeMsg)
 	pJudge->PostThreadMessage(MSG_ID_JUDGE_NEW_SEND, (WPARAM)pJudgeMsg, 0);
 }
 
+BOOL CHostEngine::NotifyConnections()
+{
+	const CMsgCntJudgeReceiverReport * pMsg = GetFullJudgeReport(GetSimTime());
+	if (!pMsg)
+	{
+		return FALSE;
+	}
+	POSITION pos = pMsg->m_Items.GetStartPosition();
+	while (pos)
+	{
+		CHost * rKey;
+		CReceiverReportItem rValue;
+		pMsg->m_Items.GetNextAssoc(pos, rKey, rValue);
+		if (rValue.m_Hosts.GetSize() > 1)
+		{
+			rKey->OnConnection(rValue.m_Hosts);
+		}
+	}
+	return TRUE;
+}
+
+SIM_TIME CHostEngine::GetDetectConnectInterval()
+{
+	SIM_TIME lnSearchInterval = 1000 * m_fCommunicationRadius / (2 * m_pRoadNet->GetSpeedLimit());
+	return lnSearchInterval;
+}
+
+const CMsgCntJudgeReceiverReport * CHostEngine::GetFullJudgeReport(SIM_TIME lnTime)
+{
+	const CMsgCntJudgeReceiverReport * pMsg = NULL;
+	if (m_FullJudgeRecord.Lookup(lnTime, pMsg))
+	{
+		return pMsg;
+	}
+	else
+	{
+		return NULL;
+	}
+}
+
+void CHostEngine::PreJudgeSeveralPeriods(SIM_TIME lnInterval)
+{
+	SIM_TIME lnCurrent = GetSimTime();
+	for (int i = 0; i <= m_nJudgeMax; ++i)
+	{
+		PreJudgeAllHosts(lnCurrent + i * lnInterval);
+	}
+}
+
+void CHostEngine::PeriodForcastAndJudge()
+{
+	SIM_TIME lnCurrentTime = GetSimTime();
+
+	SIM_TIME lnInterval = GetDetectConnectInterval();
+
+	for (int i = 0; i < 30; ++i)
+	{
+		SendForecastCommand(lnCurrentTime + i * lnInterval);
+	}
+
+	PreJudgeSeveralPeriods(lnInterval);
+}
+
 void CHostEngine::OnJudgeOk(WPARAM wParam, LPARAM lParam)
 {
 	if (!wParam)
@@ -886,6 +921,7 @@ void CHostEngine::OnJudgeOk(WPARAM wParam, LPARAM lParam)
 	CMsgCntJudgeReceiverReport * pMsg = (CMsgCntJudgeReceiverReport*)wParam;
 	if (pMsg)
 	{
+		//m_Connections.UpdateByJudgeReport(pMsg);
 		JudgeAllBroadcast(pMsg);
 		if (!pMsg->m_bFullReport)
 		{
@@ -948,14 +984,17 @@ void CHostEngine::WatchTime(WPARAM wParam, LPARAM lParam)
 void CHostEngine::OnFirstForecastFinished()
 {
 	// TURN ON ALL HOST'S PROTOCOL
-	RegisterTimer(0, NULL, m_lnEventCheckBoundary / 2);
+	PeriodForcastAndJudge();
+
+	SIM_TIME lnInterval = GetDetectConnectInterval();
+	RegisterTimer(0, NULL, lnInterval);
 	int nHostCount = m_pRoadNet->m_allHosts.GetSize();
 	for (int i = 0; i < nHostCount; ++i)
 	{
 		CHost * pHost = m_pRoadNet->m_allHosts.GetAt(i);
 		if (pHost && pHost->m_pProtocol)
 		{
-			//pHost->m_pProtocol->Turn(TRUE);
+			pHost->m_pProtocol->Turn(TRUE);
 		}
 	}
 	m_bFinishFirstForecast = TRUE;

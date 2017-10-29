@@ -6,7 +6,7 @@
 #include "SentenceAptCard.h"
 #include "HostEngine.h"
 
-#define JUST_HELLO
+//#define JUST_HELLO
 
 
 CRoutingProtocolAptCard::CRoutingProtocolAptCard()
@@ -112,6 +112,11 @@ int CRoutingProtocolAptCard::GetDebugNumber(int nParam)
 CString CRoutingProtocolAptCard::GetDebugString() const
 {
 	return GetAptCardProcess()->GetAgencyListString();
+}
+
+void CRoutingProtocolAptCard::OnEngineConnection(const CList<CHostGui> & m_Hosts)
+{
+	GetHelloProcess()->OnSomeoneNearby();
 }
 
 void CRoutingProtocolAptCard::OnBuiltConnectWithOthers(CRoutingProcessHello * pCallBy, const CPkgAck * pPkg)

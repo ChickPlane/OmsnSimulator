@@ -55,6 +55,28 @@ CMsgPosFrcstReport::CMsgPosFrcstReport(const CMsgPosFrcstReport & src)
 }
 
 
+int CMsgPosFrcstReport::FindHost(CHost * pHost, CHostGui & hostGui)
+{
+	POSITION pos = m_Reference.GetStartPosition();
+	while (pos)
+	{
+		int nKey;
+		CHostReference value;
+		m_Reference.GetNextAssoc(pos, nKey, value);
+		POSITION posList = value.m_Hosts.GetHeadPosition();
+		while (posList)
+		{
+			if (value.m_Hosts.GetAt(posList).m_pHost == pHost)
+			{
+				hostGui = value.m_Hosts.GetAt(posList);
+				return nKey;
+			}
+			value.m_Hosts.GetNext(posList);
+		}
+	}
+	return -1;
+}
+
 CMsgPosFrcstReport & CMsgPosFrcstReport::operator=(const CMsgPosFrcstReport & src)
 {
 	m_lnSimTime = src.m_lnSimTime;
@@ -267,7 +289,7 @@ void CPositionForecast::DeleteRecords(SIM_TIME lnSimTimeBefore)
 {
 	LockReports();
 	int nsize = m_Reports.GetSize();
-	ASSERT(nsize < 30);
+	//ASSERT(nsize < 30);
 	POSITION pos = m_Reports.GetHeadPosition(), posLast;
 	CMsgPosFrcstReport * pNext = NULL;
 	CMsgPosFrcstReport * pToBeDelete = NULL;
@@ -284,7 +306,7 @@ void CPositionForecast::DeleteRecords(SIM_TIME lnSimTimeBefore)
 		{
 			if (IsOccupied(posLast))
 			{
-				continue;
+				break;
 			}
 			delete pToBeDelete;
 			m_Reports.RemoveAt(posLast);
@@ -301,6 +323,7 @@ void CPositionForecast::DoNewForecast(SIM_TIME lnSimTime)
 {
 	CMsgPosFrcstReport * pNewReport = new CMsgPosFrcstReport();
 	pNewReport->m_lnSimTime = lnSimTime;
+	pNewReport->m_Reference.InitHashTable(157);
 	CHostGui newHostPosition;
 
 	for (int i = 0; i < m_pData->m_allHosts.GetSize(); ++i)

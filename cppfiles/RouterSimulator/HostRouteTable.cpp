@@ -120,6 +120,8 @@ CDoublePoint CHostRouteTable::GetPosition(SIM_TIME lnSimTime) const
 	{
 		double fTimeDiffer = m_Entries[nTo].m_lnSimTime - m_Entries[nFrom].m_lnSimTime;
 		double fRate = (lnSimTime - m_Entries[nFrom].m_lnSimTime) / fTimeDiffer;
+		CDoublePoint posFrom = m_Entries[nFrom].m_Position;
+		CDoublePoint posTo = m_Entries[nTo].m_Position;
 		CDoublePoint ret;
 		ret.m_X = m_Entries[nFrom].m_Position.m_X + (m_Entries[nTo].m_Position.m_X - m_Entries[nFrom].m_Position.m_X) * fRate;
 		ret.m_Y = m_Entries[nFrom].m_Position.m_Y + (m_Entries[nTo].m_Position.m_Y - m_Entries[nFrom].m_Position.m_Y) * fRate;

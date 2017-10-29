@@ -50,6 +50,11 @@ void CRoutingProtocol::OnReceivedMsg(const CYell * pMsg)
 	}
 }
 
+void CRoutingProtocol::OnEngineConnection(const CList<CHostGui> & m_Hosts)
+{
+
+}
+
 void CRoutingProtocol::SetEnvironment(CHost * pHost, CHostEngine * pEngine)
 {
 	m_pHost = pHost;
