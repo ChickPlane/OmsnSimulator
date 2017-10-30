@@ -206,7 +206,7 @@ void CRouterSimulatorView::InitHostProtocol(const CSimulatorCfg & Cfg)
 		summary.m_pComments = new char[200];
 		strcpy_s(summary.m_pComments, 199, "Improve_Mark");
 		pMainFrame->WriteLog(_T("APTCARD"));
-		CRoutingProtocolAptCard::SetStaticParameters(lnSearchInterval, Cfg.m_nK, 3, fHigh, 3 * Cfg.m_nTimeOutSecond * 1000);
+		CRoutingProtocolAptCard::SetStaticParameters(Cfg.m_nK, 3, fHigh, 3 * Cfg.m_nTimeOutSecond * 1000);
 		for (int i = 0; i < nLength; ++i)
 		{
 			CMobileSocialNetworkHost * pHost = (CMobileSocialNetworkHost *)pDoc->m_pRoadNet->m_allHosts[i];

@@ -55,7 +55,7 @@ void CRoutingProtocolBsw::Turn(BOOL bOn)
 	GetHelloProcess()->StartWork(TRUE);
 }
 
-COLORREF CRoutingProtocolBsw::GetInportantLevel() const
+COLORREF CRoutingProtocolBsw::GetImportantLevel() const
 {
 	int nQ = GetQueryProcess()->GetDataMapSize();
 	int nR = GetReplyProcess()->GetDataMapSize();
@@ -78,7 +78,7 @@ COLORREF CRoutingProtocolBsw::GetInportantLevel() const
 
 void CRoutingProtocolBsw::OnEngineConnection(const CList<CHostGui> & m_Hosts)
 {
-	GetHelloProcess()->OnSomeoneNearby();
+	GetHelloProcess()->OnSomeoneNearby(m_Hosts);
 }
 
 void CRoutingProtocolBsw::OnBuiltConnectWithOthers(CRoutingProcessHello * pCallBy, const CPkgAck * pPkg)

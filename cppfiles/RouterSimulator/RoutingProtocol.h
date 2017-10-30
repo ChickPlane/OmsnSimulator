@@ -34,7 +34,7 @@ public:
 	virtual void SetCommunicateRadius(double fCommunicationRadius);
 	virtual double GetCommunicateRadius() const;
 
-	virtual COLORREF GetInportantLevel() const { return 0; }
+	virtual COLORREF GetImportantLevel() const { return 0; }
 
 	CHost * GetHost() const;
 	int GetHostId() const;

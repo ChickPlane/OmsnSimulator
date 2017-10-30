@@ -51,8 +51,13 @@ void CRoutingProcessHello::OnReceivePkgFromNetwork(const CSentence * pPkg, CList
 	}
 }
 
-void CRoutingProcessHello::OnSomeoneNearby()
+void CRoutingProcessHello::OnSomeoneNearby(const CList<CHostGui> & m_Hosts)
 {
+	if (!IsDifferentList(m_Hosts))
+	{
+		return;
+	}
+	UpdateEncounterMap(m_Hosts);
 	SendHelloPackage();
 }
 
@@ -85,7 +90,47 @@ void CRoutingProcessHello::SendHelloPackage()
 	}
 }
 
-SIM_TIME CRoutingProcessHello::m_lnSearchInterval = 1000;
+BOOL CRoutingProcessHello::IsDifferentList(const CList<CHostGui> & m_Hosts)
+{
+	if (m_Hosts.GetSize() > m_HostEncounterMap.GetSize())
+	{
+		FALSE;
+	}
+	SIM_TIME lnCurrentTime = GetSimTime();
+	POSITION pos = m_Hosts.GetHeadPosition();
+	while (pos)
+	{
+		CHost * pHost = m_Hosts.GetNext(pos).m_pHost;
+		SIM_TIME lnEncounterTime;
+		if (!m_HostEncounterMap.Lookup(pHost, lnEncounterTime))
+		{
+			return TRUE;
+		}
+		else
+		{
+			if (lnCurrentTime - lnEncounterTime > m_lnSearchInterval)
+			{
+				return TRUE;
+			}
+		}
+	}
+	return FALSE;
+}
+
+BOOL CRoutingProcessHello::UpdateEncounterMap(const CList<CHostGui> & m_Hosts)
+{
+	m_HostEncounterMap.RemoveAll();
+	SIM_TIME lnCurrentTime = GetSimTime();
+	POSITION pos = m_Hosts.GetHeadPosition();
+	while (pos)
+	{
+		CHost * pHost = m_Hosts.GetNext(pos).m_pHost;
+		m_HostEncounterMap[pHost] = lnCurrentTime;
+	}
+	return FALSE;
+}
+
+SIM_TIME CRoutingProcessHello::m_lnSearchInterval = 10000;
 
 void CRoutingProcessHelloUser::OnHearHelloFromOthers(CRoutingProcessHello * pCallBy, const CPkgHello * pPkg)
 {

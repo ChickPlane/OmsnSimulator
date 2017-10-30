@@ -358,11 +358,11 @@ void CMapGui::DrawHosts(CDC * pMemDC)
 			continue;
 		GeographicToGraphicPoint(hostPosition, pointCenter);
 		CRoutingProtocol * pProtocol = m_pHostNeedUpdate->GetAt(i).m_pHost->m_pProtocol;
-		if (pProtocol->GetInportantLevel() > 1)
+		if (pProtocol->GetImportantLevel() > 1)
 		{
 			pMemDC->SelectObject(&penInfo);
 		}
-		else if(pProtocol->GetInportantLevel() > 0)
+		else if(pProtocol->GetImportantLevel() > 0)
 		{
 			pMemDC->SelectObject(&penCarry);
 		}
@@ -440,7 +440,7 @@ void CMapGui::DrawHosts_AptCard(CDC * pMemDC)
 		CPen * pSwitchPen = NULL;
 		if (nRoadWidth > 2)
 		{
-			pSwitchPen = new CPen(PS_SOLID, nRoadWidth, pProtocol->GetInportantLevel());
+			pSwitchPen = new CPen(PS_SOLID, nRoadWidth, pProtocol->GetImportantLevel());
 			pMemDC->SelectObject(pSwitchPen);
 		}
 		pMemDC->Ellipse(pointCenter.x - nRadius, pointCenter.y - nRadius, pointCenter.x + nRadius, pointCenter.y + nRadius);

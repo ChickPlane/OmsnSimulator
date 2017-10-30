@@ -44,11 +44,10 @@ void CRoutingProtocolAptCard::CreateQueryMission(const CQueryMission * pMission)
 	}
 }
 
-void CRoutingProtocolAptCard::SetStaticParameters(SIM_TIME lnSearchIntervalMS, int nK, int nSeg, double fTrust, SIM_TIME lnAcTimeout)
+void CRoutingProtocolAptCard::SetStaticParameters(int nK, int nSeg, double fTrust, SIM_TIME lnAcTimeout)
 {
 	gm_fTrust = fTrust;
 	CRoutingProcessAptCard::SetParameters(nK, nSeg, lnAcTimeout);
-	CRoutingProcessHello::SetInterval(lnSearchIntervalMS);
 }
 
 void CRoutingProtocolAptCard::SetLocalParameters(int nBswCopyCount)
@@ -57,7 +56,7 @@ void CRoutingProtocolAptCard::SetLocalParameters(int nBswCopyCount)
 	GetReplyProcess()->SetCopyCount(nBswCopyCount);
 }
 
-COLORREF CRoutingProtocolAptCard::GetInportantLevel() const
+COLORREF CRoutingProtocolAptCard::GetImportantLevel() const
 {
 	if (GetAptCardProcess()->GetTrustListSize() == 0)
 	{
@@ -116,7 +115,7 @@ CString CRoutingProtocolAptCard::GetDebugString() const
 
 void CRoutingProtocolAptCard::OnEngineConnection(const CList<CHostGui> & m_Hosts)
 {
-	GetHelloProcess()->OnSomeoneNearby();
+	GetHelloProcess()->OnSomeoneNearby(m_Hosts);
 }
 
 void CRoutingProtocolAptCard::OnBuiltConnectWithOthers(CRoutingProcessHello * pCallBy, const CPkgAck * pPkg)
