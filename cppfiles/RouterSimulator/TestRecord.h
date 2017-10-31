@@ -8,5 +8,6 @@ public:
 	virtual ~CTestRecord();
 
 	int m_nSessionId;
+	int m_nForwardTimes;
 };
 

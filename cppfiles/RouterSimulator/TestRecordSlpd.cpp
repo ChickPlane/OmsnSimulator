@@ -8,7 +8,6 @@ CTestRecordSlpd::CTestRecordSlpd()
 	{
 		m_lnTimes[i] = -1;
 	}
-	m_nForwardTimes = 0;
 }
 
 

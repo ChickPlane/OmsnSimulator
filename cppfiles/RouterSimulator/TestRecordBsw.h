@@ -11,6 +11,11 @@ enum {
 	REC_ST_MAX
 };
 
+enum {
+	SUM_BSW_TOTAL_FORWARD,
+	SUM_BSW_MAX
+};
+
 class CTestRecordBsw :
 	public CTestRecord
 {

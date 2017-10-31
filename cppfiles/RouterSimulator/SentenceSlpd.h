@@ -29,6 +29,7 @@ public:
 	virtual ~CPkgSlpd();
 
 	virtual SLPD_USERID GetOriginalRequester() const;
+	virtual BOOL IsAlreadyInFriendList(SLPD_USERID uId) const;
 
 	SLPD_USERID m_nPseudonym;
 	int m_nRemainTimes;

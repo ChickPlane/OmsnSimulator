@@ -11,6 +11,11 @@ enum {
 	REC_AC_ST_MAX
 };
 
+enum {
+	SUM_AC_TOTAL_FORWARD,
+	SUM_AC_MAX,
+};
+
 class CTestRecordAptCard :
 	public CTestRecord
 {

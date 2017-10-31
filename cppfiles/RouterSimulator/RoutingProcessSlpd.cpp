@@ -55,6 +55,10 @@ void CRoutingProcessSlpd::OnEncounterUser(CRoutingProtocol * pTheOther, CList<CS
 	{
 		posLast = pos;
 		CPkgSlpd * pPkg = m_ForwardingList.GetNext(pos).m_Value;
+		if (pPkg->IsAlreadyInFriendList(pTheOther->GetHostId()))
+		{
+			continue;
+		}
 		if (pPkg->m_nRemainTimes == m_nK)
 		{
 			m_pUser->OnFirstSlpdObfuscationForward(this, pPkg);

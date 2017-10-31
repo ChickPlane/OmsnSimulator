@@ -113,6 +113,7 @@ void CRoutingProtocolBsw::OnBswPkgReachDestination(CRoutingProcessBsw * pCallBy,
 // 		WriteLog(strLog);
 
 		SetMissionRecord(pPkg->m_pTestSession->m_nSessionId, REC_ST_REACH);
+		SetMissionForwardNumber(pPkg->m_pTestSession->m_nSessionId, pPkg->m_pTestSession->m_nForwardNumber);
 
 		if (!gm_bEnableLbsp)
 		{
@@ -204,15 +205,26 @@ BOOL CRoutingProtocolBsw::SetMissionRecord(int nSessionId, int nEventId)
 
 CMap<int, int, CTestRecordBsw *, CTestRecordBsw *> CRoutingProtocolBsw::gm_allSessions;
 
+void CRoutingProtocolBsw::SetMissionForwardNumber(int nSessionId, int nForwardNumber)
+{
+	CTestRecordBsw * pRecord = NULL;
+	gm_allSessions.Lookup(nSessionId, pRecord);
+	if (pRecord)
+	{
+		pRecord->m_nForwardTimes = nForwardNumber;
+		UpdateSummary();
+	}
+}
+
 void CRoutingProtocolBsw::UpdateSummary()
 {
 	CStatisticSummary & summary = GetEngine()->GetSummary();
-	if (summary.m_RecentData.m_ProtocolRecords.GetSize() != REC_ST_MAX)
+	if (summary.m_RecentData.m_ProtocolRecords.GetSize() != REC_ST_MAX + SUM_BSW_MAX)
 	{
-		summary.m_RecentData.m_ProtocolRecords.SetSize(REC_ST_MAX);
+		summary.m_RecentData.m_ProtocolRecords.SetSize(REC_ST_MAX + SUM_BSW_MAX);
 	}
 
-	for (int i = 0; i < REC_ST_MAX; ++i)
+	for (int i = 0; i < REC_ST_MAX + SUM_BSW_MAX; ++i)
 	{
 		summary.m_RecentData.m_ProtocolRecords[i] = 0;
 	}
@@ -223,13 +235,22 @@ void CRoutingProtocolBsw::UpdateSummary()
 		CTestRecordBsw * pRecord = NULL;
 		int nId = 0;
 		gm_allSessions.GetNextAssoc(pos, nId, pRecord);
-		for (int i = 0; i < REC_ST_MAX; ++i)
+		int i = 0;
+		for (i = 0; i < REC_ST_MAX; ++i)
 		{
 			if (pRecord->m_lnTimes[i] >= 0)
 			{
 				summary.m_RecentData.m_ProtocolRecords[i]++;
 			}
 		}
+		summary.m_RecentData.m_ProtocolRecords[i] += pRecord->m_nForwardTimes;
 	}
+
+	int nReachNumber = summary.m_RecentData.m_ProtocolRecords[REC_ST_REACH];
+	if (nReachNumber > 0)
+	{
+		summary.m_RecentData.m_ProtocolRecords[REC_ST_MAX + SUM_BSW_TOTAL_FORWARD] /= nReachNumber;
+	}
+
 	GetEngine()->ChangeSummary();
 }

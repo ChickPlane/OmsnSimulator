@@ -63,6 +63,7 @@ private:
 
 	virtual CPkgAptCardReply * SwitchToNextAgency(const CPkgAptCardReply * pReply);
 	BOOL SetMissionRecord(int nSessionId, int nEventId);
+	void SetMissionForwardNumber(int nSessionId, int nForwardNumber);
 	void UpdateSummary();
 	void SendQueries(CRoutingProtocol * pTheOther);
 

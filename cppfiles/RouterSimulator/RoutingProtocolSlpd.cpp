@@ -353,7 +353,6 @@ void CRoutingProtocolSlpd::UpdateSummary()
 				summary.m_RecentData.m_ProtocolRecords[i]++;
 			}
 		}
-		ASSERT(pRecord->m_nForwardTimes == 0 || pRecord->m_nForwardTimes > 3);
 		summary.m_RecentData.m_ProtocolRecords[i] += pRecord->m_nForwardTimes;
 	}
 	int nReachNumber = summary.m_RecentData.m_ProtocolRecords[REC_SLPD_ST_REACH];

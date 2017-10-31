@@ -38,6 +38,19 @@ SLPD_USERID CPkgSlpd::GetOriginalRequester() const
 	return m_FriendList.GetHead();
 }
 
+BOOL CPkgSlpd::IsAlreadyInFriendList(SLPD_USERID uId) const
+{
+	POSITION pos = m_FriendList.GetTailPosition();
+	while (pos)
+	{
+		if (m_FriendList.GetPrev(pos) == uId)
+		{
+			return TRUE;
+		}
+	}
+	return FALSE;
+}
+
 CPkgSlpdAck::CPkgSlpdAck()
 	: m_pIDs(NULL)
 	, m_nIDNumber(0)

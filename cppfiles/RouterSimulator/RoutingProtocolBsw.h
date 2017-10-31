@@ -35,6 +35,7 @@ protected:
 
 public:
 	static CMap<int, int, CTestRecordBsw *, CTestRecordBsw *> gm_allSessions;
+	void SetMissionForwardNumber(int nSessionId, int nForwardNumber);
 	void UpdateSummary();
 
 private:

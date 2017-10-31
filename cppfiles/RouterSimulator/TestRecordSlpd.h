@@ -25,6 +25,5 @@ public:
 	virtual ~CTestRecordSlpd();
 
 	SIM_TIME m_lnTimes[REC_SLPD_ST_MAX];
-	int m_nForwardTimes;
 };
 
