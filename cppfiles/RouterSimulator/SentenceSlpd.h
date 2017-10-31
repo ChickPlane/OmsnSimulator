@@ -28,10 +28,8 @@ public:
 	CPkgSlpd & operator = (const CPkgSlpd & src);
 	virtual ~CPkgSlpd();
 
-	virtual CTestSession * DeepCopySession() const;
 	virtual SLPD_USERID GetOriginalRequester() const;
 
-	CTestSession * m_pSession;
 	SLPD_USERID m_nPseudonym;
 	int m_nRemainTimes;
 	SIM_TIME m_lnTimeout;

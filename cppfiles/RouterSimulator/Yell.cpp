@@ -100,7 +100,7 @@ void CYell::Clean()
 	}
 }
 
-BOOL CYell::ContainData() const
+BOOL CYell::IsStatisticsRequired() const
 {
 	for (int i = 0; i < m_nSentenceCount; ++i)
 	{
@@ -110,4 +110,22 @@ BOOL CYell::ContainData() const
 		}
 	}
 	return FALSE;
+}
+
+int CYell::IncreaseForwardNumbers()
+{
+	int nRet = 0;
+	for (int i = 0; i < m_nSentenceCount; ++i)
+	{
+		if (m_ppSentences[i]->m_bInStatistic)
+		{
+			nRet++;
+			CTestSession * pTestSession = m_ppSentences[i]->m_pTestSession;
+			if (pTestSession)
+			{
+				pTestSession->m_nForwardNumber++;
+			}
+		}
+	}
+	return nRet;
 }

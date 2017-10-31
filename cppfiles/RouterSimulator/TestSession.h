@@ -13,5 +13,6 @@ public:
 
 	int m_nSessionId;
 	SIM_TIME m_lnTimeOut;
+	int m_nForwardNumber;
 };
 

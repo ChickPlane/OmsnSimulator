@@ -7,7 +7,6 @@
 CPkgBswData::CPkgBswData()
 	: m_nCopyCount(0)
 	, m_uReceiverId(UID_LBSP0)
-	, m_pTestSession(NULL)
 {
 	m_nSentenceType = BSW_MSG_TYPE_DATA;
 	ChangeId();
@@ -60,7 +59,7 @@ CTestSessionBsw * CPkgBswData::DeepCopySession() const
 {
 	if (m_pTestSession)
 	{
-		return new CTestSessionBsw(*m_pTestSession);
+		return new CTestSessionBsw(*(CTestSessionBsw*)m_pTestSession);
 	}
 	else
 	{

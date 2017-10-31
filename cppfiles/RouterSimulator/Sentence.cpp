@@ -8,6 +8,7 @@ CSentence::CSentence()
 	, m_pSpeakTo(NULL)
 	, m_nProcessID(-1)
 	, m_bInStatistic(TRUE)
+	, m_pTestSession(NULL)
 {
 }
 
@@ -23,9 +24,22 @@ CSentence & CSentence::operator=(const CSentence & src)
 	m_pSender = src.m_pSender;
 	m_pSpeakTo = src.m_pSpeakTo;
 	m_nProcessID = src.m_nProcessID;
+	m_pTestSession = src.DeepCopySession();
 	return *this;
 }
 
 CSentence::~CSentence()
 {
+}
+
+CTestSession * CSentence::DeepCopySession() const
+{
+	if (m_pTestSession)
+	{
+		return new CTestSession(*m_pTestSession);
+	}
+	else
+	{
+		return NULL;
+	}
 }

@@ -5,9 +5,7 @@ class CTestSessionBsw :
 	public CTestSession
 {
 public:
-	CTestSessionBsw();
-	CTestSessionBsw(const CTestSessionBsw & src);
-	virtual CTestSessionBsw & operator = (const CTestSessionBsw & src);
-	virtual ~CTestSessionBsw();
+	CTestSessionBsw() {}
+	CTestSessionBsw(const CTestSessionBsw & src) : CTestSession(src) {}
 };
 

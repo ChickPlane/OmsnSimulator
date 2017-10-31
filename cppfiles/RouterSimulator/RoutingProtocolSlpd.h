@@ -45,6 +45,7 @@ public:
 protected:
 	virtual CPkgSlpdReply * ForwardToOriginal(const CPkgSlpdReply * pReply);
 	BOOL SetMissionRecord(int nSessionId, int nEventId);
+	void SetMissionForwardNumber(int nSessionId, int nForwardNumber);
 	void UpdateSummary();
 
 	static CPkgSlpdReply * LbsPrepareReply(const CPkgBswData * pQuery);

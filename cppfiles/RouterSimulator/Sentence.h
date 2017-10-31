@@ -1,4 +1,5 @@
 #pragma once
+#include "TestSession.h"
 
 typedef enum
 {
@@ -18,10 +19,14 @@ public:
 	CSentence(const CSentence & src);
 	virtual CSentence & operator=(const CSentence & src);
 	virtual ~CSentence();
+
+	virtual CTestSession * DeepCopySession() const;
+
 	int m_nProcessID;
 	int m_nSentenceType;
 	CRoutingProtocol * m_pSender;
 	CRoutingProtocol * m_pSpeakTo;
+	CTestSession * m_pTestSession;
 
 	BOOL m_bInStatistic;
 };

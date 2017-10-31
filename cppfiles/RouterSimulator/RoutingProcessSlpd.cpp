@@ -70,7 +70,7 @@ void CRoutingProcessSlpd::CreateQueryMission(CPkgSlpd * pPkg)
 {
 	pPkg->m_FriendList.RemoveAll();
 	pPkg->m_FriendList.AddHead(m_pProtocol->GetHostId());
-	pPkg->m_lnTimeout = pPkg->m_pSession->m_lnTimeOut;
+	pPkg->m_lnTimeout = pPkg->m_pTestSession->m_lnTimeOut;
 	pPkg->m_nPseudonym = ++gm_PseudonymMax;
 	pPkg->m_nRemainTimes = m_nK+1;
 	OnReceiveNewPseudoPkg(pPkg);
@@ -109,27 +109,32 @@ void CRoutingProcessSlpd::OnReceiveNewPseudoPkg(const CPkgSlpd * pPkg)
 		return;
 	}
 
-	if (pPkg->m_nRemainTimes == 1)
+	CString strLog;
+	strLog.Format(_T("[slpd] %d %d %d"), pPkg->m_pTestSession->m_nSessionId, m_pProtocol->GetHostId(), pPkg->m_nRemainTimes);
+	WriteLog(strLog);
+
+	CTimeOutPair<CSlpdUserAndPseudo> pairUserId;
+	pairUserId.m_lnTimeOut = pPkg->m_lnTimeout;
+	pairUserId.m_Value.m_lnPseudonym = pPkg->m_nPseudonym;
+	pairUserId.m_Value.m_lnUserId = pPkg->GetOriginalRequester();
+	CTimeOutPair<CSlpdUserAndPseudo>::InsertToTimeoutPairList(pairUserId, m_PseudonymList);
+
+	if (pPkg->m_nRemainTimes == 0)
 	{
 		m_pUser->OnNewSlpdPseudoOver(this, pPkg);
 	}
-	else
+	else if(pPkg->m_nRemainTimes > 0)
 	{
 		m_pUser->OnNewSlpdPseudo(this, pPkg);
+
+		CPkgSlpd * pNewPkg = m_pUser->GetSlpdDataCopy(this, pPkg);
+		--pNewPkg->m_nRemainTimes;
+
+		CTimeOutPair<CPkgSlpd *> pairPkg;
+		pairPkg.m_lnTimeOut = pNewPkg->m_lnTimeout;
+		pairPkg.m_Value = pNewPkg;
+		CTimeOutPair<CPkgSlpd *>::InsertToTimeoutPairList(pairPkg, m_ForwardingList);
 	}
-	CPkgSlpd * pNewPkg = m_pUser->GetSlpdDataCopy(this, pPkg);
-	--pNewPkg->m_nRemainTimes;
-
-	CTimeOutPair<CSlpdUserAndPseudo> pairUserId;
-	pairUserId.m_lnTimeOut = pNewPkg->m_lnTimeout;
-	pairUserId.m_Value.m_lnPseudonym = pNewPkg->m_nPseudonym;
-	pairUserId.m_Value.m_lnUserId = pNewPkg->GetOriginalRequester();
-	CTimeOutPair<CSlpdUserAndPseudo>::InsertToTimeoutPairList(pairUserId, m_PseudonymList);
-
-	CTimeOutPair<CPkgSlpd *> pairPkg;
-	pairPkg.m_lnTimeOut = pNewPkg->m_lnTimeout;
-	pairPkg.m_Value = pNewPkg;
-	CTimeOutPair<CPkgSlpd *>::InsertToTimeoutPairList(pairPkg, m_ForwardingList);
 }
 
 int CRoutingProcessSlpd::gm_PseudonymMax = 0;

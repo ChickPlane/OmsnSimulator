@@ -5,4 +5,7 @@
 class CTestSessionAptCard :
 	public CTestSessionBsw
 {
+public:
+	CTestSessionAptCard() {}
+	CTestSessionAptCard(const CTestSessionAptCard & src) : CTestSessionBsw(src) {}
 };

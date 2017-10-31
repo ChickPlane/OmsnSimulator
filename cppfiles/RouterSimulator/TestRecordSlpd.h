@@ -12,6 +12,11 @@ enum {
 	REC_SLPD_ST_MAX
 };
 
+enum {
+	SUM_SLPD_ST_FORWARD,
+	SUM_SLPD_MAX
+};
+
 class CTestRecordSlpd :
 	public CTestRecord
 {
@@ -20,5 +25,6 @@ public:
 	virtual ~CTestRecordSlpd();
 
 	SIM_TIME m_lnTimes[REC_SLPD_ST_MAX];
+	int m_nForwardTimes;
 };
 

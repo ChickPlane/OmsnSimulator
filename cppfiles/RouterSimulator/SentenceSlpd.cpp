@@ -3,7 +3,6 @@
 
 
 CPkgSlpd::CPkgSlpd()
-	: m_pSession(NULL)
 {
 	m_nSentenceType = SLPD_SENTENCE_TYPE_DATA;
 }
@@ -17,12 +16,7 @@ CPkgSlpd::CPkgSlpd(const CPkgSlpd & src)
 CPkgSlpd & CPkgSlpd::operator=(const CPkgSlpd & src)
 {
 	CSentence::operator=(src);
-	if (m_pSession)
-	{
-		delete m_pSession;
-	}
 	m_nPseudonym = src.m_nPseudonym;
-	m_pSession = src.DeepCopySession();
 	m_nRemainTimes = src.m_nRemainTimes;
 	m_lnTimeout = src.m_lnTimeout;
 	m_FriendList.RemoveAll();
@@ -37,23 +31,6 @@ CPkgSlpd & CPkgSlpd::operator=(const CPkgSlpd & src)
 
 CPkgSlpd::~CPkgSlpd()
 {
-	if (m_pSession)
-	{
-		delete m_pSession;
-		m_pSession = NULL;
-	}
-}
-
-CTestSession * CPkgSlpd::DeepCopySession() const
-{
-	if (m_pSession)
-	{
-		return new CTestSession(*m_pSession);
-	}
-	else
-	{
-		return NULL;
-	}
 }
 
 SLPD_USERID CPkgSlpd::GetOriginalRequester() const

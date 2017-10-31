@@ -5,6 +5,7 @@
 CTestSession::CTestSession()
 	: m_nSessionId(0)
 	, m_lnTimeOut(0)
+	, m_nForwardNumber(0)
 {
 }
 
@@ -18,6 +19,7 @@ CTestSession & CTestSession::operator=(const CTestSession & src)
 {
 	m_nSessionId = src.m_nSessionId;
 	m_lnTimeOut = src.m_lnTimeOut;
+	m_nForwardNumber = src.m_nForwardNumber;
 	return *this;
 }
 

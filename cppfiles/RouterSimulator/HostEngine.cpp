@@ -113,7 +113,7 @@ void CHostEngine::BreakMapGui()
 
 void CHostEngine::TransmitMessage(CRoutingProtocol * pFrom, CRoutingProtocol * pTo, CYell * pMsg)
 {
-	if (m_Summary.IsWorking() && pMsg->ContainData())
+	if (m_Summary.IsWorking() && pMsg->IncreaseForwardNumbers() > 0)
 	{
 		m_Summary.m_RecentData.m_EngineRecords[SS_TOTLE_YELL] += 1;
 	}

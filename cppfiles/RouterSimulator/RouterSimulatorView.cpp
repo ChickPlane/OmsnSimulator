@@ -193,7 +193,7 @@ void CRouterSimulatorView::DestroyEngine()
 
 void CRouterSimulatorView::InitHostProtocol(const CSimulatorCfg & Cfg)
 {
-	CRoutingProtocol::gm_bEnableLbsp = TRUE;
+	CRoutingProtocol::gm_bEnableLbsp = FALSE;
 
 	double fHigh = Cfg.m_fPrivacyHigh / 100.0;
 	double fLow = Cfg.m_fPrivacyLow / 100.0;

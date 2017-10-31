@@ -30,7 +30,6 @@ public:
 
 	CList<const CRoutingProtocol *> m_KnownNodes;
 	int m_nBswId;
-	CTestSessionBsw * m_pTestSession;
 	BOOL m_bLastHop;
 	SIM_TIME m_lnTimeOut;
 	int m_nCopyCount;
