@@ -1,5 +1,22 @@
 #pragma once
 #include "SimulatorCommon.h"
+
+enum
+{
+	SS_TOTLE_YELL = 0,
+	SS_ENGINE_MAX
+};
+
+class CStatisticSummaryTag
+{
+public:
+	CArray<double> m_ProtocolRecords;
+	CArray<double> m_EngineRecords;
+	CStatisticSummaryTag();
+	CStatisticSummaryTag(const CStatisticSummaryTag & src) { *this = src; }
+	CStatisticSummaryTag & operator=(const CStatisticSummaryTag & src);
+};
+
 class CStatisticSummary
 {
 public:
@@ -11,11 +28,11 @@ public:
 	void StartTest(SIM_TIME lnStartTime, SIM_TIME lnTestEndTime, SIM_TIME Interval);
 	void AddTag(SIM_TIME lnStartTime);
 	void OutputResult();
+	BOOL IsWorking() const { return !m_bEnd; }
 
-	CArray<double> m_RealData;
-	CArray<CString> m_StringData;
+	CStatisticSummaryTag m_RecentData;
 
-	CArray<CArray<double>> m_Tags;
+	CArray<CStatisticSummaryTag> m_Tags;
 	CString m_ProtocolName;
 	int m_nRandomSeed;
 	double m_fCommuRadius;
@@ -28,7 +45,8 @@ private:
 	SIM_TIME m_Interval;
 	SIM_TIME m_lnTestEndTime;
 	int m_nTagIndex;
-	int m_nMaxSize;
+	int m_nMaxProtocolSize;
+	int m_nMaxEngineSize;
 	BOOL m_bEnd;
 };
 

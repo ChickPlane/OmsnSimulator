@@ -113,6 +113,12 @@ void CRoutingProtocolBsw::OnBswPkgReachDestination(CRoutingProcessBsw * pCallBy,
 // 		WriteLog(strLog);
 
 		SetMissionRecord(pPkg->m_pTestSession->m_nSessionId, REC_ST_REACH);
+
+		if (!gm_bEnableLbsp)
+		{
+			return;
+		}
+
 		SetMissionRecord(pPkg->m_pTestSession->m_nSessionId, REC_ST_REP_LEAVE);
 
 		CPkgBswData * pNewReply = new CPkgBswData();
@@ -201,14 +207,14 @@ CMap<int, int, CTestRecordBsw *, CTestRecordBsw *> CRoutingProtocolBsw::gm_allSe
 void CRoutingProtocolBsw::UpdateSummary()
 {
 	CStatisticSummary & summary = GetEngine()->GetSummary();
-	if (summary.m_RealData.GetSize() != REC_ST_MAX)
+	if (summary.m_RecentData.m_ProtocolRecords.GetSize() != REC_ST_MAX)
 	{
-		summary.m_RealData.SetSize(REC_ST_MAX);
+		summary.m_RecentData.m_ProtocolRecords.SetSize(REC_ST_MAX);
 	}
 
 	for (int i = 0; i < REC_ST_MAX; ++i)
 	{
-		summary.m_RealData[i] = 0;
+		summary.m_RecentData.m_ProtocolRecords[i] = 0;
 	}
 
 	POSITION pos = gm_allSessions.GetStartPosition();
@@ -221,9 +227,9 @@ void CRoutingProtocolBsw::UpdateSummary()
 		{
 			if (pRecord->m_lnTimes[i] >= 0)
 			{
-				summary.m_RealData[i]++;
+				summary.m_RecentData.m_ProtocolRecords[i]++;
 			}
 		}
 	}
-	GetEngine()->ChangeSummary(summary);
+	GetEngine()->ChangeSummary();
 }

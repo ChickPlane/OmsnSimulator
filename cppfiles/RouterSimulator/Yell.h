@@ -13,6 +13,7 @@ public:
 	void SetSentenceLength(int nLength);
 	CRoutingProtocol * SetSentences(CList<CSentence*> & Sentences);
 	void Clean();
+	BOOL ContainData() const;
 	CRoutingProtocol * m_pSender;
 	// If m_pRecver is NULL, then it is a broadcast.
 	CRoutingProtocol * m_pRecver;

@@ -60,7 +60,7 @@ public:
 	int GetActualSpeed() const;
 	CRoadNet * GetRoadNet();
 	void RegisterUser(CEngineUser * pUser);
-	void ChangeSummary(const CStatisticSummary & summary);
+	void ChangeSummary();
 	CStatisticSummary & GetSummary();
 
 	//double GetAveSurroundingHosts(double fRadius, int nComment);

@@ -150,6 +150,7 @@ CPkgAptCardCards::CPkgAptCardCards()
 	, m_nCardNumber(0)
 {
 	m_nSentenceType = AC_SENTENCE_TYPE_CARD;
+	m_bInStatistic = FALSE;
 }
 
 CPkgAptCardCards::CPkgAptCardCards(const CPkgAptCardCards & src)

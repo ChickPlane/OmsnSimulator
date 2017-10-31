@@ -7,6 +7,7 @@ CSentence::CSentence()
 	, m_pSender(NULL)
 	, m_pSpeakTo(NULL)
 	, m_nProcessID(-1)
+	, m_bInStatistic(TRUE)
 {
 }
 

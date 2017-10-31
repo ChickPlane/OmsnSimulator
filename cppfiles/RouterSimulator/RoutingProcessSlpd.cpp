@@ -4,7 +4,6 @@
 
 
 CRoutingProcessSlpd::CRoutingProcessSlpd()
-	: m_nK(1)
 {
 }
 
@@ -15,12 +14,12 @@ CRoutingProcessSlpd::~CRoutingProcessSlpd()
 
 void CRoutingProcessSlpd::SetBasicParameters(int nProcessID, CRoutingProtocol * pProtocol)
 {
-
+	CRoutingProcess::SetBasicParameters(nProcessID, pProtocol);
 }
 
 void CRoutingProcessSlpd::SetParameters(int nK)
 {
-
+	m_nK = nK;
 }
 
 void CRoutingProcessSlpd::OnReceivePkgFromNetwork(const CSentence * pPkg, CList<CSentence*> & SendingList)
@@ -51,9 +50,10 @@ void CRoutingProcessSlpd::OnEncounterUser(CRoutingProtocol * pTheOther, CList<CS
 		return;
 	}
 	CTimeOutPair<CPkgSlpd *>::DeleteTimePairs(m_ForwardingList, GetSimTime());
-	POSITION pos = m_ForwardingList.GetHeadPosition();
+	POSITION pos = m_ForwardingList.GetHeadPosition(), posLast;
 	while (pos)
 	{
+		posLast = pos;
 		CPkgSlpd * pPkg = m_ForwardingList.GetNext(pos).m_Value;
 		if (pPkg->m_nRemainTimes == m_nK)
 		{
@@ -62,6 +62,7 @@ void CRoutingProcessSlpd::OnEncounterUser(CRoutingProtocol * pTheOther, CList<CS
 		MarkProcessIdToSentences(pPkg);
 		pPkg->m_pSpeakTo = pTheOther;
 		SendingList.AddTail(pPkg);
+		m_ForwardingList.RemoveAt(posLast);
 	}
 }
 
@@ -132,6 +133,8 @@ void CRoutingProcessSlpd::OnReceiveNewPseudoPkg(const CPkgSlpd * pPkg)
 }
 
 int CRoutingProcessSlpd::gm_PseudonymMax = 0;
+
+int CRoutingProcessSlpd::m_nK = 1;
 
 CPkgSlpd * CRoutingProcessSlpdUser::GetSlpdDataCopy(CRoutingProcessSlpd * pCallBy, const CPkgSlpd * pPkg)
 {

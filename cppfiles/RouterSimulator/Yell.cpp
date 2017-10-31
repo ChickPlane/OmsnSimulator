@@ -99,3 +99,15 @@ void CYell::Clean()
 		m_nSentenceCount = 0;
 	}
 }
+
+BOOL CYell::ContainData() const
+{
+	for (int i = 0; i < m_nSentenceCount; ++i)
+	{
+		if (m_ppSentences[i]->m_bInStatistic)
+		{
+			return TRUE;
+		}
+	}
+	return FALSE;
+}

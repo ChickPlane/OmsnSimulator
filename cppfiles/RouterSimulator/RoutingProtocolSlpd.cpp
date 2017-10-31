@@ -38,6 +38,8 @@ void CRoutingProtocolSlpd::CreateQueryMission(const CQueryMission * pMission)
 	pPkgSlpd->m_pSession->m_nSessionId = pMission->m_nMissionId;
 	pPkgSlpd->m_RecverId = pMission->m_RecverId;
 	GetSlpdProcess()->CreateQueryMission(pPkgSlpd);
+
+	SetMissionRecord(pMission->m_nMissionId, REC_SLPD_ST_GENERATE);
 }
 
 void CRoutingProtocolSlpd::SetStaticParameters(int nK, double fTrust)
@@ -222,6 +224,14 @@ void CRoutingProtocolSlpd::OnBswPkgReachDestination(CRoutingProcessBsw * pCallBy
 		const CPkgBswData * pQuery = pPkg;
 		strLog.Format(_T("\nDelievery to %d"), GetHostId());
 		WriteLog(strLog);
+
+		SetMissionRecord(pQuery->m_pTestSession->m_nSessionId, REC_SLPD_ST_REACH);
+
+		if (!gm_bEnableLbsp)
+		{
+			return;
+		}
+
 		CPkgSlpdReply * pNewReply = LbsPrepareReply(pQuery);
 		GetReplyProcess()->InitNewPackage(pNewReply);
 		pNewReply->m_pSpeakTo = pQuery->m_pSender;
@@ -229,7 +239,6 @@ void CRoutingProtocolSlpd::OnBswPkgReachDestination(CRoutingProcessBsw * pCallBy
 
 		TransmitSingleSentence(pNewReply);
 
-		SetMissionRecord(pQuery->m_pTestSession->m_nSessionId, REC_SLPD_ST_REACH);
 		SetMissionRecord(pQuery->m_pTestSession->m_nSessionId, REC_SLPD_ST_REP_LEAVE);
 		return;
 	}
@@ -307,14 +316,14 @@ BOOL CRoutingProtocolSlpd::SetMissionRecord(int nSessionId, int nEventId)
 void CRoutingProtocolSlpd::UpdateSummary()
 {
 	CStatisticSummary & summary = GetEngine()->GetSummary();
-	if (summary.m_RealData.GetSize() != REC_SLPD_ST_MAX)
+	if (summary.m_RecentData.m_ProtocolRecords.GetSize() != REC_SLPD_ST_MAX)
 	{
-		summary.m_RealData.SetSize(REC_SLPD_ST_MAX);
+		summary.m_RecentData.m_ProtocolRecords.SetSize(REC_SLPD_ST_MAX);
 	}
 
 	for (int i = 0; i < REC_SLPD_ST_MAX; ++i)
 	{
-		summary.m_RealData[i] = 0;
+		summary.m_RecentData.m_ProtocolRecords[i] = 0;
 	}
 
 	POSITION pos = gm_allSessions.GetStartPosition();
@@ -327,11 +336,11 @@ void CRoutingProtocolSlpd::UpdateSummary()
 		{
 			if (pRecord->m_lnTimes[i] >= 0)
 			{
-				summary.m_RealData[i]++;
+				summary.m_RecentData.m_ProtocolRecords[i]++;
 			}
 		}
 	}
-	GetEngine()->ChangeSummary(summary);
+	GetEngine()->ChangeSummary();
 }
 
 CPkgSlpdReply * CRoutingProtocolSlpd::LbsPrepareReply(const CPkgBswData * pQuery)

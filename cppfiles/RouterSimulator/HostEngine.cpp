@@ -113,6 +113,10 @@ void CHostEngine::BreakMapGui()
 
 void CHostEngine::TransmitMessage(CRoutingProtocol * pFrom, CRoutingProtocol * pTo, CYell * pMsg)
 {
+	if (m_Summary.IsWorking() && pMsg->ContainData())
+	{
+		m_Summary.m_RecentData.m_EngineRecords[SS_TOTLE_YELL] += 1;
+	}
 	++m_nMsgId;
 	ASSERT(pMsg != NULL);
 	CTransmitionRecord newRecord(pFrom, pTo, pMsg, m_nMsgId);
@@ -263,13 +267,12 @@ void CHostEngine::RegisterUser(CEngineUser * pUser)
 	m_NotifyList.AddTail(pUser);
 }
 
-void CHostEngine::ChangeSummary(const CStatisticSummary & summary)
+void CHostEngine::ChangeSummary()
 {
-	m_Summary = summary;
 	POSITION pos = m_NotifyList.GetHeadPosition();
 	while (pos)
 	{
-		m_NotifyList.GetNext(pos)->ChangeSummary(summary);
+		m_NotifyList.GetNext(pos)->ChangeSummary(m_Summary);
 	}
 }
 
@@ -408,6 +411,7 @@ void CHostEngine::NotifyTimeChange()
 	{
 		m_NotifyList.GetNext(pos)->OnEngineTimeChanged(m_lnSimTimeMillisecond);
 	}
+	ChangeSummary();
 }
 
 void CHostEngine::UpdateStartTick()

@@ -20,6 +20,8 @@
 #include "RoutingProtocolBSW.h"
 #include "CommonFunctions.h"
 #include "MainFrm.h"
+#include "RoutingProtocolSlpd.h"
+#include "RoutingProtocol.h"
 using namespace std;
 
 #ifdef _DEBUG
@@ -113,10 +115,19 @@ void CRouterSimulatorView::OnEngineTimeChanged(SIM_TIME lnCurrentTime)
 void CRouterSimulatorView::ChangeSummary(const CStatisticSummary & summary)
 {
 	CString strSummary;
-	summary.m_RealData.GetSize();
-	for (int i = 0; i < summary.m_RealData.GetSize(); ++i)
+	summary.m_RecentData.m_ProtocolRecords.GetSize();
+	for (int i = 0; i < summary.m_RecentData.m_ProtocolRecords.GetSize(); ++i)
 	{
-		double fRd = summary.m_RealData[i];
+		double fRd = summary.m_RecentData.m_ProtocolRecords[i];
+		CString strTmp;
+		strTmp.Format(_T("%f"), fRd);
+		strSummary += strTmp + _T(" ; ");
+	}
+	strSummary += _T(" | ");
+	summary.m_RecentData.m_EngineRecords.GetSize();
+	for (int i = 0; i < summary.m_RecentData.m_EngineRecords.GetSize(); ++i)
+	{
+		double fRd = summary.m_RecentData.m_EngineRecords[i];
 		CString strTmp;
 		strTmp.Format(_T("%f"), fRd);
 		strSummary += strTmp + _T(" ; ");
@@ -182,6 +193,8 @@ void CRouterSimulatorView::DestroyEngine()
 
 void CRouterSimulatorView::InitHostProtocol(const CSimulatorCfg & Cfg)
 {
+	CRoutingProtocol::gm_bEnableLbsp = TRUE;
+
 	double fHigh = Cfg.m_fPrivacyHigh / 100.0;
 	double fLow = Cfg.m_fPrivacyLow / 100.0;
 	CRouterSimulatorDoc * pDoc = GetDocument();
@@ -211,6 +224,22 @@ void CRouterSimulatorView::InitHostProtocol(const CSimulatorCfg & Cfg)
 		{
 			CMobileSocialNetworkHost * pHost = (CMobileSocialNetworkHost *)pDoc->m_pRoadNet->m_allHosts[i];
 			CRoutingProtocolAptCard * pAptCard = new CRoutingProtocolAptCard();
+			pAptCard->SetCommunicateRadius(Cfg.m_fCommunicateRadius);
+			pAptCard->SetEnvironment(pHost, m_pEngine);
+			pAptCard->SetLocalParameters(Cfg.m_nBswCopyCount);
+			pDoc->m_pRoadNet->m_allHosts[i]->m_pProtocol = pAptCard;
+		}
+	}
+	else if (strcmp(Cfg.m_strProtocolName, PROTOCOL_NAME_SLPD) == 0)
+	{
+		summary.m_pComments = new char[200];
+		strcpy_s(summary.m_pComments, 199, "SLPD_FIRST_TRY");
+		pMainFrame->WriteLog(_T("SLPD"));
+		CRoutingProtocolSlpd::SetStaticParameters(Cfg.m_nK, fHigh);
+		for (int i = 0; i < nLength; ++i)
+		{
+			CMobileSocialNetworkHost * pHost = (CMobileSocialNetworkHost *)pDoc->m_pRoadNet->m_allHosts[i];
+			CRoutingProtocolSlpd * pAptCard = new CRoutingProtocolSlpd();
 			pAptCard->SetCommunicateRadius(Cfg.m_fCommunicateRadius);
 			pAptCard->SetEnvironment(pHost, m_pEngine);
 			pAptCard->SetLocalParameters(Cfg.m_nBswCopyCount);

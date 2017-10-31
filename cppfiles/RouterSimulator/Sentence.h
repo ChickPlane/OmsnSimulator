@@ -22,12 +22,14 @@ public:
 	int m_nSentenceType;
 	CRoutingProtocol * m_pSender;
 	CRoutingProtocol * m_pSpeakTo;
+
+	BOOL m_bInStatistic;
 };
 
 class CPkgHello : public CSentence
 {
 public:
-	CPkgHello() { m_nSentenceType = SENTENCE_TYPE_HELLO; }
+	CPkgHello() { m_nSentenceType = SENTENCE_TYPE_HELLO; m_bInStatistic = FALSE; }
 	CPkgHello(const CPkgHello & src) { *this = src; }
 	virtual ~CPkgHello() {};
 };
@@ -35,7 +37,7 @@ public:
 class CPkgAck : public CSentence
 {
 public:
-	CPkgAck() { m_nSentenceType = SENTENCE_TYPE_ACK; }
+	CPkgAck() { m_nSentenceType = SENTENCE_TYPE_ACK; m_bInStatistic = FALSE; }
 	CPkgAck(const CPkgAck & src) { *this = src; }
 	void SetAsOkPackage() { m_nSentenceType = SENTENCE_TYPE_OK; }
 };

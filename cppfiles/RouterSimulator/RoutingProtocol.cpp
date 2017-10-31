@@ -190,6 +190,8 @@ void CRoutingProtocol::WriteLog(const CString & strLog)
 	OutputDebugString(_T("\n") + strWriteDown);
 }
 
+BOOL CRoutingProtocol::gm_bEnableLbsp = TRUE;
+
 CString CRoutingProtocol::GetDebugString() const
 {
 	return _T("");

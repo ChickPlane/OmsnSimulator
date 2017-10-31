@@ -43,10 +43,10 @@ protected:
 	virtual void OnReceiveNewPseudoPkg(const CPkgSlpd * pPkg);
 
 private:
-	int m_nK;
 	CRoutingProcessSlpdUser * m_pUser;
 	CList<CTimeOutPair<CSlpdUserAndPseudo>> m_PseudonymList;
 	CList<CTimeOutPair<CPkgSlpd *>> m_ForwardingList;
 	static int gm_PseudonymMax;
+	static int m_nK;
 };
 

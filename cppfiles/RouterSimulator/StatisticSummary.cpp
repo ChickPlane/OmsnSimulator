@@ -40,8 +40,10 @@ void CStatisticSummary::StartTest(SIM_TIME lnStartTime, SIM_TIME lnTestEndTime, 
 	m_lnTestEndTime = lnTestEndTime;
 	m_Interval = Interval;
 	m_nTagIndex = 0;
-	m_nMaxSize = 0;
+	m_nMaxProtocolSize = 0;
+	m_nMaxEngineSize = 0;
 	int nExpectSize = (lnTestEndTime - lnStartTime) / Interval;
+	m_RecentData.m_EngineRecords[SS_TOTLE_YELL] = 0;
 	m_Tags.SetSize(nExpectSize);
 }
 
@@ -60,16 +62,17 @@ void CStatisticSummary::AddTag(SIM_TIME lnStartTime)
 	{
 		return;
 	}
-	int nSize = m_RealData.GetSize();
-	if (nSize > m_nMaxSize)
+	int nSize = m_RecentData.m_ProtocolRecords.GetSize();
+	if (nSize > m_nMaxProtocolSize)
 	{
-		m_nMaxSize = nSize;
+		m_nMaxProtocolSize = nSize;
 	}
-	m_Tags[m_nTagIndex].SetSize(nSize);
-	for (int i = 0; i < nSize; ++i)
+	nSize = m_RecentData.m_EngineRecords.GetSize();
+	if (nSize > m_nMaxEngineSize)
 	{
-		m_Tags[m_nTagIndex][i] = m_RealData[i];
+		m_nMaxEngineSize = nSize;
 	}
+	m_Tags[m_nTagIndex] = m_RecentData;
 	++m_nTagIndex;
 }
 
@@ -81,15 +84,15 @@ void CStatisticSummary::OutputResult()
 
 	ofstream fout;
 	char filename[200] = {};
-	for (int i = 0; i < m_nMaxSize; ++i)
+	for (int i = 0; i < m_nMaxProtocolSize; ++i)
 	{
 		if (m_pComments)
 		{
-			sprintf_s(filename, "\\ANALY_%s_E%02d_C%d_%s.csv", pProtocolName, i, (int)m_fCommuRadius, m_pComments);
+			sprintf_s(filename, "\\ANALY_%s_P%02d_C%d_%s.csv", pProtocolName, i, (int)m_fCommuRadius, m_pComments);
 		}
 		else
 		{
-			sprintf_s(filename, "\\ANALY_%s_E%02d_C%d_%s.csv", pProtocolName, i, (int)m_fCommuRadius, m_pComments);
+			sprintf_s(filename, "\\ANALY_%s_P%02d_C%d_%s.csv", pProtocolName, i, (int)m_fCommuRadius, m_pComments);
 		}
 		char filepath[200] = {};
 		strcpy_s(filepath, m_pWorkPath);
@@ -98,9 +101,39 @@ void CStatisticSummary::OutputResult()
 		fout << m_nRandomSeed << ";,";
 		for (int j = 0; j < m_nTagIndex; ++j)
 		{
-			if (m_Tags[j].GetSize() > i)
+			if (m_Tags[j].m_ProtocolRecords.GetSize() > i)
 			{
-				fout << m_Tags[j][i] << ",";
+				fout << m_Tags[j].m_ProtocolRecords[i] << ",";
+			}
+			else
+			{
+				ASSERT(0);
+			}
+		}
+		fout << endl;
+		fout.close();
+	}
+
+	for (int i = 0; i < m_nMaxEngineSize; ++i)
+	{
+		if (m_pComments)
+		{
+			sprintf_s(filename, "\\ANALY_%s_ENG%02d_C%d_%s.csv", pProtocolName, i, (int)m_fCommuRadius, m_pComments);
+		}
+		else
+		{
+			sprintf_s(filename, "\\ANALY_%s_ENG%02d_C%d_%s.csv", pProtocolName, i, (int)m_fCommuRadius, m_pComments);
+		}
+		char filepath[200] = {};
+		strcpy_s(filepath, m_pWorkPath);
+		strcat_s(filepath, filename);
+		fout.open(filepath, ios::app);
+		fout << m_nRandomSeed << ";,";
+		for (int j = 0; j < m_nTagIndex; ++j)
+		{
+			if (m_Tags[j].m_EngineRecords.GetSize() > i)
+			{
+				fout << m_Tags[j].m_EngineRecords[i] << ",";
 			}
 			else
 			{
@@ -111,4 +144,26 @@ void CStatisticSummary::OutputResult()
 		fout.close();
 	}
 	delete[] pProtocolName;
+}
+
+CStatisticSummaryTag & CStatisticSummaryTag::operator=(const CStatisticSummaryTag & src)
+{
+	int nPr = src.m_ProtocolRecords.GetSize();
+	m_ProtocolRecords.SetSize(nPr);
+	for (int i = 0; i < nPr; ++i)
+	{
+		m_ProtocolRecords[i] = src.m_ProtocolRecords[i];
+	}
+	int nEr = src.m_EngineRecords.GetSize();
+	m_EngineRecords.SetSize(nEr);
+	for (int i = 0; i < nEr; ++i)
+	{
+		m_EngineRecords[i] = src.m_EngineRecords[i];
+	}
+	return *this;
+}
+
+CStatisticSummaryTag::CStatisticSummaryTag()
+{
+	m_EngineRecords.SetSize(SS_ENGINE_MAX);
 }

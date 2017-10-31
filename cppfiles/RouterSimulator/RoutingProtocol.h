@@ -48,6 +48,9 @@ public:
 	virtual CString GetDebugString() const;
 
 	void WriteLog(const CString & strLog);
+
+	static BOOL gm_bEnableLbsp;
+
 protected:
 	CHost * m_pHost;
 	double m_fCommunicationRadius;
