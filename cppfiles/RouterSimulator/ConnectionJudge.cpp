@@ -75,11 +75,16 @@ void CConnectionJudge::OnNewSend(WPARAM wParam, LPARAM lParam)
 {
 	ULONGLONG a = GetTickCount64();
 	CMsgNewSendJudge * pMsg = (CMsgNewSendJudge *)wParam;
-	if (pMsg->m_Items.GetSize() == 0)
+	if (!pMsg->m_bFullJudge)
+	{
+		ASSERT(0);
+		return;
+	}
+	if (pMsg->m_Items.GetSize() == 0 && pMsg->m_bFullJudge == FALSE)
 	{
 		return;
 	}
-	double fSecondId = pMsg->GetSecondId();
+	double fSecondId = pMsg->m_fSecondId;
 	POSITION posOccupyReport = NULL;
 	CMsgPosFrcstReport * pReport = m_pForecast->GetReport(fSecondId, LONG_MAX, posOccupyReport);
 	if (!pReport)
@@ -94,24 +99,19 @@ void CConnectionJudge::OnNewSend(WPARAM wParam, LPARAM lParam)
 	CMsgCntJudgeReceiverReport * pJRR = new CMsgCntJudgeReceiverReport();
 	pJRR->m_lnTime = fSecondId;
 	pJRR->m_bFullReport = pMsg->m_bFullJudge;
+	int nReportSize = m_pData->m_allHosts.GetSize();
+	pJRR->m_ArrItems.SetSize(nReportSize);
 
-	POSITION pos = pMsg->m_Items.GetHeadPosition();
-	while (pos)
+	CMsgNewJudgeItem judgingItem;
+	judgingItem.m_fRadius = pMsg->m_fRadius;
+	judgingItem.m_fSecondId = fSecondId;
+
+	for (int i = 0; i < nReportSize; ++i)
 	{
-		CMsgNewJudgeItem & item = pMsg->m_Items.GetNext(pos);
+		judgingItem.m_pHost = m_pData->m_allHosts[i];
 		CReceiverReportItem reportItem;
-		JudgeItem(item, pReport, reportItem);
-		pJRR->m_Items.SetAt(item.m_pHost, reportItem);
-
-// 		if (!pJRR->m_Items.Lookup(item.m_pHost, reportItem))
-// 		{
-// 			JudgeItem(item, pReport, reportItem);
-// 			pJRR->m_Items.SetAt(item.m_pHost, reportItem);
-// 		}
-// 		else
-// 		{
-// 			ASSERT(0);
-// 		}
+		JudgeItem(judgingItem, pReport, reportItem);
+		pJRR->m_ArrItems[i] = reportItem;
 	}
 
 	m_pForecast->GiveBackReport(posOccupyReport);
@@ -137,6 +137,7 @@ void CConnectionJudge::OnNewSend(WPARAM wParam, LPARAM lParam)
 
 void CConnectionJudge::JudgeItem(const CMsgNewJudgeItem & item, CMsgPosFrcstReport * pReport, CReceiverReportItem & ret)
 {
+	ret.m_pCenterHost = item.m_pHost;
 	ret.m_Hosts.RemoveAll();
 
 	int nBlockCount;
@@ -227,24 +228,3 @@ END_MESSAGE_MAP()
 
 
 // CConnectionJudge 消息处理程序
-
-double CMsgNewSendJudge::GetSecondId()
-{
-	if (m_Items.GetSize() == 0)
-	{
-		ASSERT(0);
-		return 0;
-	}
-
-	double fSecondId = m_Items.GetHead().m_fSecondId;
-	POSITION pos = m_Items.GetHeadPosition();
-	while (pos)
-	{
-		if (fSecondId != m_Items.GetNext(pos).m_fSecondId)
-		{
-			ASSERT(0);
-			return 0;
-		}
-	}
-	return fSecondId;
-}

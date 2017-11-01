@@ -20,14 +20,10 @@ class CMsgNewSendJudge
 {
 public:
 	CMsgNewSendJudge() :m_bFullJudge(FALSE) {}
-	double GetSecondId();
 	BOOL m_bFullJudge;
+	double m_fRadius;
+	double m_fSecondId;
 	CList<CMsgNewJudgeItem> m_Items;
-// 	CMsgNewSendJudge() :m_pHost(NULL), m_fSecondId(0), m_fRadius(0), m_nMsgId(0) {}
-// 	CHost * m_pHost;
-// 	double m_fSecondId;
-// 	double m_fRadius;
-// 	int m_nMsgId;
 };
 
 enum {

@@ -22,6 +22,7 @@ CReceiverReportItem::~CReceiverReportItem()
 CReceiverReportItem & CReceiverReportItem::operator=(const CReceiverReportItem & src)
 {
 	m_bUnicast = src.m_bUnicast;
+	m_pCenterHost = src.m_pCenterHost;
 	POSITION pos = src.m_Hosts.GetHeadPosition();
 	while (pos)
 	{
@@ -46,17 +47,38 @@ CMsgCntJudgeReceiverReport & CMsgCntJudgeReceiverReport::operator=(const CMsgCnt
 	ASSERT(0);
 	m_bFullReport = src.m_bFullReport;
 	m_lnTime = src.m_lnTime;
-	POSITION pos = src.m_Items.GetStartPosition();
-	CHost * rKey;
-	CReceiverReportItem rValue;
-	while (pos)
+
+	int nSize = src.m_ArrItems.GetSize();
+	m_ArrItems.SetSize(nSize);
+	for (int i = 0; i < nSize; ++i)
 	{
-		src.m_Items.GetNextAssoc(pos, rKey, rValue);
-		m_Items[rKey] = rValue;
+		m_ArrItems[i] = src.m_ArrItems[i];
 	}
 	return *this;
 }
 
 CMsgCntJudgeReceiverReport::~CMsgCntJudgeReceiverReport()
 {
+}
+
+CJudgeTmpRouteEntry::CJudgeTmpRouteEntry()
+{
+
+}
+
+CJudgeTmpRouteEntry::CJudgeTmpRouteEntry(const CJudgeTmpRouteEntry & src)
+{
+
+}
+
+CJudgeTmpRouteEntry & CJudgeTmpRouteEntry::operator=(const CJudgeTmpRouteEntry & src)
+{
+	m_HopFrom = src.m_HopFrom;
+	m_HopDestinations.RemoveHead();
+	POSITION pos = src.m_HopDestinations.GetHeadPosition();
+	while (pos)
+	{
+		m_HopDestinations.AddTail(src.m_HopDestinations.GetNext(pos));
+	}
+	return *this;
 }

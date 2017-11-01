@@ -19,7 +19,6 @@ public:
 	CHostConnection();
 	virtual ~CHostConnection();
 	void Reset(int nRecordCount);
-	int UpdateByJudgeReport(const CMsgCntJudgeReceiverReport * pReport);
 	CArray<CMap<int, int, CHostConnectionEntry, CHostConnectionEntry&>> m_Records;
 
 protected:

@@ -39,30 +39,6 @@ void CHostConnection::Reset(int nRecordCount)
 	m_Records.SetSize(nRecordCount);
 }
 
-int CHostConnection::UpdateByJudgeReport(const CMsgCntJudgeReceiverReport * pReport)
-{
-	if (!pReport || !pReport->m_bFullReport)
-	{
-		return -1;
-	}
-	if (pReport->m_lnTime <= m_lnLastUpdate)
-	{
-		return -2;
-	}
-
-	POSITION pos = pReport->m_Items.GetStartPosition();
-	while (pos)
-	{
-		CHost * pHost;
-		CReceiverReportItem item;
-		pReport->m_Items.GetNextAssoc(pos, pHost, item);
-		UpdateSingleHost(pHost, item, pReport->m_lnTime);
-	}
-
-	m_lnLastUpdate = pReport->m_lnTime;
-	return 0;
-}
-
 int CHostConnection::UpdateSingleHost(CHost * pHost, const CReceiverReportItem & item, SIM_TIME lnUpdateTime)
 {
 	int nItemHostCount = item.m_Hosts.GetSize();

@@ -92,8 +92,6 @@ protected:
 	void OnFinishedForecastOnce(SIM_TIME lnSimTime);
 	BOOL SendForecastCommand(SIM_TIME lnSimTime);
 	void DeleteForecastsBefore(int nBeforeSecond);
-	void StartJudgeProcess(const CTransmitionRecord & transmitionData, int nFrom);
-	void StartJudgeUnicastProcess(const CTransmitionRecord & transmitionData);
 
 	SIM_TIME GetForecastThreshhold(int nExtraBlock) const;
 	SIM_TIME GetPeriodDefaultInterval();
@@ -101,24 +99,22 @@ protected:
 	void RefreshUiDirectly(CArray<CHostGui> * pMessage, const CDoublePoint & lt, const CDoublePoint & rb);
 	int GetSurringNodesCount(CDoublePoint currentLocation, double fRadius);
 
-	CMsgCntJudgeReceiverReport * GetUnicastReport(const CTransmitionRecord & tr);
 	SIM_TIME GetActualSimMillisecPerActSec();
 	SIM_TIME GetBoundary() const;
 	void NotifyTimeChange();
 	void UpdateStartTick();
-	void JudgeAllUnicastOk();
-	void JudgeAllFullForcast();
-	void JudgeAllBroadcast(const CMsgCntJudgeReceiverReport * pMsg);
+	void JudgeAllMessages();
 	BOOL PreJudgeAllHosts(SIM_TIME lnTime);
 	BOOL DeletePreFullJudge(SIM_TIME lnTime);
 	void SendEventChangeMsg();
-	void SendJudgeOkMsg();
 	void SendJudgeMsgToThread(CMsgNewSendJudge * pJudgeMsg);
 	BOOL NotifyConnections();
 	SIM_TIME GetDetectConnectInterval();
 	const CMsgCntJudgeReceiverReport * GetFullJudgeReport(SIM_TIME lnTime);
 	void PreJudgeSeveralPeriods(SIM_TIME lnInterval);
 	void PeriodForcastAndJudge();
+
+	static void NotifyAllReceivers(const CMsgCntJudgeReceiverReport * pReport, CTransmitionRecord & tr);
 
 private:
 	SIM_TIME m_lnSimTimeMillisecond;
@@ -151,7 +147,6 @@ private:
 	int m_nMsgId;
 	ULONGLONG m_llLastUpdateTime;
 	CList<CEngineUser *> m_NotifyList;
-	int m_nTransmitCount;
 
 	double m_fCommunicationRadius;
 
@@ -164,9 +159,7 @@ private:
 	BOOL m_bJudgingUnicast;
 	CMap<SIM_TIME, SIM_TIME, const CMsgCntJudgeReceiverReport*, const CMsgCntJudgeReceiverReport*> m_FullJudgeRecord;
 
-	int m_nMsgCount;
-	int m_nJudgeOkMsgCount;
-	int m_nBusyJudgeThreadCount;
+	int m_nEventChangeMsgCount;
 
 	CHostConnection m_Connections;
 	ULONGLONG m_ullLastUiTick;
