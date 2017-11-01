@@ -21,8 +21,6 @@ public:
 	void Reset(int nRecordCount);
 	CArray<CMap<int, int, CHostConnectionEntry, CHostConnectionEntry&>> m_Records;
 
-protected:
-	int UpdateSingleHost(CHost * pHost, const CReceiverReportItem & item, SIM_TIME lnUpdateTime);
 private:
 	SIM_TIME m_lnLastUpdate;
 };

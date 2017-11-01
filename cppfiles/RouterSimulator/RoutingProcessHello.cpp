@@ -51,9 +51,9 @@ void CRoutingProcessHello::OnReceivePkgFromNetwork(const CSentence * pPkg, CList
 	}
 }
 
-void CRoutingProcessHello::OnSomeoneNearby(const CList<CHostGui> & m_Hosts)
+void CRoutingProcessHello::OnSomeoneNearby(const CList<CJudgeTmpRouteEntry> & m_Hosts, const CMsgCntJudgeReceiverReport* pWholeReport)
 {
-	if (!IsDifferentList(m_Hosts))
+	if (!IsDifferentList(m_Hosts, pWholeReport))
 	{
 		return;
 	}
@@ -90,7 +90,7 @@ void CRoutingProcessHello::SendHelloPackage()
 	}
 }
 
-BOOL CRoutingProcessHello::IsDifferentList(const CList<CHostGui> & m_Hosts)
+BOOL CRoutingProcessHello::IsDifferentList(const CList<CJudgeTmpRouteEntry> & m_Hosts, const CMsgCntJudgeReceiverReport* pWholeReport)
 {
 	if (m_Hosts.GetSize() > m_HostEncounterMap.GetSize())
 	{
@@ -100,7 +100,7 @@ BOOL CRoutingProcessHello::IsDifferentList(const CList<CHostGui> & m_Hosts)
 	POSITION pos = m_Hosts.GetHeadPosition();
 	while (pos)
 	{
-		CHost * pHost = m_Hosts.GetNext(pos).m_pHost;
+		CHost * pHost = m_Hosts.GetNext(pos).m_HopFrom.m_pHost;
 		SIM_TIME lnEncounterTime;
 		if (!m_HostEncounterMap.Lookup(pHost, lnEncounterTime))
 		{
@@ -117,14 +117,14 @@ BOOL CRoutingProcessHello::IsDifferentList(const CList<CHostGui> & m_Hosts)
 	return FALSE;
 }
 
-BOOL CRoutingProcessHello::UpdateEncounterMap(const CList<CHostGui> & m_Hosts)
+BOOL CRoutingProcessHello::UpdateEncounterMap(const CList<CJudgeTmpRouteEntry> & m_Hosts)
 {
 	m_HostEncounterMap.RemoveAll();
 	SIM_TIME lnCurrentTime = GetSimTime();
 	POSITION pos = m_Hosts.GetHeadPosition();
 	while (pos)
 	{
-		CHost * pHost = m_Hosts.GetNext(pos).m_pHost;
+		CHost * pHost = m_Hosts.GetNext(pos).m_HopFrom.m_pHost;
 		m_HostEncounterMap[pHost] = lnCurrentTime;
 	}
 	return FALSE;

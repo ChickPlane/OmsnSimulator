@@ -19,8 +19,9 @@ public:
 class CMsgNewSendJudge
 {
 public:
-	CMsgNewSendJudge() :m_bFullJudge(FALSE) {}
+	CMsgNewSendJudge() :m_bFullJudge(FALSE), m_bAutoDij(TRUE) {}
 	BOOL m_bFullJudge;
+	BOOL m_bAutoDij;
 	double m_fRadius;
 	double m_fSecondId;
 	CList<CMsgNewJudgeItem> m_Items;

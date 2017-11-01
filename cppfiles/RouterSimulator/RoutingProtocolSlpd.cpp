@@ -86,9 +86,9 @@ CString CRoutingProtocolSlpd::GetDebugString() const
 	return _T("");
 }
 
-void CRoutingProtocolSlpd::OnEngineConnection(const CList<CHostGui> & m_Hosts)
+void CRoutingProtocolSlpd::OnEngineConnection(const CList<CJudgeTmpRouteEntry> & m_Hosts, const CMsgCntJudgeReceiverReport* pWholeReport)
 {
-	GetHelloProcess()->OnSomeoneNearby(m_Hosts);
+	GetHelloProcess()->OnSomeoneNearby(m_Hosts,pWholeReport);
 }
 
 BOOL CRoutingProtocolSlpd::IsTrustful(CRoutingProcessSlpd * pCallBy, const CRoutingProtocol * pOther) const

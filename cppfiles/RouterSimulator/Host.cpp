@@ -45,11 +45,11 @@ void CHost::OnHearMsg(const CYell * pYell)
 	}
 }
 
-void CHost::OnConnection(const CList<CHostGui> & m_Hosts)
+void CHost::OnConnection(const CList<CJudgeTmpRouteEntry> & m_Hosts, const CMsgCntJudgeReceiverReport* pWholeReport)
 {
 	if (m_pProtocol)
 	{
-		m_pProtocol->OnEngineConnection(m_Hosts);
+		m_pProtocol->OnEngineConnection(m_Hosts, pWholeReport);
 	}
 }
 

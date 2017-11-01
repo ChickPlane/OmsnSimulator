@@ -116,6 +116,11 @@ void CConnectionJudge::OnNewSend(WPARAM wParam, LPARAM lParam)
 
 	m_pForecast->GiveBackReport(posOccupyReport);
 
+	if (pMsg->m_bAutoDij)
+	{
+		pJRR->RunDij();
+	}
+
 	if (m_pEngine)
 	{
 		m_pEngine->PostThreadMessage(MSG_ID_ENGINE_JUDGE_OK, (WPARAM)pJRR, 0);
@@ -195,17 +200,18 @@ void CConnectionJudge::JudgeItem(const CMsgNewJudgeItem & item, CMsgPosFrcstRepo
 				POSITION pos = tmpReference.m_Hosts.GetHeadPosition();
 				while (pos)
 				{
-					CHostGui tmpTarget = tmpReference.m_Hosts.GetNext(pos);
-					CDoublePoint targetPosition = tmpTarget.m_pHost->GetPosition(item.m_fSecondId);
+					CJudgeTmpRouteEntry tmpRouteEntry;
+					tmpRouteEntry.m_HopFrom = tmpReference.m_Hosts.GetNext(pos);
+					CDoublePoint targetPosition = tmpRouteEntry.m_HopFrom.m_pHost->GetPosition(item.m_fSecondId);
 					double fDistance = CDoublePoint::GetDistance(targetPosition, centerPosition);
 					if (fDistance <= item.m_fRadius)
 					{
-						if (tmpTarget.m_pHost == item.m_pHost)
+						if (tmpRouteEntry.m_HopFrom.m_pHost == item.m_pHost)
 						{
 							bFindSelf = TRUE;
 						}
-						tmpTarget.m_Position = targetPosition;
-						ret.m_Hosts.AddTail(tmpTarget);
+						tmpRouteEntry.m_HopFrom.m_Position = targetPosition;
+						ret.m_Hosts.AddTail(tmpRouteEntry);
 					}
 				}
 			}

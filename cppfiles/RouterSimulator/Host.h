@@ -4,6 +4,7 @@
 #include "HostInfo.h"
 #include "MsgShowInfo.h"
 #include "HostGui.h"
+#include "MsgCntJudgeReceiverReport.h"
 class CHost
 {
 public:
@@ -14,7 +15,7 @@ public:
 	virtual double GetDefaultSpeed() const;
 	virtual void SetSpeed(double fSpeed);
 	virtual void OnHearMsg(const CYell * pYell);
-	virtual void OnConnection(const CList<CHostGui> & m_Hosts);
+	virtual void OnConnection(const CList<CJudgeTmpRouteEntry> & m_Hosts, const CMsgCntJudgeReceiverReport* pWholeReport);
 	virtual void OnPackageArrived(const CQueryMission * pMission);
 	virtual bool IsReceivedPackage(const CQueryMission * pMission);
 	virtual void GetAllCarryingMessages(CMsgShowInfo & allMessages);

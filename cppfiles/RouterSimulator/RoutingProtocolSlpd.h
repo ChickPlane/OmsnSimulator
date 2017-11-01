@@ -23,7 +23,7 @@ public:
 	virtual void Turn(BOOL bOn);
 	virtual int GetDebugNumber(int nParam);
 	CString GetDebugString() const;
-	virtual void OnEngineConnection(const CList<CHostGui> & m_Hosts);
+	virtual void OnEngineConnection(const CList<CJudgeTmpRouteEntry> & m_Hosts, const CMsgCntJudgeReceiverReport* pWholeReport);
 
 	// SLPD
 	virtual BOOL IsTrustful(CRoutingProcessSlpd * pCallBy, const CRoutingProtocol * pOther) const;

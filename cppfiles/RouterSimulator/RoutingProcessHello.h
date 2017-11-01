@@ -1,6 +1,7 @@
 #pragma once
 #include "RoutingProcess.h"
 #include "HostGui.h"
+#include "MsgCntJudgeReceiverReport.h"
 
 class CPkgAck;
 class CPkgHello;
@@ -33,15 +34,15 @@ public:
 	virtual void SetBasicParameters(int nProcessID, CRoutingProtocol * pProtocol);
 	virtual void SetProcessUser(CRoutingProcessHelloUser * pUser) { m_pUser = pUser; }
 	virtual void OnReceivePkgFromNetwork(const CSentence * pPkg, CList<CSentence*> & SendingList);
-	virtual void OnSomeoneNearby(const CList<CHostGui> & m_Hosts);
+	virtual void OnSomeoneNearby(const CList<CJudgeTmpRouteEntry> & m_Hosts, const CMsgCntJudgeReceiverReport* pWholeReport);
 	virtual void StartWork(BOOL bStart);
 	static void SetInterval(SIM_TIME lnInterval) { m_lnSearchInterval = lnInterval; }
 
 protected:
 	virtual void StartSearhing();
 	virtual void SendHelloPackage();
-	virtual BOOL IsDifferentList(const CList<CHostGui> & m_Hosts);
-	virtual BOOL UpdateEncounterMap(const CList<CHostGui> & m_Hosts);
+	virtual BOOL IsDifferentList(const CList<CJudgeTmpRouteEntry> & m_Hosts, const CMsgCntJudgeReceiverReport* pWholeReport);
+	virtual BOOL UpdateEncounterMap(const CList<CJudgeTmpRouteEntry> & m_Hosts);
 
 private:
 	CRoutingProcessHelloUser * m_pUser;

@@ -30,7 +30,7 @@ CHostEngine::CHostEngine()
 	, m_lnLastForecastSimTime(INT_MIN)
 	, m_lnLastForecastedSimTime(INT_MIN)
 	, m_nMsgId(0)
-	, m_nJudgeMax(6)
+	, m_nJudgeMax(1)
 #ifdef DEBUG
 	, m_bEnableMonitor(FALSE)
 	, m_blimitedSpeed(FALSE)
@@ -728,7 +728,7 @@ BOOL CHostEngine::NotifyConnections()
 		const CReceiverReportItem & item = pMsg->m_ArrItems[i];
 		if (item.m_Hosts.GetSize() > 1)
 		{
-			item.m_pCenterHost->OnConnection(item.m_Hosts);
+			item.m_pCenterHost->OnConnection(item.m_Hosts, pMsg);
 		}
 	}
 	return TRUE;
@@ -779,13 +779,13 @@ void CHostEngine::PeriodForcastAndJudge()
 void CHostEngine::NotifyAllReceivers(const CMsgCntJudgeReceiverReport * pReport, CTransmitionRecord & tr)
 {
 	int nSenderId = tr.m_pFrom->GetHostId();
-	const CList<CHostGui> & reportRecvers = pReport->m_ArrItems[nSenderId].m_Hosts;
+	const CList<CJudgeTmpRouteEntry> & reportRecvers = pReport->m_ArrItems[nSenderId].m_Hosts;
 	if (tr.m_pTo == NULL)
 	{
 		POSITION pos = reportRecvers.GetHeadPosition();
 		while (pos)
 		{
-			const CHostGui & guiItem = reportRecvers.GetNext(pos);
+			const CHostGui & guiItem = reportRecvers.GetNext(pos).m_HopFrom;
 			CString strOut;
 			strOut.Format(_T("\nB %d->%d"), nSenderId, guiItem.m_pHost->m_nId);
 			OutputDebugString(strOut);
@@ -797,7 +797,7 @@ void CHostEngine::NotifyAllReceivers(const CMsgCntJudgeReceiverReport * pReport,
 		POSITION pos = reportRecvers.GetHeadPosition();
 		while (pos)
 		{
-			const CHostGui & guiItem = reportRecvers.GetNext(pos);
+			const CHostGui & guiItem = reportRecvers.GetNext(pos).m_HopFrom;
 			if (guiItem.m_pHost == tr.m_pTo->GetHost())
 			{
 				guiItem.m_pHost->OnHearMsg(tr.m_pMsg);

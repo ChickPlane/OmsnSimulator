@@ -14,7 +14,7 @@ public:
 	virtual void SetLocalParameters(int nBswCopyCount);
 	virtual void Turn(BOOL bOn);
 	virtual COLORREF GetImportantLevel() const;
-	virtual void OnEngineConnection(const CList<CHostGui> & m_Hosts);
+	virtual void OnEngineConnection(const CList<CJudgeTmpRouteEntry> & m_Hosts, const CMsgCntJudgeReceiverReport* pWholeReport);
 
 public:
 	// Hello User
