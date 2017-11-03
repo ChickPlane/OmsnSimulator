@@ -29,7 +29,6 @@ public:
 	virtual void SetBasicParameters(int nProcessID, CRoutingProtocol * pProtocol);
 	static void SetParameters(int nK);
 	virtual void SetProcessUser(CRoutingProcessSlpdUser * pUser) { m_pUser = pUser; }
-	virtual void SetK(int nK) { m_nK = nK; }
 	virtual void OnReceivePkgFromNetwork(const CSentence * pPkg, CList<CSentence*> & SendingList);
 	virtual void OnEncounterUser(CRoutingProtocol * pTheOther, CList<CSentence *> & SendingList);
 	virtual void CreateQueryMission(CPkgSlpd * pPkg);

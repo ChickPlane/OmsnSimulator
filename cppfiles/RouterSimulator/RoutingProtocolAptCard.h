@@ -22,7 +22,7 @@ public:
 	virtual void Turn(BOOL bOn);
 	virtual int GetDebugNumber(int nParam);
 	CString GetDebugString() const;
-	virtual void OnEngineConnection(const CList<CJudgeTmpRouteEntry> & m_Hosts, const CMsgCntJudgeReceiverReport* pWholeReport);
+	virtual void OnEngineConnection(BOOL bAnyOneNearby, BOOL bDifferentFromPrev);
 
 public:
 	// Hello User

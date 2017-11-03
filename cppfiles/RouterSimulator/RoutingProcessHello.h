@@ -34,20 +34,19 @@ public:
 	virtual void SetBasicParameters(int nProcessID, CRoutingProtocol * pProtocol);
 	virtual void SetProcessUser(CRoutingProcessHelloUser * pUser) { m_pUser = pUser; }
 	virtual void OnReceivePkgFromNetwork(const CSentence * pPkg, CList<CSentence*> & SendingList);
-	virtual void OnSomeoneNearby(const CList<CJudgeTmpRouteEntry> & m_Hosts, const CMsgCntJudgeReceiverReport* pWholeReport);
+	virtual void OnSomeoneNearby(BOOL bAnyOneNearby, BOOL bDifferentFromPrev);
 	virtual void StartWork(BOOL bStart);
+	virtual void EnableHelloMsg(BOOL bEnable) { m_bSendHello = bEnable; }
 	static void SetInterval(SIM_TIME lnInterval) { m_lnSearchInterval = lnInterval; }
-
 protected:
 	virtual void StartSearhing();
 	virtual void SendHelloPackage();
-	virtual BOOL IsDifferentList(const CList<CJudgeTmpRouteEntry> & m_Hosts, const CMsgCntJudgeReceiverReport* pWholeReport);
-	virtual BOOL UpdateEncounterMap(const CList<CJudgeTmpRouteEntry> & m_Hosts);
 
 private:
 	CRoutingProcessHelloUser * m_pUser;
 	BOOL m_bIsSearching;
+	BOOL m_bSendHello;
 	static SIM_TIME m_lnSearchInterval;
-	CMap<const CHost *, const CHost *, SIM_TIME, SIM_TIME> m_HostEncounterMap;
+
 };
 

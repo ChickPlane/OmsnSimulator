@@ -30,10 +30,10 @@ CHostEngine::CHostEngine()
 	, m_lnLastForecastSimTime(INT_MIN)
 	, m_lnLastForecastedSimTime(INT_MIN)
 	, m_nMsgId(0)
-	, m_nJudgeMax(1)
+	, m_nJudgeMax(6)
 #ifdef DEBUG
 	, m_bEnableMonitor(FALSE)
-	, m_blimitedSpeed(FALSE)
+	, m_blimitedSpeed(TRUE)
 #else
 	, m_bEnableMonitor(FALSE)
 	, m_blimitedSpeed(FALSE)
@@ -723,13 +723,15 @@ BOOL CHostEngine::NotifyConnections()
 		return FALSE;
 	}
 	int nSize = pMsg->m_ArrItems.GetSize();
+	ASSERT(nSize == 127);
 	for (int i = 0; i < nSize; ++i)
 	{
 		const CReceiverReportItem & item = pMsg->m_ArrItems[i];
-		if (item.m_Hosts.GetSize() > 1)
-		{
-			item.m_pCenterHost->OnConnection(item.m_Hosts, pMsg);
-		}
+		item.m_pCenterHost->UpdateNetworkLocations(pMsg);
+	}
+	for (int i = 0; i < nSize; ++i)
+	{
+		pMsg->m_ArrItems[i].m_pCenterHost->OnEnterNewTimePeriod();
 	}
 	return TRUE;
 }
@@ -786,9 +788,6 @@ void CHostEngine::NotifyAllReceivers(const CMsgCntJudgeReceiverReport * pReport,
 		while (pos)
 		{
 			const CHostGui & guiItem = reportRecvers.GetNext(pos).m_HopFrom;
-			CString strOut;
-			strOut.Format(_T("\nB %d->%d"), nSenderId, guiItem.m_pHost->m_nId);
-			OutputDebugString(strOut);
 			guiItem.m_pHost->OnHearMsg(tr.m_pMsg);
 		}
 	}
@@ -801,9 +800,6 @@ void CHostEngine::NotifyAllReceivers(const CMsgCntJudgeReceiverReport * pReport,
 			if (guiItem.m_pHost == tr.m_pTo->GetHost())
 			{
 				guiItem.m_pHost->OnHearMsg(tr.m_pMsg);
-				CString strOut;
-				strOut.Format(_T("\nU %d->%d"), nSenderId, guiItem.m_pHost->m_nId);
-				OutputDebugString(strOut);
 				break;
 			}
 		}

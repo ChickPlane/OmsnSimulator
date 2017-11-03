@@ -59,6 +59,8 @@ CPkgSlpdAck::CPkgSlpdAck()
 }
 
 CPkgSlpdAck::CPkgSlpdAck(const CPkgSlpdAck & src)
+	: m_pIDs(NULL)
+	, m_nIDNumber(0)
 {
 	*this = src;
 }

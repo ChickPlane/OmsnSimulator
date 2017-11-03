@@ -1,10 +1,15 @@
 #include "stdafx.h"
 #include "MsgCntJudgeReceiverReport.h"
 #include "Host.h"
+#include "CommonFunctions.h"
 
 
 CReceiverReportItem::CReceiverReportItem()
 	: m_bUnicast(FALSE)
+	, m_pDirNeighbours(NULL)
+	, m_nDirNeighbourCount(0)
+	, m_pAllNeighbours(NULL)
+	, m_nNeighbourCount(0)
 {
 
 }
@@ -17,13 +22,82 @@ CReceiverReportItem::CReceiverReportItem(const CReceiverReportItem & src)
 
 CReceiverReportItem::~CReceiverReportItem()
 {
+	if (m_pDirNeighbours)
+	{
+		delete[] m_pDirNeighbours;
+		m_pDirNeighbours = NULL;
+	}
+	if (m_pAllNeighbours)
+	{
+		delete[] m_pAllNeighbours;
+		m_pAllNeighbours = NULL;
+	}
+}
 
+void CReceiverReportItem::GenerateDirNeighbourArr()
+{
+	m_nDirNeighbourCount = m_Hosts.GetSize() - 1;
+	if (m_nDirNeighbourCount == 0)
+	{
+		return;
+	}
+	int nIndex = 0;
+	m_pDirNeighbours = new int[m_nDirNeighbourCount];
+	POSITION pos = m_Hosts.GetHeadPosition();
+	while (pos)
+	{
+		int nId = m_Hosts.GetNext(pos).m_HopFrom.m_pHost->m_nId;
+		if (nId == m_pCenterHost->m_nId)
+		{
+			continue;
+		}
+		m_pDirNeighbours[nIndex++] = nId;
+	}
+	ASSERT(nIndex == m_nDirNeighbourCount);
+	CCommonFunctions_T<int>::QuickIncreaseSort(m_pDirNeighbours, nIndex);
+}
+
+void CReceiverReportItem::GenerateAllNeighbourArr()
+{
+	int nIndex = 0;
+	m_pAllNeighbours = new int[m_nNeighbourCount];
+	int rKey;
+	POSITION rValue;
+
+	POSITION pos = m_HopDestinations.GetStartPosition();
+	while (pos)
+	{
+		m_HopDestinations.GetNextAssoc(pos, rKey, rValue);
+		m_pAllNeighbours[nIndex++] = rKey;
+	}
+	ASSERT(m_nNeighbourCount == nIndex);
+	CCommonFunctions_T<int>::QuickIncreaseSort(m_pAllNeighbours, nIndex);
+}
+
+CHost * CReceiverReportItem::GetNextHop(USERID nDestinationId) const
+{
+	POSITION posFrom = NULL;
+	if (m_HopDestinations.Lookup(nDestinationId, posFrom))
+	{
+		return m_Hosts.GetAt(posFrom).m_HopFrom.m_pHost;
+	}
+	else
+	{
+		return NULL;
+	}
+}
+
+BOOL CReceiverReportItem::IsAnyOneNearby() const
+{
+	return m_nDirNeighbourCount > 0;
 }
 
 CReceiverReportItem & CReceiverReportItem::operator=(const CReceiverReportItem & src)
 {
+	ASSERT(0);
 	m_bUnicast = src.m_bUnicast;
 	m_pCenterHost = src.m_pCenterHost;
+	m_CenterLocation = src.m_CenterLocation;
 	POSITION pos = src.m_Hosts.GetHeadPosition();
 	while (pos)
 	{
@@ -77,10 +151,10 @@ void CMsgCntJudgeReceiverReport::RunDij()
 		RunDijFor(i);
 	}
 #ifdef DEBUG
-	if (m_bHasMultiNeighbours)
-	{
-		ShowAllDij();
-	}
+// 	if (m_bHasMultiNeighbours)
+// 	{
+// 		ShowAllDij();
+// 	}
 #endif
 }
 
@@ -129,7 +203,7 @@ void CMsgCntJudgeReceiverReport::RunDijFor(int nIndex)
 	while (searchingHosts.GetSize() > 0)
 	{
 		CJudgeDijPair searchingPair = searchingHosts.RemoveHead();
-		m_ArrItems[nIndex].m_Hosts.GetAt(searchingPair.m_Group).m_HopDestinations.AddTail(searchingPair.m_pItem);
+		m_ArrItems[nIndex].m_HopDestinations[searchingPair.m_pItem->m_pCenterHost->m_nId] = searchingPair.m_Group;
 		CList<CJudgeTmpRouteEntry> & currentNeighbours = searchingPair.m_pItem->m_Hosts;
 		pos = currentNeighbours.GetHeadPosition();
 		while (pos)
@@ -151,6 +225,8 @@ void CMsgCntJudgeReceiverReport::RunDijFor(int nIndex)
 	{
 		m_bHasMultiNeighbours = TRUE;
 	}
+	m_ArrItems[nIndex].m_nNeighbourCount = nAllNeighbourCount;
+	m_ArrItems[nIndex].GenerateAllNeighbourArr();
 }
 
 void CMsgCntJudgeReceiverReport::ShowAllDijFor(int nIndex)
@@ -163,27 +239,16 @@ void CMsgCntJudgeReceiverReport::ShowAllDijFor(int nIndex)
 	CString strOut;
 	strOut.Format(_T("\n--%d"), nIndex);
 	OutputDebugString(strOut);
-	POSITION posDirNeighbor = recentItem.m_Hosts.GetHeadPosition();
-	while (posDirNeighbor)
+
+	int rKey;
+	POSITION rValue;
+
+	POSITION pos = recentItem.m_HopDestinations.GetStartPosition();
+	while (pos)
 	{
-		CList<CReceiverReportItem *> & multiNeighbors = recentItem.m_Hosts.GetNext(posDirNeighbor).m_HopDestinations;
-		if (multiNeighbors.GetSize() == 0)
-		{
-			continue;
-		}
-		POSITION posMulti = multiNeighbors.GetHeadPosition();
-		int nDirId = multiNeighbors.GetNext(posMulti)->m_pCenterHost->m_nId;
-		if (nDirId == m_ArrItems[nIndex].m_pCenterHost->m_nId)
-		{
-			continue;
-		}
-		strOut.Format(_T("\n\t%d : "), nDirId);
+		recentItem.m_HopDestinations.GetNextAssoc(pos, rKey, rValue);
+		strOut.Format(_T("\n\t%d -> %d"), rKey, recentItem.m_Hosts.GetAt(rValue).m_HopFrom.m_pHost->m_nId);
 		OutputDebugString(strOut);
-		while (posMulti)
-		{
-			strOut.Format(_T("%d,"), multiNeighbors.GetNext(posMulti)->m_pCenterHost->m_nId);
-			OutputDebugString(strOut);
-		}
 	}
 }
 
@@ -206,11 +271,5 @@ int CJudgeTmpRouteEntry::GetHopFromId() const
 CJudgeTmpRouteEntry & CJudgeTmpRouteEntry::operator=(const CJudgeTmpRouteEntry & src)
 {
 	m_HopFrom = src.m_HopFrom;
-	m_HopDestinations.RemoveAll();
-	POSITION pos = src.m_HopDestinations.GetHeadPosition();
-	while (pos)
-	{
-		m_HopDestinations.AddTail(src.m_HopDestinations.GetNext(pos));
-	}
 	return *this;
 }

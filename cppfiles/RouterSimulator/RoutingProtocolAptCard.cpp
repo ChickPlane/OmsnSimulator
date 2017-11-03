@@ -113,9 +113,9 @@ CString CRoutingProtocolAptCard::GetDebugString() const
 	return GetAptCardProcess()->GetAgencyListString();
 }
 
-void CRoutingProtocolAptCard::OnEngineConnection(const CList<CJudgeTmpRouteEntry> & m_Hosts, const CMsgCntJudgeReceiverReport* pWholeReport)
+void CRoutingProtocolAptCard::OnEngineConnection(BOOL bAnyOneNearby, BOOL bDifferentFromPrev)
 {
-	GetHelloProcess()->OnSomeoneNearby(m_Hosts,pWholeReport);
+	GetHelloProcess()->OnSomeoneNearby(bAnyOneNearby, bDifferentFromPrev);
 }
 
 void CRoutingProtocolAptCard::OnBuiltConnectWithOthers(CRoutingProcessHello * pCallBy, const CPkgAck * pPkg)

@@ -109,9 +109,7 @@ void CConnectionJudge::OnNewSend(WPARAM wParam, LPARAM lParam)
 	for (int i = 0; i < nReportSize; ++i)
 	{
 		judgingItem.m_pHost = m_pData->m_allHosts[i];
-		CReceiverReportItem reportItem;
-		JudgeItem(judgingItem, pReport, reportItem);
-		pJRR->m_ArrItems[i] = reportItem;
+		JudgeItem(judgingItem, pReport, pJRR->m_ArrItems[i]);
 	}
 
 	m_pForecast->GiveBackReport(posOccupyReport);
@@ -176,6 +174,7 @@ void CConnectionJudge::JudgeItem(const CMsgNewJudgeItem & item, CMsgPosFrcstRepo
 
 
 	CDoublePoint centerPosition = item.m_pHost->m_schedule.GetPosition(item.m_fSecondId);
+	ret.m_CenterLocation = centerPosition;
 	DWORD OriHashValue = m_pData->GetHashValue(centerPosition.m_X, centerPosition.m_Y);
 	if (!m_pData->HasHash(centerPosition))
 	{
@@ -218,13 +217,7 @@ void CConnectionJudge::JudgeItem(const CMsgNewJudgeItem & item, CMsgPosFrcstRepo
 
 		}
 	}
-// 	if (bFindSelf == FALSE)
-// 	{
-// 		CHost * pLookingFor = item.m_pHost;
-// 		CHostGui findGui;
-// 		int nKey = pReport->FindHost(pLookingFor, findGui);
-// 		int k = 3;
-// 	}
+	ret.GenerateDirNeighbourArr();
 }
 
 BEGIN_MESSAGE_MAP(CConnectionJudge, CWinThread)

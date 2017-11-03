@@ -50,7 +50,7 @@ void CRoutingProtocol::OnReceivedMsg(const CYell * pMsg)
 	}
 }
 
-void CRoutingProtocol::OnEngineConnection(const CList<CJudgeTmpRouteEntry> & m_Hosts, const CMsgCntJudgeReceiverReport* pWholeReport)
+void CRoutingProtocol::OnEngineConnection(BOOL bAnyOneNearby, BOOL bDifferentFromPrev)
 {
 
 }

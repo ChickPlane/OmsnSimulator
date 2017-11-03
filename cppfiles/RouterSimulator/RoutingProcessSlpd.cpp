@@ -114,14 +114,21 @@ void CRoutingProcessSlpd::OnReceiveNewPseudoPkg(const CPkgSlpd * pPkg)
 	}
 
 	CString strLog;
-	strLog.Format(_T("[slpd] %d %d %d"), pPkg->m_pTestSession->m_nSessionId, m_pProtocol->GetHostId(), pPkg->m_nRemainTimes);
-	WriteLog(strLog);
 
-	CTimeOutPair<CSlpdUserAndPseudo> pairUserId;
-	pairUserId.m_lnTimeOut = pPkg->m_lnTimeout;
-	pairUserId.m_Value.m_lnPseudonym = pPkg->m_nPseudonym;
-	pairUserId.m_Value.m_lnUserId = pPkg->GetOriginalRequester();
-	CTimeOutPair<CSlpdUserAndPseudo>::InsertToTimeoutPairList(pairUserId, m_PseudonymList);
+	if (pPkg->m_nRemainTimes <= m_nK)
+	{
+		strLog.Format(_T("[slpd] %d %d %d"), pPkg->m_pTestSession->m_nSessionId, m_pProtocol->GetHostId(), pPkg->m_nRemainTimes);
+		CTimeOutPair<CSlpdUserAndPseudo> pairUserId;
+		pairUserId.m_lnTimeOut = pPkg->m_lnTimeout;
+		pairUserId.m_Value.m_lnPseudonym = pPkg->m_nPseudonym;
+		pairUserId.m_Value.m_lnUserId = pPkg->GetOriginalRequester();
+		CTimeOutPair<CSlpdUserAndPseudo>::InsertToTimeoutPairList(pairUserId, m_PseudonymList);
+	}
+	else
+	{
+		strLog.Format(_T("[slpd] Create:%d from %d %d"), pPkg->m_pTestSession->m_nSessionId, m_pProtocol->GetHostId());
+	}
+	WriteLog(strLog);
 
 	if (pPkg->m_nRemainTimes == 0)
 	{

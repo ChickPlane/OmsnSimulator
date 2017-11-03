@@ -2,10 +2,12 @@
 #include "RoutingProcessHello.h"
 #include "Yell.h"
 #include "Sentence.h"
+#include "RoutingProtocol.h"
 
 
 CRoutingProcessHello::CRoutingProcessHello()
 	: m_bIsSearching(FALSE)
+	, m_bSendHello(TRUE)
 {
 }
 
@@ -51,14 +53,12 @@ void CRoutingProcessHello::OnReceivePkgFromNetwork(const CSentence * pPkg, CList
 	}
 }
 
-void CRoutingProcessHello::OnSomeoneNearby(const CList<CJudgeTmpRouteEntry> & m_Hosts, const CMsgCntJudgeReceiverReport* pWholeReport)
+void CRoutingProcessHello::OnSomeoneNearby(BOOL bAnyOneNearby, BOOL bDifferentFromPrev)
 {
-	if (!IsDifferentList(m_Hosts, pWholeReport))
+	if (m_bSendHello && bAnyOneNearby)
 	{
-		return;
+		SendHelloPackage();
 	}
-	UpdateEncounterMap(m_Hosts);
-	SendHelloPackage();
 }
 
 void CRoutingProcessHello::StartWork(BOOL bStart)
@@ -88,46 +88,6 @@ void CRoutingProcessHello::SendHelloPackage()
 	{
 		ASSERT(0);
 	}
-}
-
-BOOL CRoutingProcessHello::IsDifferentList(const CList<CJudgeTmpRouteEntry> & m_Hosts, const CMsgCntJudgeReceiverReport* pWholeReport)
-{
-	if (m_Hosts.GetSize() > m_HostEncounterMap.GetSize())
-	{
-		FALSE;
-	}
-	SIM_TIME lnCurrentTime = GetSimTime();
-	POSITION pos = m_Hosts.GetHeadPosition();
-	while (pos)
-	{
-		CHost * pHost = m_Hosts.GetNext(pos).m_HopFrom.m_pHost;
-		SIM_TIME lnEncounterTime;
-		if (!m_HostEncounterMap.Lookup(pHost, lnEncounterTime))
-		{
-			return TRUE;
-		}
-		else
-		{
-			if (lnCurrentTime - lnEncounterTime > m_lnSearchInterval)
-			{
-				return TRUE;
-			}
-		}
-	}
-	return FALSE;
-}
-
-BOOL CRoutingProcessHello::UpdateEncounterMap(const CList<CJudgeTmpRouteEntry> & m_Hosts)
-{
-	m_HostEncounterMap.RemoveAll();
-	SIM_TIME lnCurrentTime = GetSimTime();
-	POSITION pos = m_Hosts.GetHeadPosition();
-	while (pos)
-	{
-		CHost * pHost = m_Hosts.GetNext(pos).m_HopFrom.m_pHost;
-		m_HostEncounterMap[pHost] = lnCurrentTime;
-	}
-	return FALSE;
 }
 
 SIM_TIME CRoutingProcessHello::m_lnSearchInterval = 10000;

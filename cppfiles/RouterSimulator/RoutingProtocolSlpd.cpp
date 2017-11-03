@@ -56,7 +56,11 @@ void CRoutingProtocolSlpd::SetLocalParameters(int nBswCopyCount)
 
 COLORREF CRoutingProtocolSlpd::GetImportantLevel() const
 {
-	return RGB(0, 0, 150);
+	if (GetSlpdProcess()->GetObfuscationCount() > 0)
+	{
+		return RGB(255, 0, 0);
+	}
+	return RGB(50, 50, 150);
 }
 
 int CRoutingProtocolSlpd::GetInfoList(CMsgShowInfo & allMessages) const
@@ -86,9 +90,9 @@ CString CRoutingProtocolSlpd::GetDebugString() const
 	return _T("");
 }
 
-void CRoutingProtocolSlpd::OnEngineConnection(const CList<CJudgeTmpRouteEntry> & m_Hosts, const CMsgCntJudgeReceiverReport* pWholeReport)
+void CRoutingProtocolSlpd::OnEngineConnection(BOOL bAnyOneNearby, BOOL bDifferentFromPrev)
 {
-	GetHelloProcess()->OnSomeoneNearby(m_Hosts,pWholeReport);
+	GetHelloProcess()->OnSomeoneNearby(bAnyOneNearby, bDifferentFromPrev);
 }
 
 BOOL CRoutingProtocolSlpd::IsTrustful(CRoutingProcessSlpd * pCallBy, const CRoutingProtocol * pOther) const
@@ -116,6 +120,7 @@ void CRoutingProtocolSlpd::OnNewSlpdPseudoOver(CRoutingProcessSlpd * pCallBy, co
 	pNewQuery->m_pTestSession = pTestSession;
 
 	GetQueryProcess()->InitNewPackage(pNewQuery, pPkg->m_RecverId, pTestSession->m_lnTimeOut);
+	pNewQuery->m_uSenderId = pPkg->m_nPseudonym;
 	GetQueryProcess()->InsertToDataMap(pNewQuery);
 }
 
@@ -248,10 +253,11 @@ void CRoutingProtocolSlpd::OnBswPkgReachDestination(CRoutingProcessBsw * pCallBy
 	{
 		CPkgSlpdReply * pReply = (CPkgSlpdReply *)pPkg;
 
-		if (!pReply->m_bIsPseudonym)
+		if (pReply->m_bIsPseudonym)
 		{
 			// Is an agency
 			CPkgSlpdReply * pNewReply = ForwardToOriginal(pReply);
+			GetReplyProcess()->InsertToDataMap(pNewReply);
 
 			strLog.Format(_T("\nAgency %d To %d"), GetHostId(), pNewReply->GetReceiverId());
 			WriteLog(strLog);
@@ -260,9 +266,11 @@ void CRoutingProtocolSlpd::OnBswPkgReachDestination(CRoutingProcessBsw * pCallBy
 		else
 		{
 			// The original requirestor.
-			strLog.Format(_T("\nOri req %d"), GetHostId());
-			WriteLog(strLog);
-			SetMissionRecord(pReply->m_pTestSession->m_nSessionId, REC_SLPD_ST_REP_RETURN);
+			if (SetMissionRecord(pReply->m_pTestSession->m_nSessionId, REC_SLPD_ST_REP_RETURN))
+			{
+				strLog.Format(_T("\nOri req %d"), GetHostId());
+				WriteLog(strLog);
+			}
 		}
 		return;
 	}
@@ -280,6 +288,7 @@ void CRoutingProtocolSlpd::OnPackageFirstSent(CRoutingProcessBsw * pCallBy, cons
 CPkgSlpdReply * CRoutingProtocolSlpd::ForwardToOriginal(const CPkgSlpdReply * pReply)
 {
 	CPkgSlpdReply * pRet = new CPkgSlpdReply(*pReply);
+	GetReplyProcess()->InitNewPackage(pRet);
 	CSlpdUserAndPseudo forwardRecord;
 	if (!GetSlpdProcess()->IsInPseudonymList(pReply->m_bIsPseudonym, TRUE, forwardRecord))
 	{
@@ -287,6 +296,8 @@ CPkgSlpdReply * CRoutingProtocolSlpd::ForwardToOriginal(const CPkgSlpdReply * pR
 		return NULL;
 	}
 	pRet->m_uReceiverId = forwardRecord.m_lnUserId;
+	pRet->m_bIsPseudonym = FALSE;
+	GetReplyProcess()->MarkProcessIdToSentences(pRet);
 	return pRet;
 }
 
@@ -296,6 +307,10 @@ BOOL CRoutingProtocolSlpd::SetMissionRecord(int nSessionId, int nEventId)
 	gm_allSessions.Lookup(nSessionId, pRecord);
 	if (pRecord)
 	{
+		if (pRecord->m_lnTimes[nEventId] != -1)
+		{
+			return FALSE;
+		}
 		pRecord->m_lnTimes[nEventId] = GetSimTime();
 #ifdef DEBUG
 		CString strLog;

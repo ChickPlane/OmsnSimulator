@@ -21,7 +21,6 @@ public:
 	int GetHopFromId() const;
 
 	CHostGui m_HopFrom;
-	CList<CReceiverReportItem *> m_HopDestinations;
 };
 
 class CReceiverReportItem
@@ -31,9 +30,21 @@ public:
 	CReceiverReportItem(const CReceiverReportItem & src);
 	CReceiverReportItem & operator = (const CReceiverReportItem & src);
 	~CReceiverReportItem();
+
+	void GenerateDirNeighbourArr();
+	void GenerateAllNeighbourArr();
+	CHost * GetNextHop(USERID nDestinationId) const;
+	BOOL IsAnyOneNearby() const;
+
 	BOOL m_bUnicast;
 	CList<CJudgeTmpRouteEntry> m_Hosts;
 	CHost * m_pCenterHost;
+	CDoublePoint m_CenterLocation;
+	int * m_pDirNeighbours;
+	int m_nDirNeighbourCount;
+	int * m_pAllNeighbours;
+	int m_nNeighbourCount;
+	CMap<int, int, POSITION, POSITION> m_HopDestinations;
 };
 
 class CMsgCntJudgeReceiverReport

@@ -3,8 +3,10 @@
 #include "RoutingProtocol.h"
 #include "HostInfo.h"
 #include "MsgShowInfo.h"
-#include "HostGui.h"
 #include "MsgCntJudgeReceiverReport.h"
+
+class CMsgCntJudgeReceiverReport;
+
 class CHost
 {
 public:
@@ -15,10 +17,12 @@ public:
 	virtual double GetDefaultSpeed() const;
 	virtual void SetSpeed(double fSpeed);
 	virtual void OnHearMsg(const CYell * pYell);
-	virtual void OnConnection(const CList<CJudgeTmpRouteEntry> & m_Hosts, const CMsgCntJudgeReceiverReport* pWholeReport);
+	virtual void UpdateNetworkLocations(const CMsgCntJudgeReceiverReport* pWholeReport);
+	virtual void OnEnterNewTimePeriod();
 	virtual void OnPackageArrived(const CQueryMission * pMission);
 	virtual bool IsReceivedPackage(const CQueryMission * pMission);
 	virtual void GetAllCarryingMessages(CMsgShowInfo & allMessages);
+	const CMsgCntJudgeReceiverReport* GetRecentReport() const;
 
 	CDoublePoint GetPosition(SIM_TIME lnSimTime) const;
 	void Reset();
@@ -28,7 +32,20 @@ public:
 	CRoutingProtocol * m_pProtocol;
 	int m_nId;
 	CMap<int, int, int, int> m_nReceivedMsgs;
+
+protected:
+	virtual BOOL IsDifferentList(const CReceiverReportItem & reportItem);
+
 protected:
 	double m_fSpeed;
+
+private:
+	int * m_pDirNeighbours;
+	int m_nDirNeighbourCount;
+	int * m_pAllNeighbours;
+	int m_nAllNeighbourCount;
+	const CMsgCntJudgeReceiverReport* m_pCurrentReport;
+	BOOL m_bDifferentFromPrev;
+	BOOL m_bAnyOneNearby;
 };
 

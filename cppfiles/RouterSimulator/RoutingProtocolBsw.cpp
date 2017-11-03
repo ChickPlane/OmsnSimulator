@@ -76,9 +76,9 @@ COLORREF CRoutingProtocolBsw::GetImportantLevel() const
 	}
 }
 
-void CRoutingProtocolBsw::OnEngineConnection(const CList<CJudgeTmpRouteEntry> & m_Hosts, const CMsgCntJudgeReceiverReport* pWholeReport)
+void CRoutingProtocolBsw::OnEngineConnection(BOOL bAnyOneNearby, BOOL bDifferentFromPrev)
 {
-	GetHelloProcess()->OnSomeoneNearby(m_Hosts, pWholeReport);
+	GetHelloProcess()->OnSomeoneNearby(bAnyOneNearby, bDifferentFromPrev);
 }
 
 void CRoutingProtocolBsw::OnBuiltConnectWithOthers(CRoutingProcessHello * pCallBy, const CPkgAck * pPkg)

@@ -1,34 +1,36 @@
 #pragma once
 #include "RoutingProtocol.h"
-#include "RoutingProcessSlpd.h"
+#include "RoutingProcessMultiHop.h"
 #include "RoutingProcessHello.h"
 #include "RoutingProcessBSW.h"
-#include "TestRecordSlpd.h"
+#include "PkgMhlpp.h"
+#include "TimeOutPair.h"
+#include "TestRecordMhlpp.h"
 
-class CRoutingProtocolSlpd :
+class CRoutingProtocolMhlpp :
 	public CRoutingProtocol,
-	public CRoutingProcessSlpdUser,
+	public CRoutingProcessMultiHopUser,
 	public CRoutingProcessHelloUser,
 	public CRoutingProcessBswUser
 {
 public:
-	CRoutingProtocolSlpd();
-	virtual ~CRoutingProtocolSlpd();
+	CRoutingProtocolMhlpp();
+	virtual ~CRoutingProtocolMhlpp();
 
 	virtual void CreateQueryMission(const CQueryMission * pMission);
-	static void SetStaticParameters(int nK, double fTrust);
+	static void SetStaticParameters(double fTrust, double fObfuscationRadius);
 	virtual void SetLocalParameters(int nBswCopyCount);
 	virtual COLORREF GetImportantLevel() const;
 	virtual int GetInfoList(CMsgShowInfo & allMessages) const;
 	virtual void Turn(BOOL bOn);
-	virtual int GetDebugNumber(int nParam);
-	CString GetDebugString() const;
+	virtual int GetDebugNumber(int nParam) { return 0; }
+	CString GetDebugString() const { return _T(""); }
 	virtual void OnEngineConnection(BOOL bAnyOneNearby, BOOL bDifferentFromPrev);
 
-	// SLPD
-	virtual BOOL IsTrustful(CRoutingProcessSlpd * pCallBy, const CRoutingProtocol * pOther) const;
-	virtual void OnNewSlpdPseudoOver(CRoutingProcessSlpd * pCallBy, const CPkgSlpd * pPkg);
-	virtual void OnFirstSlpdObfuscationForward(CRoutingProcessSlpd * pCallBy, const CPkgSlpd * pPkg);
+	// MultiHop User
+	virtual CRoutingProtocol * GetNextHop(CRoutingProcessMultiHop * pCallBy, USERID nDestinationId);
+	virtual CPkgMultiHop * GetMultiHopDataCopy(CRoutingProcessMultiHop * pCallBy, const CPkgMultiHop * pPkg);
+	virtual void OnMultiHopMsgArrived(CRoutingProcessMultiHop * pCallBy, const CPkgMultiHop * pPkg);
 
 	// Hello User
 	virtual void OnHearHelloFromOthers(CRoutingProcessHello * pCallBy, const CPkgHello * pPkg) {};
@@ -43,27 +45,36 @@ public:
 	virtual void OnPackageFirstSent(CRoutingProcessBsw * pCallBy, const CPkgBswData * pPkg);
 
 protected:
-	virtual CPkgSlpdReply * ForwardToOriginal(const CPkgSlpdReply * pReply);
+	virtual CPkgMhlppReply * ForwardToOriginal(const CPkgMhlppReply * pReply);
 	BOOL SetMissionRecord(int nSessionId, int nEventId);
 	void SetMissionForwardNumber(int nSessionId, int nForwardNumber);
 	void UpdateSummary();
+	virtual BOOL IsTrustful(int nHostId) const;
 
-	static CPkgSlpdReply * LbsPrepareReply(const CPkgBswData * pQuery);
+	static CPkgMhlppReply * LbsPrepareReply(const CPkgBswData * pQuery);
+	BOOL TryToFinishObfuscation(const CPkgMhlpp & ObfuscatingPkg);
+	BOOL IsFartherThanMe(const CPkgMhlpp & ObfuscatingPkg, CHost * pTheOther);
+	virtual BOOL IsInPseudonymList(USERID lnPseudonym, CMhlppUserAndPseudo & ret);
+	virtual void OnMulNeighbourDifferent(const CMsgCntJudgeReceiverReport* pWholeReport);
 
 private:
-	CRoutingProcessSlpd * GetSlpdProcess() const;
+	CRoutingProcessMultiHop * GetMhProcess() const;
 	CRoutingProcessBsw * GetQueryProcess() const;
 	CRoutingProcessBsw * GetReplyProcess() const;
 	CRoutingProcessHello * GetHelloProcess() const;
 
 public:
-	static CMap<int, int, CTestRecordSlpd *, CTestRecordSlpd *> gm_allSessions;
+	static CMap<int, int, CTestRecordMhlpp *, CTestRecordMhlpp *> gm_allSessions;
 
 private:
+	CList<CTimeOutPair<CPkgMhlpp>> m_WaitingList;
+	CList<CTimeOutPair<CMhlppUserAndPseudo>> m_Pseudonyms;
 	int m_nHelloProcessId;
 	int m_nQueryBswProcessId;
 	int m_nReplyBswProcessId;
-	int m_nSlpdProcessId;
+	int m_nMhProcessId;
 	static double gm_fTrust;
+	static double gm_fObfuscationRadius;
+	static int gm_nPseudonymMax;
 };
 

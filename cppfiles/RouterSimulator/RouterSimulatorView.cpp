@@ -22,6 +22,7 @@
 #include "MainFrm.h"
 #include "RoutingProtocolSlpd.h"
 #include "RoutingProtocol.h"
+#include "RoutingProtocolMhlpp.h"
 using namespace std;
 
 #ifdef _DEBUG
@@ -29,7 +30,7 @@ using namespace std;
 #endif
 
 #ifdef DEBUG
-#define AUTO_RUN_TEST 1
+#define AUTO_RUN_TEST 0
 #else
 #define AUTO_RUN_TEST 1
 #endif
@@ -193,7 +194,7 @@ void CRouterSimulatorView::DestroyEngine()
 
 void CRouterSimulatorView::InitHostProtocol(const CSimulatorCfg & Cfg)
 {
-	CRoutingProtocol::gm_bEnableLbsp = FALSE;
+	CRoutingProtocol::gm_bEnableLbsp = TRUE;
 
 	double fHigh = Cfg.m_fPrivacyHigh / 100.0;
 	double fLow = Cfg.m_fPrivacyLow / 100.0;
@@ -240,6 +241,22 @@ void CRouterSimulatorView::InitHostProtocol(const CSimulatorCfg & Cfg)
 		{
 			CMobileSocialNetworkHost * pHost = (CMobileSocialNetworkHost *)pDoc->m_pRoadNet->m_allHosts[i];
 			CRoutingProtocolSlpd * pAptCard = new CRoutingProtocolSlpd();
+			pAptCard->SetCommunicateRadius(Cfg.m_fCommunicateRadius);
+			pAptCard->SetEnvironment(pHost, m_pEngine);
+			pAptCard->SetLocalParameters(Cfg.m_nBswCopyCount);
+			pDoc->m_pRoadNet->m_allHosts[i]->m_pProtocol = pAptCard;
+		}
+	}
+	else if (strcmp(Cfg.m_strProtocolName, PROTOCOL_NAME_MHLPP) == 0)
+	{
+		summary.m_pComments = new char[200];
+		strcpy_s(summary.m_pComments, 199, "MHLPP_FIRST_TRY");
+		pMainFrame->WriteLog(_T("SLPD"));
+		CRoutingProtocolMhlpp::SetStaticParameters(fHigh, Cfg.m_fAnonyRadius);
+		for (int i = 0; i < nLength; ++i)
+		{
+			CMobileSocialNetworkHost * pHost = (CMobileSocialNetworkHost *)pDoc->m_pRoadNet->m_allHosts[i];
+			CRoutingProtocolMhlpp * pAptCard = new CRoutingProtocolMhlpp();
 			pAptCard->SetCommunicateRadius(Cfg.m_fCommunicateRadius);
 			pAptCard->SetEnvironment(pHost, m_pEngine);
 			pAptCard->SetLocalParameters(Cfg.m_nBswCopyCount);
