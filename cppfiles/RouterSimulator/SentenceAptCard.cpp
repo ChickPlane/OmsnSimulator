@@ -1,5 +1,7 @@
 #include "stdafx.h"
 #include "SentenceAptCard.h"
+#include "RoutingProcessAptCard.h"
+#include "RoutingProtocol.h"
 
 
 CPkgAptCardHello::CPkgAptCardHello()
@@ -150,7 +152,6 @@ CPkgAptCardCards::CPkgAptCardCards()
 	, m_nCardNumber(0)
 {
 	m_nSentenceType = AC_SENTENCE_TYPE_CARD;
-	m_bInStatistic = FALSE;
 }
 
 CPkgAptCardCards::CPkgAptCardCards(const CPkgAptCardCards & src)
@@ -190,6 +191,42 @@ void CPkgAptCardCards::SetCards(CList<CAppointmentCard *> & SendingList)
 	{
 		m_pCards[nIndex++] = *SendingList.GetNext(pos);
 	}
+}
+
+BOOL CPkgAptCardCards::HasDuplicated()
+{
+	CMap<int, int, CIdAndApt, CIdAndApt> mapAllAc;
+
+	CIdAndApt tmpIA;
+	for (int i = 0; i < m_nCardNumber; ++i)
+	{
+		if (mapAllAc.Lookup(m_pCards[i].m_nCapt, tmpIA))
+		{
+			ASSERT(0);
+			return TRUE;
+		}
+		else
+		{
+			tmpIA.nId = m_pCards[i].m_nCid;
+			tmpIA.nApt = m_pCards[i].m_nCapt;
+			tmpIA.nGroup = 0;
+			mapAllAc[m_pCards[i].m_nCapt] = tmpIA;
+		}
+	}
+	return FALSE;
+}
+
+CString CPkgAptCardCards::GetString() const
+{
+	CString strOut = _T("\n");
+	strOut.Format(_T("\n[AC] %d to %d:"), m_pSender->GetHostId(), m_pSpeakTo->GetHostId());
+	for (int i = 0; i < m_nCardNumber; ++i)
+	{
+		CString strTmp;
+		strTmp.Format(_T("(%d,%d,%d);"), m_pCards[i].m_nCid, m_pCards[i].m_nCapt, m_pCards[i].m_EQ.GetSize());
+		strOut += strTmp;
+	}
+	return strOut;
 }
 
 CPkgAptCardCards & CPkgAptCardCards::operator=(const CPkgAptCardCards & src)

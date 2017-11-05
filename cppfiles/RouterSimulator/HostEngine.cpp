@@ -33,7 +33,7 @@ CHostEngine::CHostEngine()
 	, m_nJudgeMax(6)
 #ifdef DEBUG
 	, m_bEnableMonitor(FALSE)
-	, m_blimitedSpeed(TRUE)
+	, m_blimitedSpeed(FALSE)
 #else
 	, m_bEnableMonitor(FALSE)
 	, m_blimitedSpeed(FALSE)
@@ -114,6 +114,7 @@ void CHostEngine::TransmitMessage(CRoutingProtocol * pFrom, CRoutingProtocol * p
 	if (pMsg->m_nSentenceCount == 0)
 	{
 		delete pMsg;
+		return;
 	}
 	if (m_Summary.IsWorking() && pMsg->IncreaseForwardNumbers() > 0)
 	{
@@ -626,8 +627,10 @@ void CHostEngine::JudgeAllMessages()
 	int kk = 90;
 	int nUnicastNumber = 0;
 	int nBroadcastNumber = 0;
+	static int nRuntimes = 0;
 	do 
 	{
+		++nRuntimes;
 		nUnicastNumber = m_TransmitionUnicast.GetSize();
 		nBroadcastNumber = m_TransmitionBroadcast.GetSize();
 		if (nUnicastNumber == 0 && nBroadcastNumber == 0)
@@ -788,6 +791,7 @@ void CHostEngine::NotifyAllReceivers(const CMsgCntJudgeReceiverReport * pReport,
 		while (pos)
 		{
 			const CHostGui & guiItem = reportRecvers.GetNext(pos).m_HopFrom;
+			ASSERT(tr.m_pFrom == tr.m_pMsg->m_pSender);
 			guiItem.m_pHost->OnHearMsg(tr.m_pMsg);
 		}
 	}
@@ -804,6 +808,8 @@ void CHostEngine::NotifyAllReceivers(const CMsgCntJudgeReceiverReport * pReport,
 			}
 		}
 	}
+	delete tr.m_pMsg;
+	tr.m_pMsg = NULL;
 }
 
 void CHostEngine::OnJudgeOk(WPARAM wParam, LPARAM lParam)

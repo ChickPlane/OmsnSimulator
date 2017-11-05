@@ -10,22 +10,3 @@ enum {
 	REC_AC_ST_REP_RETURN,
 	REC_AC_ST_MAX
 };
-
-enum {
-	SUM_AC_TOTAL_FORWARD,
-	SUM_AC_MAX,
-};
-
-class CTestRecordAptCard :
-	public CTestRecord
-{
-public:
-	CTestRecordAptCard()
-	{
-		for (int i = 0; i < REC_AC_ST_MAX; ++i)
-		{
-			m_lnTimes[i] = -1;
-		}
-	}
-	SIM_TIME m_lnTimes[REC_AC_ST_MAX];
-};

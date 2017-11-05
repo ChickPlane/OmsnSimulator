@@ -30,7 +30,7 @@ using namespace std;
 #endif
 
 #ifdef DEBUG
-#define AUTO_RUN_TEST 0
+#define AUTO_RUN_TEST 1
 #else
 #define AUTO_RUN_TEST 1
 #endif
@@ -251,7 +251,7 @@ void CRouterSimulatorView::InitHostProtocol(const CSimulatorCfg & Cfg)
 	{
 		summary.m_pComments = new char[200];
 		strcpy_s(summary.m_pComments, 199, "MHLPP_FIRST_TRY");
-		pMainFrame->WriteLog(_T("SLPD"));
+		pMainFrame->WriteLog(_T("MHLPP"));
 		CRoutingProtocolMhlpp::SetStaticParameters(fHigh, Cfg.m_fAnonyRadius);
 		for (int i = 0; i < nLength; ++i)
 		{

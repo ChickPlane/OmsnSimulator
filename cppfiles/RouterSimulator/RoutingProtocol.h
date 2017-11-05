@@ -7,6 +7,7 @@
 #include "DoublePoint.h"
 #include "HostGui.h"
 #include "MsgCntJudgeReceiverReport.h"
+#include "TestRecord.h"
 
 class CHost;
 class CHostEngine;
@@ -53,8 +54,17 @@ public:
 	static BOOL gm_bEnableLbsp;
 
 protected:
+	BOOL SetSissionRecord(int nSessionId, int nEventId);
+	BOOL SetSissionForwardNumber(int nSessionId, int nForwardNumber);
+	void UpdateEngineSummary();
+	CTestRecord * GetSessionRecord(int nSessionId);
+
+protected:
 	CHost * m_pHost;
 	double m_fCommunicationRadius;
 	CArray<CRoutingProcess *> m_Processes;
 	CString m_strLogPrefix;
+	static CMap<int, int, CTestRecord *, CTestRecord *> gm_allSessionRecords;
+	int m_nSessionRecordEntrySize;
+	int m_nForwardBoundary;
 };

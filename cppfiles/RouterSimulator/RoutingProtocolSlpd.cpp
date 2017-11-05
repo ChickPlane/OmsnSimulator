@@ -20,6 +20,7 @@ CRoutingProtocolSlpd::CRoutingProtocolSlpd()
 	CRoutingProcessSlpd * pSlpd = new CRoutingProcessSlpd();
 	pSlpd->SetProcessUser(this);
 	m_nSlpdProcessId = AddProcess(pSlpd);
+	m_nSessionRecordEntrySize = REC_SLPD_ST_MAX;
 }
 
 
@@ -29,9 +30,6 @@ CRoutingProtocolSlpd::~CRoutingProtocolSlpd()
 
 void CRoutingProtocolSlpd::CreateQueryMission(const CQueryMission * pMission)
 {
-	CTestRecordSlpd * pNewSessionRecord = new CTestRecordSlpd();
-	gm_allSessions.SetAt(pMission->m_nMissionId, pNewSessionRecord);
-
 	CPkgSlpd * pPkgSlpd = new CPkgSlpd();
 	pPkgSlpd->m_pTestSession = new CTestSession();
 	pPkgSlpd->m_pTestSession->m_lnTimeOut = pMission->m_lnTimeOut;
@@ -39,7 +37,7 @@ void CRoutingProtocolSlpd::CreateQueryMission(const CQueryMission * pMission)
 	pPkgSlpd->m_RecverId = pMission->m_RecverId;
 	GetSlpdProcess()->CreateQueryMission(pPkgSlpd);
 
-	SetMissionRecord(pMission->m_nMissionId, REC_SLPD_ST_GENERATE);
+	SetSissionRecord(pMission->m_nMissionId, REC_SLPD_ST_GENERATE);
 }
 
 void CRoutingProtocolSlpd::SetStaticParameters(int nK, double fTrust)
@@ -126,7 +124,7 @@ void CRoutingProtocolSlpd::OnNewSlpdPseudoOver(CRoutingProcessSlpd * pCallBy, co
 
 void CRoutingProtocolSlpd::OnFirstSlpdObfuscationForward(CRoutingProcessSlpd * pCallBy, const CPkgSlpd * pPkg)
 {
-	SetMissionRecord(pPkg->m_pTestSession->m_nSessionId, REC_SLPD_ST_FIRSTSEND);
+	SetSissionRecord(pPkg->m_pTestSession->m_nSessionId, REC_SLPD_ST_FIRSTSEND);
 }
 
 void CRoutingProtocolSlpd::OnBuiltConnectWithOthers(CRoutingProcessHello * pCallBy, const CPkgAck * pPkg)
@@ -231,8 +229,8 @@ void CRoutingProtocolSlpd::OnBswPkgReachDestination(CRoutingProcessBsw * pCallBy
 		strLog.Format(_T("\nDelievery to %d"), GetHostId());
 		WriteLog(strLog);
 
-		SetMissionRecord(pQuery->m_pTestSession->m_nSessionId, REC_SLPD_ST_REACH);
-		SetMissionForwardNumber(pQuery->m_pTestSession->m_nSessionId, pQuery->m_pTestSession->m_nForwardNumber);
+		SetSissionRecord(pQuery->m_pTestSession->m_nSessionId, REC_SLPD_ST_REACH);
+		SetSissionForwardNumber(pQuery->m_pTestSession->m_nSessionId, pQuery->m_pTestSession->m_nForwardNumber);
 
 		if (!gm_bEnableLbsp)
 		{
@@ -243,10 +241,11 @@ void CRoutingProtocolSlpd::OnBswPkgReachDestination(CRoutingProcessBsw * pCallBy
 		GetReplyProcess()->InitNewPackage(pNewReply);
 		pNewReply->m_pSpeakTo = pQuery->m_pSender;
 		GetReplyProcess()->MarkProcessIdToSentences(pNewReply);
+		pNewReply->m_pTestSession->m_bInStatistic = FALSE;
 
 		TransmitSingleSentence(pNewReply);
 
-		SetMissionRecord(pQuery->m_pTestSession->m_nSessionId, REC_SLPD_ST_REP_LEAVE);
+		SetSissionRecord(pQuery->m_pTestSession->m_nSessionId, REC_SLPD_ST_REP_LEAVE);
 		return;
 	}
 	if (pCallBy == GetReplyProcess())
@@ -266,7 +265,7 @@ void CRoutingProtocolSlpd::OnBswPkgReachDestination(CRoutingProcessBsw * pCallBy
 		else
 		{
 			// The original requirestor.
-			if (SetMissionRecord(pReply->m_pTestSession->m_nSessionId, REC_SLPD_ST_REP_RETURN))
+			if (SetSissionRecord(pReply->m_pTestSession->m_nSessionId, REC_SLPD_ST_REP_RETURN))
 			{
 				strLog.Format(_T("\nOri req %d"), GetHostId());
 				WriteLog(strLog);
@@ -281,7 +280,7 @@ void CRoutingProtocolSlpd::OnPackageFirstSent(CRoutingProcessBsw * pCallBy, cons
 {
 	if (pCallBy == GetQueryProcess())
 	{
-		SetMissionRecord(pPkg->m_pTestSession->m_nSessionId, REC_SLPD_ST_OBFUSCATION_OVER);
+		SetSissionRecord(pPkg->m_pTestSession->m_nSessionId, REC_SLPD_ST_OBFUSCATION_OVER);
 	}
 }
 
@@ -290,7 +289,7 @@ CPkgSlpdReply * CRoutingProtocolSlpd::ForwardToOriginal(const CPkgSlpdReply * pR
 	CPkgSlpdReply * pRet = new CPkgSlpdReply(*pReply);
 	GetReplyProcess()->InitNewPackage(pRet);
 	CSlpdUserAndPseudo forwardRecord;
-	if (!GetSlpdProcess()->IsInPseudonymList(pReply->m_bIsPseudonym, TRUE, forwardRecord))
+	if (!GetSlpdProcess()->IsInPseudonymList(pReply->m_uReceiverId, TRUE, forwardRecord))
 	{
 		ASSERT(0);
 		return NULL;
@@ -299,83 +298,6 @@ CPkgSlpdReply * CRoutingProtocolSlpd::ForwardToOriginal(const CPkgSlpdReply * pR
 	pRet->m_bIsPseudonym = FALSE;
 	GetReplyProcess()->MarkProcessIdToSentences(pRet);
 	return pRet;
-}
-
-BOOL CRoutingProtocolSlpd::SetMissionRecord(int nSessionId, int nEventId)
-{
-	CTestRecordSlpd * pRecord = NULL;
-	gm_allSessions.Lookup(nSessionId, pRecord);
-	if (pRecord)
-	{
-		if (pRecord->m_lnTimes[nEventId] != -1)
-		{
-			return FALSE;
-		}
-		pRecord->m_lnTimes[nEventId] = GetSimTime();
-#ifdef DEBUG
-		CString strLog;
-		if (nEventId == REC_SLPD_ST_GENERATE)
-		{
-			strLog.Format(_T("PKG %d: E%d T(%d)"), nSessionId, nEventId, pRecord->m_lnTimes[nEventId]);
-		}
-		else
-		{
-			strLog.Format(_T("PKG %d: E%d T(%d) TG(%d)"), nSessionId, nEventId, pRecord->m_lnTimes[nEventId], pRecord->m_lnTimes[nEventId] - pRecord->m_lnTimes[REC_SLPD_ST_GENERATE]);
-		}
-		WriteLog(strLog);
-#endif
-		UpdateSummary();
-		return TRUE;
-	}
-	return FALSE;
-}
-
-void CRoutingProtocolSlpd::SetMissionForwardNumber(int nSessionId, int nForwardNumber)
-{
-	CTestRecordSlpd * pRecord = NULL;
-	gm_allSessions.Lookup(nSessionId, pRecord);
-	if (pRecord)
-	{
-		pRecord->m_nForwardTimes = nForwardNumber;
-		UpdateSummary();
-	}
-}
-
-void CRoutingProtocolSlpd::UpdateSummary()
-{
-	CStatisticSummary & summary = GetEngine()->GetSummary();
-	if (summary.m_RecentData.m_ProtocolRecords.GetSize() != REC_SLPD_ST_MAX + SUM_SLPD_MAX)
-	{
-		summary.m_RecentData.m_ProtocolRecords.SetSize(REC_SLPD_ST_MAX + SUM_SLPD_MAX);
-	}
-
-	for (int i = 0; i < REC_SLPD_ST_MAX + SUM_SLPD_MAX; ++i)
-	{
-		summary.m_RecentData.m_ProtocolRecords[i] = 0;
-	}
-
-	POSITION pos = gm_allSessions.GetStartPosition();
-	while (pos)
-	{
-		CTestRecordSlpd * pRecord = NULL;
-		int nId = 0;
-		gm_allSessions.GetNextAssoc(pos, nId, pRecord);
-		int i = 0;
-		for (i = 0; i < REC_SLPD_ST_MAX; ++i)
-		{
-			if (pRecord->m_lnTimes[i] >= 0)
-			{
-				summary.m_RecentData.m_ProtocolRecords[i]++;
-			}
-		}
-		summary.m_RecentData.m_ProtocolRecords[i] += pRecord->m_nForwardTimes;
-	}
-	int nReachNumber = summary.m_RecentData.m_ProtocolRecords[REC_SLPD_ST_REACH];
-	if (nReachNumber > 0)
-	{
-		summary.m_RecentData.m_ProtocolRecords[REC_SLPD_ST_MAX + SUM_SLPD_ST_FORWARD] /= nReachNumber;
-	}
-	GetEngine()->ChangeSummary();
 }
 
 CPkgSlpdReply * CRoutingProtocolSlpd::LbsPrepareReply(const CPkgBswData * pQuery)
@@ -407,7 +329,5 @@ CRoutingProcessHello * CRoutingProtocolSlpd::GetHelloProcess() const
 {
 	return (CRoutingProcessHello*)m_Processes[m_nHelloProcessId];
 }
-
-CMap<int, int, CTestRecordSlpd *, CTestRecordSlpd *> CRoutingProtocolSlpd::gm_allSessions;
 
 double CRoutingProtocolSlpd::gm_fTrust = 1;

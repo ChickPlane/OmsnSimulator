@@ -10,18 +10,3 @@ enum {
 	REC_ST_REP_RETURN,
 	REC_ST_MAX
 };
-
-enum {
-	SUM_BSW_TOTAL_FORWARD,
-	SUM_BSW_MAX
-};
-
-class CTestRecordBsw :
-	public CTestRecord
-{
-public:
-	CTestRecordBsw();
-	virtual ~CTestRecordBsw();
-
-	SIM_TIME m_lnTimes[REC_ST_MAX];
-};

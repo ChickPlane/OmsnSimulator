@@ -130,8 +130,10 @@ void CRoutingProcessBsw::OnReceivePkgFromNetwork(const CSentence * pPkg, CList<C
 			CBswIdAndTimeout bt;
 			bt.m_nBswId = pBswPkg->m_nBswId;
 			bt.m_lnTimeout = pBswPkg->m_lnTimeOut;
-			InsertToDestinationRecvRecord(bt);
 			m_pUser->OnBswPkgReachDestination(this, pBswPkg);
+			InsertToDestinationRecvRecord(bt);
+			int k = 3;
+			++k;
 		}
 		else
 		{
@@ -240,6 +242,9 @@ void CRoutingProcessBsw::InsertToDataMap(CPkgBswData* pPkg)
 void CRoutingProcessBsw::InsertToDestinationRecvRecord(const CBswIdAndTimeout & BT)
 {
 	InsertToBTList(BT, m_PkgRecvRecord);
+	CString strOut;
+	strOut.Format(_T("\n[BSW] %d insert %d"), m_pProtocol->GetHostId(), BT.m_nBswId);
+	OutputDebugString(strOut);
 }
 
 BOOL CRoutingProcessBsw::IsDestRecvRecordExist(int nBswId)

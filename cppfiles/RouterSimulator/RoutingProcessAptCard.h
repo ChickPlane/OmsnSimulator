@@ -8,6 +8,14 @@
 #include "SentenceAptCard.h"
 #include "Yell.h"
 
+class CIdAndApt
+{
+public:
+	int nId;
+	int nApt;
+	int nGroup;
+};
+
 class CRoutingProcessAptCard;
 
 class CRoutingProcessACUser
@@ -43,6 +51,8 @@ public:
 	static void SetParameters(int nK, int nSeg, SIM_TIME lnAcTimeout);
 	virtual BOOL GetAndRemoveAgencyRecord(USERID uOldId, int nOldApt, CAptCardAgencyRecord & retRecord);
 
+	static BOOL CheckSameAptCard(const CRoutingProcessAptCard * pA, const CRoutingProcessAptCard * pB);
+
 public:
 	virtual int GetInfoList(CMsgShowInfo & allMessages) const;
 	virtual COLORREF GetInportantLevel() const;
@@ -72,6 +82,7 @@ protected:
 	double TestAptCardMark(CAppointmentCard * pCard, SIM_TIME lnTimeout);
 	void CheckAptCards(const CAppointmentCard * pCard);
 	int GetReadyCount() const;
+	BOOL CheckDuplicated();
 
 protected:
 	static int gm_nK;

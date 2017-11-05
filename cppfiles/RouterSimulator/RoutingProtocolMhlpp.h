@@ -46,9 +46,6 @@ public:
 
 protected:
 	virtual CPkgMhlppReply * ForwardToOriginal(const CPkgMhlppReply * pReply);
-	BOOL SetMissionRecord(int nSessionId, int nEventId);
-	void SetMissionForwardNumber(int nSessionId, int nForwardNumber);
-	void UpdateSummary();
 	virtual BOOL IsTrustful(int nHostId) const;
 
 	static CPkgMhlppReply * LbsPrepareReply(const CPkgBswData * pQuery);
@@ -62,9 +59,6 @@ private:
 	CRoutingProcessBsw * GetQueryProcess() const;
 	CRoutingProcessBsw * GetReplyProcess() const;
 	CRoutingProcessHello * GetHelloProcess() const;
-
-public:
-	static CMap<int, int, CTestRecordMhlpp *, CTestRecordMhlpp *> gm_allSessions;
 
 private:
 	CList<CTimeOutPair<CPkgMhlpp>> m_WaitingList;

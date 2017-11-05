@@ -9,6 +9,8 @@
 
 CRoutingProtocol::CRoutingProtocol()
 	: m_fCommunicationRadius(0)
+	, m_nSessionRecordEntrySize(0)
+	, m_nForwardBoundary(0)
 {
 }
 
@@ -191,6 +193,83 @@ void CRoutingProtocol::WriteLog(const CString & strLog)
 }
 
 BOOL CRoutingProtocol::gm_bEnableLbsp = TRUE;
+
+BOOL CRoutingProtocol::SetSissionRecord(int nSessionId, int nEventId)
+{
+	CTestRecord * pRecord = GetSessionRecord(nSessionId);
+	if (pRecord->m_pMilestoneTime[nEventId] == INVALID_SIMTIME)
+	{
+		pRecord->m_pMilestoneTime[nEventId] = GetSimTime();
+		UpdateEngineSummary();
+		return TRUE;
+	}
+	else
+	{
+		return FALSE;
+	}
+}
+
+BOOL CRoutingProtocol::SetSissionForwardNumber(int nSessionId, int nForwardNumber)
+{
+	CTestRecord * pRecord = GetSessionRecord(nSessionId);
+	if (pRecord->m_nForwardTimes == 0)
+	{
+		pRecord->m_nForwardTimes = nForwardNumber;
+		UpdateEngineSummary();
+		return TRUE;
+	}
+	return FALSE;
+}
+
+void CRoutingProtocol::UpdateEngineSummary()
+{
+	CStatisticSummary & summary = GetEngine()->GetSummary();
+	if (summary.m_RecentData.m_ProtocolRecords.GetSize() != m_nSessionRecordEntrySize + ENGINE_RECORD_MAX)
+	{
+		summary.m_RecentData.m_ProtocolRecords.SetSize(m_nSessionRecordEntrySize + ENGINE_RECORD_MAX);
+	}
+
+	for (int i = 0; i < m_nSessionRecordEntrySize + ENGINE_RECORD_MAX; ++i)
+	{
+		summary.m_RecentData.m_ProtocolRecords[i] = 0;
+	}
+
+	POSITION pos = gm_allSessionRecords.GetStartPosition();
+	while (pos)
+	{
+		CTestRecord * pRecord = NULL;
+		int nId = 0;
+		gm_allSessionRecords.GetNextAssoc(pos, nId, pRecord);
+		int i = 0;
+		for (i = 0; i < m_nSessionRecordEntrySize; ++i)
+		{
+			if (pRecord->m_pMilestoneTime[i] > INVALID_SIMTIME)
+			{
+				summary.m_RecentData.m_ProtocolRecords[i]++;
+			}
+		}
+		summary.m_RecentData.m_ProtocolRecords[i] += pRecord->m_nForwardTimes;
+	}
+	int nReachNumber = summary.m_RecentData.m_ProtocolRecords[m_nForwardBoundary];
+	if (nReachNumber > 0)
+	{
+		summary.m_RecentData.m_ProtocolRecords[m_nSessionRecordEntrySize + ENGINE_RECORD_FORWARD_TIMES] /= nReachNumber;
+	}
+	GetEngine()->ChangeSummary();
+}
+
+CTestRecord * CRoutingProtocol::GetSessionRecord(int nSessionId)
+{
+	CTestRecord * pRecord = NULL;
+	if (!gm_allSessionRecords.Lookup(nSessionId, pRecord))
+	{
+		pRecord = new CTestRecord(m_nSessionRecordEntrySize);
+		gm_allSessionRecords[nSessionId] = pRecord;
+	}
+	return pRecord;
+}
+
+CMap<int, int, CTestRecord *, CTestRecord *> CRoutingProtocol::gm_allSessionRecords;
 
 CString CRoutingProtocol::GetDebugString() const
 {

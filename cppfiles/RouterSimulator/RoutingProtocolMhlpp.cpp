@@ -20,6 +20,7 @@ CRoutingProtocolMhlpp::CRoutingProtocolMhlpp()
 	CRoutingProcessMultiHop * pMh = new CRoutingProcessMultiHop();
 	pMh->SetProcessUser(this);
 	m_nMhProcessId = AddProcess(pMh);
+	m_nSessionRecordEntrySize = REC_MHLPP_ST_MAX;
 }
 
 
@@ -29,6 +30,7 @@ CRoutingProtocolMhlpp::~CRoutingProtocolMhlpp()
 
 void CRoutingProtocolMhlpp::CreateQueryMission(const CQueryMission * pMission)
 {
+	SetSissionRecord(pMission->m_nMissionId, REC_MHLPP_ST_GENERATE);
 	CPkgMhlpp NewPkg;
 	NewPkg.m_pTestSession = new CTestSession();
 	NewPkg.m_pTestSession->m_lnTimeOut = pMission->m_lnTimeOut;
@@ -169,12 +171,19 @@ void CRoutingProtocolMhlpp::OnMulNeighbourDifferent(const CMsgCntJudgeReceiverRe
 	{
 		posOld = pos;
 		CPkgMhlpp & testing = m_WaitingList.GetNext(pos).m_Value;
-		if (IsFartherThanMe(testing, pNextHop))
+		if (testing.m_bInitialed == FALSE || IsFartherThanMe(testing, pNextHop))
 		{
+			if (testing.m_bInitialed == FALSE)
+			{
+				SetSissionRecord(testing.m_pTestSession->m_nSessionId, REC_MHLPP_ST_FIRSTSEND);
+			}
 			testing.m_nToId = pNextHop->m_nId;
 			testing.m_OriginalPosition = GetHostPostion(GetSimTime());
 			testing.m_bInitialed = TRUE;
 			GetMhProcess()->SendPkgToMultiHopHost(&testing);
+			CString strOut;
+			strOut.Format(_T("\n[MH] %d : %d -> %d"), testing.m_pTestSession->m_nSessionId, GetHostId(), pNextHop->m_nId);
+			OutputDebugString(strOut);
 			m_WaitingList.RemoveAt(posOld);
 		}
 	}
@@ -279,8 +288,8 @@ void CRoutingProtocolMhlpp::OnBswPkgReachDestination(CRoutingProcessBsw * pCallB
 		strLog.Format(_T("\nDelievery to %d"), GetHostId());
 		WriteLog(strLog);
 
-		SetMissionRecord(pQuery->m_pTestSession->m_nSessionId, REC_MHLPP_ST_REACH);
-		SetMissionForwardNumber(pQuery->m_pTestSession->m_nSessionId, pQuery->m_pTestSession->m_nForwardNumber);
+		SetSissionRecord(pQuery->m_pTestSession->m_nSessionId, REC_MHLPP_ST_REACH);
+		SetSissionForwardNumber(pQuery->m_pTestSession->m_nSessionId, pQuery->m_pTestSession->m_nForwardNumber);
 
 		if (!gm_bEnableLbsp)
 		{
@@ -291,10 +300,11 @@ void CRoutingProtocolMhlpp::OnBswPkgReachDestination(CRoutingProcessBsw * pCallB
 		GetReplyProcess()->InitNewPackage(pNewReply);
 		pNewReply->m_pSpeakTo = pQuery->m_pSender;
 		GetReplyProcess()->MarkProcessIdToSentences(pNewReply);
+		pNewReply->m_pTestSession->m_bInStatistic = FALSE;
 
 		TransmitSingleSentence(pNewReply);
 
-		SetMissionRecord(pQuery->m_pTestSession->m_nSessionId, REC_MHLPP_ST_REP_LEAVE);
+		SetSissionRecord(pQuery->m_pTestSession->m_nSessionId, REC_MHLPP_ST_REP_LEAVE);
 		return;
 	}
 	if (pCallBy == GetReplyProcess())
@@ -315,9 +325,11 @@ void CRoutingProtocolMhlpp::OnBswPkgReachDestination(CRoutingProcessBsw * pCallB
 		else
 		{
 			// The original requirestor.
-			strLog.Format(_T("\nOri req %d"), GetHostId());
-			WriteLog(strLog);
-			SetMissionRecord(pReply->m_pTestSession->m_nSessionId, REC_MHLPP_ST_REP_RETURN);
+			if (SetSissionRecord(pReply->m_pTestSession->m_nSessionId, REC_MHLPP_ST_REP_RETURN))
+			{
+				strLog.Format(_T("\nOri req %d"), GetHostId());
+				WriteLog(strLog);
+			}
 		}
 		return;
 	}
@@ -328,7 +340,7 @@ void CRoutingProtocolMhlpp::OnPackageFirstSent(CRoutingProcessBsw * pCallBy, con
 {
 	if (pCallBy == GetQueryProcess())
 	{
-		SetMissionRecord(pPkg->m_pTestSession->m_nSessionId, REC_MHLPP_ST_OBFUSCATION_OVER);
+		SetSissionRecord(pPkg->m_pTestSession->m_nSessionId, REC_MHLPP_ST_OBFUSCATION_OVER);
 	}
 }
 
@@ -337,7 +349,7 @@ CPkgMhlppReply * CRoutingProtocolMhlpp::ForwardToOriginal(const CPkgMhlppReply *
 	CPkgMhlppReply * pRet = new CPkgMhlppReply(*pReply);
 	GetReplyProcess()->InitNewPackage(pRet);
 	CMhlppUserAndPseudo forwardRecord;
-	if (!IsInPseudonymList(pReply->m_bIsPseudonym, forwardRecord))
+	if (!IsInPseudonymList(pReply->m_uReceiverId, forwardRecord))
 	{
 		ASSERT(0);
 		return NULL;
@@ -346,79 +358,6 @@ CPkgMhlppReply * CRoutingProtocolMhlpp::ForwardToOriginal(const CPkgMhlppReply *
 	pRet->m_bIsPseudonym = FALSE;
 	GetReplyProcess()->MarkProcessIdToSentences(pRet);
 	return pRet;
-}
-
-BOOL CRoutingProtocolMhlpp::SetMissionRecord(int nSessionId, int nEventId)
-{
-	CTestRecordMhlpp * pRecord = NULL;
-	gm_allSessions.Lookup(nSessionId, pRecord);
-	if (pRecord)
-	{
-		pRecord->m_lnTimes[nEventId] = GetSimTime();
-#ifdef DEBUG
-		CString strLog;
-		if (nEventId == REC_MHLPP_ST_GENERATE)
-		{
-			strLog.Format(_T("PKG %d: E%d T(%d)"), nSessionId, nEventId, pRecord->m_lnTimes[nEventId]);
-		}
-		else
-		{
-			strLog.Format(_T("PKG %d: E%d T(%d) TG(%d)"), nSessionId, nEventId, pRecord->m_lnTimes[nEventId], pRecord->m_lnTimes[nEventId] - pRecord->m_lnTimes[REC_MHLPP_ST_GENERATE]);
-		}
-		WriteLog(strLog);
-#endif
-		UpdateSummary();
-		return TRUE;
-	}
-	return FALSE;
-}
-
-void CRoutingProtocolMhlpp::SetMissionForwardNumber(int nSessionId, int nForwardNumber)
-{
-	CTestRecordMhlpp * pRecord = NULL;
-	gm_allSessions.Lookup(nSessionId, pRecord);
-	if (pRecord)
-	{
-		pRecord->m_nForwardTimes = nForwardNumber;
-		UpdateSummary();
-	}
-}
-
-void CRoutingProtocolMhlpp::UpdateSummary()
-{
-	CStatisticSummary & summary = GetEngine()->GetSummary();
-	if (summary.m_RecentData.m_ProtocolRecords.GetSize() != REC_MHLPP_ST_MAX + SUM_MHLPP_MAX)
-	{
-		summary.m_RecentData.m_ProtocolRecords.SetSize(REC_MHLPP_ST_MAX + SUM_MHLPP_MAX);
-	}
-
-	for (int i = 0; i < REC_MHLPP_ST_MAX + SUM_MHLPP_MAX; ++i)
-	{
-		summary.m_RecentData.m_ProtocolRecords[i] = 0;
-	}
-
-	POSITION pos = gm_allSessions.GetStartPosition();
-	while (pos)
-	{
-		CTestRecordMhlpp * pRecord = NULL;
-		int nId = 0;
-		gm_allSessions.GetNextAssoc(pos, nId, pRecord);
-		int i = 0;
-		for (i = 0; i < REC_MHLPP_ST_MAX; ++i)
-		{
-			if (pRecord->m_lnTimes[i] >= 0)
-			{
-				summary.m_RecentData.m_ProtocolRecords[i]++;
-			}
-		}
-		summary.m_RecentData.m_ProtocolRecords[i] += pRecord->m_nForwardTimes;
-	}
-	int nReachNumber = summary.m_RecentData.m_ProtocolRecords[REC_MHLPP_ST_REACH];
-	if (nReachNumber > 0)
-	{
-		summary.m_RecentData.m_ProtocolRecords[REC_MHLPP_ST_MAX + SUM_MHLPP_ST_FORWARD] /= nReachNumber;
-	}
-	GetEngine()->ChangeSummary();
 }
 
 BOOL CRoutingProtocolMhlpp::IsTrustful(int nHostId) const
@@ -519,8 +458,6 @@ CRoutingProcessHello * CRoutingProtocolMhlpp::GetHelloProcess() const
 {
 	return (CRoutingProcessHello*)m_Processes[m_nHelloProcessId];
 }
-
-CMap<int, int, CTestRecordMhlpp *, CTestRecordMhlpp *> CRoutingProtocolMhlpp::gm_allSessions;
 
 double CRoutingProtocolMhlpp::gm_fTrust = 1;
 

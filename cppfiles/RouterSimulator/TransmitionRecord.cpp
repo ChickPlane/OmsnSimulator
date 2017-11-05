@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "TransmitionRecord.h"
+#include "Yell.h"
 
 
 CTransmitionRecord::CTransmitionRecord()

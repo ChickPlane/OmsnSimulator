@@ -73,6 +73,8 @@ public:
 	virtual void CleanCards();
 	virtual void SetCardCount(int nCardNumber);
 	virtual void SetCards(CList<CAppointmentCard *> & SendingList);
+	BOOL HasDuplicated();
+	CString GetString() const;
 
 	CAppointmentCard * m_pCards;
 	int m_nCardNumber;

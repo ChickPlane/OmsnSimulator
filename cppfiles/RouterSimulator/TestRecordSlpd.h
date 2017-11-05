@@ -11,19 +11,3 @@ enum {
 	REC_SLPD_ST_REP_RETURN,
 	REC_SLPD_ST_MAX
 };
-
-enum {
-	SUM_SLPD_ST_FORWARD,
-	SUM_SLPD_MAX
-};
-
-class CTestRecordSlpd :
-	public CTestRecord
-{
-public:
-	CTestRecordSlpd();
-	virtual ~CTestRecordSlpd();
-
-	SIM_TIME m_lnTimes[REC_SLPD_ST_MAX];
-};
-

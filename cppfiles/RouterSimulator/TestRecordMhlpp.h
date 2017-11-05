@@ -11,18 +11,3 @@ enum {
 	REC_MHLPP_ST_REP_RETURN,
 	REC_MHLPP_ST_MAX
 };
-
-enum {
-	SUM_MHLPP_ST_FORWARD,
-	SUM_MHLPP_MAX
-};
-
-class CTestRecordMhlpp :
-	public CTestRecord
-{
-public:
-	CTestRecordMhlpp();
-	virtual ~CTestRecordMhlpp();
-	SIM_TIME m_lnTimes[REC_MHLPP_ST_MAX];
-};
-

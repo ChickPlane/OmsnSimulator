@@ -1,6 +1,7 @@
 #pragma once
 
 typedef long long SIM_TIME;
+#define INVALID_SIMTIME -1
 typedef unsigned int USERID;
 typedef enum 
 {

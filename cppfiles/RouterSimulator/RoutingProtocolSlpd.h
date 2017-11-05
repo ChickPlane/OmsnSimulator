@@ -44,9 +44,6 @@ public:
 
 protected:
 	virtual CPkgSlpdReply * ForwardToOriginal(const CPkgSlpdReply * pReply);
-	BOOL SetMissionRecord(int nSessionId, int nEventId);
-	void SetMissionForwardNumber(int nSessionId, int nForwardNumber);
-	void UpdateSummary();
 
 	static CPkgSlpdReply * LbsPrepareReply(const CPkgBswData * pQuery);
 
@@ -55,9 +52,6 @@ private:
 	CRoutingProcessBsw * GetQueryProcess() const;
 	CRoutingProcessBsw * GetReplyProcess() const;
 	CRoutingProcessHello * GetHelloProcess() const;
-
-public:
-	static CMap<int, int, CTestRecordSlpd *, CTestRecordSlpd *> gm_allSessions;
 
 private:
 	int m_nHelloProcessId;

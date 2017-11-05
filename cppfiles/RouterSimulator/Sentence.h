@@ -21,20 +21,19 @@ public:
 	virtual ~CSentence();
 
 	virtual CTestSession * DeepCopySession() const;
+	virtual BOOL IsInStatistic() const;
 
 	int m_nProcessID;
 	int m_nSentenceType;
 	CRoutingProtocol * m_pSender;
 	CRoutingProtocol * m_pSpeakTo;
 	CTestSession * m_pTestSession;
-
-	BOOL m_bInStatistic;
 };
 
 class CPkgHello : public CSentence
 {
 public:
-	CPkgHello() { m_nSentenceType = SENTENCE_TYPE_HELLO; m_bInStatistic = FALSE; }
+	CPkgHello() { m_nSentenceType = SENTENCE_TYPE_HELLO; }
 	CPkgHello(const CPkgHello & src) { *this = src; }
 	virtual ~CPkgHello() {};
 };
@@ -42,7 +41,7 @@ public:
 class CPkgAck : public CSentence
 {
 public:
-	CPkgAck() { m_nSentenceType = SENTENCE_TYPE_ACK; m_bInStatistic = FALSE; }
+	CPkgAck() { m_nSentenceType = SENTENCE_TYPE_ACK; }
 	CPkgAck(const CPkgAck & src) { *this = src; }
 	void SetAsOkPackage() { m_nSentenceType = SENTENCE_TYPE_OK; }
 };

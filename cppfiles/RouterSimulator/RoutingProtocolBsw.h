@@ -30,13 +30,6 @@ protected:
 	CRoutingProcessBsw * GetQueryProcess() const;
 	CRoutingProcessBsw * GetReplyProcess() const;
 	CRoutingProcessHello * GetHelloProcess() const;
-	void ResetAll();
-	BOOL SetMissionRecord(int nSessionId, int nEventId);
-
-public:
-	static CMap<int, int, CTestRecordBsw *, CTestRecordBsw *> gm_allSessions;
-	void SetMissionForwardNumber(int nSessionId, int nForwardNumber);
-	void UpdateSummary();
 
 private:
 	int m_nHelloProcessId;

@@ -44,6 +44,10 @@ CYell::~CYell()
 void CYell::SetSentenceLength(int nLength)
 {
 	Clean();
+	if (nLength == 0)
+	{
+		return;
+	}
 	m_nSentenceCount = nLength;
 	m_ppSentences = new CSentence *[nLength];
 }
@@ -104,7 +108,7 @@ BOOL CYell::IsStatisticsRequired() const
 {
 	for (int i = 0; i < m_nSentenceCount; ++i)
 	{
-		if (m_ppSentences[i]->m_bInStatistic)
+		if (m_ppSentences[i]->IsInStatistic())
 		{
 			return TRUE;
 		}
@@ -117,7 +121,7 @@ int CYell::IncreaseForwardNumbers()
 	int nRet = 0;
 	for (int i = 0; i < m_nSentenceCount; ++i)
 	{
-		if (m_ppSentences[i]->m_bInStatistic)
+		if (m_ppSentences[i]->IsInStatistic())
 		{
 			nRet++;
 			CTestSession * pTestSession = m_ppSentences[i]->m_pTestSession;

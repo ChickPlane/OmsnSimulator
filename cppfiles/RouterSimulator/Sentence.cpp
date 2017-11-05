@@ -7,7 +7,6 @@ CSentence::CSentence()
 	, m_pSender(NULL)
 	, m_pSpeakTo(NULL)
 	, m_nProcessID(-1)
-	, m_bInStatistic(TRUE)
 	, m_pTestSession(NULL)
 {
 }
@@ -42,4 +41,16 @@ CTestSession * CSentence::DeepCopySession() const
 	{
 		return NULL;
 	}
+}
+
+BOOL CSentence::IsInStatistic() const
+{
+	if (m_pTestSession)
+	{
+		if (m_pTestSession->m_bInStatistic == TRUE)
+		{
+			return TRUE;
+		}
+	}
+	return FALSE;
 }

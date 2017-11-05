@@ -42,7 +42,7 @@ public:
 	virtual BOOL IsTrustful(CRoutingProcessAptCard * pCallBy, const CRoutingProtocol * pOther) const;
 	virtual void OnGetNewCards(CRoutingProcessAptCard * pCallBy, const CPkgAptCardCards * pPkg);
 	virtual void OnGetNoneCards(CRoutingProcessAptCard * pCallBy, const CPkgAptCardCards * pPkg);
-private:
+public:
 	BOOL IsFriend(const CRoutingProtocol * pOther) const;
 	BOOL IsLongTimeNoSee(const CRoutingProtocol * pOther) const;
 	CRoutingProcessAptCard * GetAptCardProcess() const;
@@ -62,13 +62,7 @@ private:
 	void ResetAll();
 
 	virtual CPkgAptCardReply * SwitchToNextAgency(const CPkgAptCardReply * pReply);
-	BOOL SetMissionRecord(int nSessionId, int nEventId);
-	void SetMissionForwardNumber(int nSessionId, int nForwardNumber);
-	void UpdateSummary();
 	void SendQueries(CRoutingProtocol * pTheOther);
-
-public:
-	static CMap<int, int, CTestRecordAptCard *, CTestRecordAptCard *> gm_allSessions;
 
 private:
 	int m_nHelloProcessId;

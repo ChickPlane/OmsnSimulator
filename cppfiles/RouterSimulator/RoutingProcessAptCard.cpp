@@ -7,6 +7,7 @@
 #include "TrustValue.h"
 #include "MobileSocialNetworkHost.h"
 #include "CommonFunctions.h"
+#include "RoutingProtocolAptCard.h"
 
 
 CRoutingProcessAptCard::CRoutingProcessAptCard()
@@ -33,19 +34,26 @@ CPkgAptCardCards * CRoutingProcessAptCard::GetSendingList(BOOL bNeedReady, int n
 	CList<CAppointmentCard*> cardList;
 	CreateNewAptCards(cardList);
 	PickDispensedCards(pTo->GetHostId(), cardList);
+
 	if (bNeedReady)
 	{
 		PickReadyAndTrustCards(nHoldingCount, cardList);
-		//PickReadyCards(nHoldingCount, cardList);
 	}
 	PrepareToSend(pTo->GetHostId(), cardList);
 
+
 	CPkgAptCardCards * pNewCards = new CPkgAptCardCards();
 	pNewCards->SetCards(cardList);
+	if (pNewCards->HasDuplicated())
+	{
+		ASSERT(0);
+	}
 	pNewCards->m_pSpeakTo = pTo;
+	pNewCards->m_pSender = m_pProtocol;
 	CleanSendingList(cardList);
 
 	MarkProcessIdToSentences(pNewCards);
+
 	return pNewCards;
 }
 
@@ -106,6 +114,26 @@ BOOL CRoutingProcessAptCard::GetAndRemoveAgencyRecord(USERID uOldId, int nOldApt
 		}
 	}
 
+	return FALSE;
+}
+
+BOOL CRoutingProcessAptCard::CheckSameAptCard(const CRoutingProcessAptCard * pA, const CRoutingProcessAptCard * pB)
+{
+	POSITION posA = pA->m_TrustCards.GetHeadPosition();
+	while (posA)
+	{
+		CAppointmentCard * pACard = pA->m_TrustCards.GetNext(posA);
+		POSITION posB = pB->m_TrustCards.GetHeadPosition();
+		while (posB)
+		{
+			CAppointmentCard * pBCard = pB->m_TrustCards.GetNext(posB);
+			if (pACard->m_nCid == pBCard->m_nCid && pACard->m_nCapt == pBCard->m_nCapt)
+			{
+				ASSERT(0);
+				return TRUE;
+			}
+		}
+	}
 	return FALSE;
 }
 
@@ -197,6 +225,7 @@ void CRoutingProcessAptCard::CreateNewAptCards(CList<CAppointmentCard*> & Sendin
 	for (int i = 0; i < nCreateCount; ++i)
 	{
 		CAppointmentCard * pGeneratedCard = CreateSingleNewAptCard(pCreatList);
+
 		SendingList.AddTail(pGeneratedCard);
 	}
 // 	for (int i = nExistCardNumber; i < m_nNeededCardNumber; ++i)
@@ -250,6 +279,7 @@ void CRoutingProcessAptCard::PickReadyAndTrustCards(int nTheOtherReadyNumber, CL
 				m_ReadyCards.RemoveAt(posMove);
 			}
 		}
+
 	}
 	else
 	{
@@ -276,6 +306,7 @@ void CRoutingProcessAptCard::PickReadyAndTrustCards(int nTheOtherReadyNumber, CL
 					m_TrustCards.RemoveAt(posMove);
 				}
 			}
+
 		}
 	}
 	delete[] pRandom;
@@ -528,6 +559,10 @@ void CRoutingProcessAptCard::OnReceivedCards(const CPkgAptCardCards * pCards)
 			m_DispensedCards.AddTail(pNewCard);
 		}
 	}
+	if (CheckSameAptCard(this, ((CRoutingProtocolAptCard*)(pCards->m_pSender))->GetAptCardProcess()) == TRUE)
+	{
+		int k = 3;
+	}
 	if (pCards->m_nCardNumber > 0)
 	{
 		m_pUser->OnGetNewCards(this, pCards);
@@ -661,6 +696,68 @@ void CRoutingProcessAptCard::CheckAptCards(const CAppointmentCard * pCard)
 int CRoutingProcessAptCard::GetReadyCount() const
 {
 	return m_ReadyCards.GetSize() + m_TrustCards.GetSize();
+}
+
+BOOL CRoutingProcessAptCard::CheckDuplicated()
+{
+	CMap<int, int, CIdAndApt, CIdAndApt> mapAllAc;
+
+	POSITION ppp = m_TrustCards.GetHeadPosition();
+	while (ppp)
+	{
+		CAppointmentCard * pttt = m_TrustCards.GetNext(ppp);
+		CIdAndApt tmpIA;
+		int nnn = 0;
+		if (mapAllAc.Lookup(pttt->m_nCapt, tmpIA))
+		{
+			ASSERT(0);
+		}
+		else
+		{
+			tmpIA.nId = pttt->m_nCid;
+			tmpIA.nApt = pttt->m_nCapt;
+			tmpIA.nGroup = 1;
+			mapAllAc[pttt->m_nCapt] = tmpIA;
+		}
+	}
+	ppp = m_ReadyCards.GetHeadPosition();
+	while (ppp)
+	{
+		CAppointmentCard * pttt = m_ReadyCards.GetNext(ppp);
+		CIdAndApt tmpIA;
+		int nnn = 0;
+		if (mapAllAc.Lookup(pttt->m_nCapt, tmpIA))
+		{
+			ASSERT(0);
+		}
+		else
+		{
+			tmpIA.nId = pttt->m_nCid;
+			tmpIA.nApt = pttt->m_nCapt;
+			tmpIA.nGroup = 2;
+			mapAllAc[pttt->m_nCapt] = tmpIA;
+		}
+	}
+
+	ppp = m_DispensedCards.GetHeadPosition();
+	while (ppp)
+	{
+		CAppointmentCard * pttt = m_DispensedCards.GetNext(ppp);
+		CIdAndApt tmpIA;
+		int nnn = 0;
+		if (mapAllAc.Lookup(pttt->m_nCapt, tmpIA))
+		{
+			ASSERT(0);
+		}
+		else
+		{
+			tmpIA.nId = pttt->m_nCid;
+			tmpIA.nApt = pttt->m_nCapt;
+			tmpIA.nGroup = 3;
+			mapAllAc[pttt->m_nCapt] = tmpIA;
+		}
+	}
+	return FALSE;
 }
 
 int CRoutingProcessAptCard::gm_nK;
