@@ -257,9 +257,6 @@ void CRoutingProtocolSlpd::OnBswPkgReachDestination(CRoutingProcessBsw * pCallBy
 			// Is an agency
 			CPkgSlpdReply * pNewReply = ForwardToOriginal(pReply);
 			GetReplyProcess()->InsertToDataMap(pNewReply);
-
-			strLog.Format(_T("\nAgency %d To %d"), GetHostId(), pNewReply->GetReceiverId());
-			WriteLog(strLog);
 			return;
 		}
 		else
@@ -267,7 +264,7 @@ void CRoutingProtocolSlpd::OnBswPkgReachDestination(CRoutingProcessBsw * pCallBy
 			// The original requirestor.
 			if (SetSissionRecord(pReply->m_pTestSession->m_nSessionId, REC_SLPD_ST_REP_RETURN))
 			{
-				strLog.Format(_T("\nOri req %d"), GetHostId());
+				strLog.Format(_T("\nReturn to original %d"), GetHostId());
 				WriteLog(strLog);
 			}
 		}

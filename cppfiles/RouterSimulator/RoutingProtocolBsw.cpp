@@ -107,6 +107,8 @@ void CRoutingProtocolBsw::OnBswPkgReachDestination(CRoutingProcessBsw * pCallBy,
 	if (pCallBy == GetQueryProcess())
 	{
 		// LBS REPLY
+		strLog.Format(_T("\nDelievery to %d"), GetHostId());
+		WriteLog(strLog);
 
 		SetSissionRecord(pPkg->m_pTestSession->m_nSessionId, REC_ST_REACH);
 		SetSissionForwardNumber(pPkg->m_pTestSession->m_nSessionId, pPkg->m_pTestSession->m_nForwardNumber);
@@ -133,7 +135,7 @@ void CRoutingProtocolBsw::OnBswPkgReachDestination(CRoutingProcessBsw * pCallBy,
 		// The original requirestor.
 		if (SetSissionRecord(pPkg->m_pTestSession->m_nSessionId, REC_ST_REP_RETURN))
 		{
-			strLog.Format(_T("\%d nOri req %d"), pPkg->m_pTestSession->m_nSessionId, GetHostId());
+			strLog.Format(_T("\nReturn to original %d"), GetHostId());
 			WriteLog(strLog);
 		}
 		return;

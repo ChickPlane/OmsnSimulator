@@ -1352,7 +1352,7 @@ LRESULT CMapGui::OnAllInitOk(WPARAM wParam, LPARAM lParam)
 	if (wParam != 0)
 	{
 		SetTimer(MAP_GUI_TIMER_ID_START_TEST, 1000, NULL);
-		SetTimer(MAP_GUI_TIMER_ID_CHECK_TIMEOUT, 5000, NULL);
+		SetTimer(MAP_GUI_TIMER_ID_CHECK_TIMEOUT, 2000, NULL);
 	}
 	return 0;
 }

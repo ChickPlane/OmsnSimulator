@@ -48,28 +48,20 @@ void CRoutingProcessMultiHop::SendPkgToMultiHopHost(const CPkgMultiHop * pPkg)
 
 void CRoutingProcessMultiHop::OnReceivedDataPkg(const CPkgMultiHop * pPkg)
 {
-	CString strLog;
 	if (pPkg->m_nToId == m_pProtocol->GetHostId())
 	{
-		strLog.Format(_T("MH: Arrive %d"), m_pProtocol->GetHostId());
-		WriteLog(strLog);
 		m_pUser->OnMultiHopMsgArrived(this, pPkg);
 		return;
 	}
 	CRoutingProtocol * pNextHop = m_pUser->GetNextHop(this, pPkg->m_nToId);
 	if (pNextHop == NULL)
 	{
-		strLog.Format(_T("MH: ERROR %d"), m_pProtocol->GetHostId());
-		WriteLog(strLog);
 		ASSERT(0);
 		return;
 	}
 	CPkgMultiHop * pNewPkg = m_pUser->GetMultiHopDataCopy(this, pPkg);
 	pNewPkg->m_pSpeakTo = pNextHop;
 	MarkProcessIdToSentences(pNewPkg);
-
-	strLog.Format(_T("MH: Forward %d->%d"), m_pProtocol->GetHostId(), pNextHop->GetHostId());
-	WriteLog(strLog);
 
 	CYell * pNewYell = new CYell();
 	pNewYell->SetSentenceLength(1);

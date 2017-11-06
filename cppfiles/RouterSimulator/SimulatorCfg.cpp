@@ -7,6 +7,7 @@ using namespace std;
 CSimulatorCfg::CSimulatorCfg()
 	: m_strSettingFilePath(NULL)
 	, m_strWorkFolder(NULL)
+	, m_strComment(NULL)
 	, m_strMapName(NULL)
 	, m_strProtocolName(NULL)
 	, m_nNodeCount(0)
@@ -67,6 +68,7 @@ void CSimulatorCfg::ReadFromFile(char * strSettingFilePath)
 
 	fin.getline(inputBuffer, LINE_LENGTH);
 	CopyString(&m_strWorkFolder, inputBuffer);
+	CopyString(&m_strComment, GetFolderName(m_strWorkFolder));
 	fin.getline(inputBuffer, LINE_LENGTH);
 	CopyString(&m_strMapName, inputBuffer);
 	fin.getline(inputBuffer, LINE_LENGTH);
@@ -106,4 +108,17 @@ void CSimulatorCfg::CopyString(char ** pStrDes, char * strSrc)
 		*pStrDes = new char[nLength + 1];
 		strcpy_s(*pStrDes, nLength + 1, strSrc);
 	}
+}
+
+char * CSimulatorCfg::GetFolderName(char * pPathName)
+{
+	int nPathLength = strlen(pPathName);
+	for (int i = nPathLength; i >= 0; --i)
+	{
+		if (pPathName[i] == '\\' || pPathName[i] == '/')
+		{
+			return pPathName + i + 1;
+		}
+	}
+	return NULL;
 }

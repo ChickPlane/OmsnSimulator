@@ -277,7 +277,7 @@ void CRoutingProtocolAptCard::OnBswPkgReachDestination(CRoutingProcessBsw * pCal
 			// The original requirestor.
 			if (SetSissionRecord(pReply->m_pTestSession->m_nSessionId, REC_AC_ST_REP_RETURN))
 			{
-				strLog.Format(_T("\nOri req %d"), GetHostId());
+				strLog.Format(_T("\nReturn to original %d"), GetHostId());
 				WriteLog(strLog);
 				RemovePsedunym(pReply->m_Next);
 			}

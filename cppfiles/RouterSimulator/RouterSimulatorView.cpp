@@ -208,6 +208,8 @@ void CRouterSimulatorView::InitHostProtocol(const CSimulatorCfg & Cfg)
 	summary.m_pWorkPath = new char[200];
 	summary.m_pWorkPath[0] = 0;
 	strcpy_s(summary.m_pWorkPath, 200, Cfg.m_strWorkFolder);
+	summary.m_pComments = new char[200];
+	strcpy_s(summary.m_pComments, 199, Cfg.m_strComment);
 	m_pEngine->SetCommunicationRadius(Cfg.m_fCommunicateRadius);
 	double fSpeedLimit = pDoc->m_pRoadNet->GetSpeedLimit();
 
@@ -217,8 +219,6 @@ void CRouterSimulatorView::InitHostProtocol(const CSimulatorCfg & Cfg)
 	{
 		SIM_TIME lnSearchInterval = 1000 * Cfg.m_fCommunicateRadius / (2 * fSpeedLimit);
 		//SIM_TIME lnSearchInterval = 1000;
-		summary.m_pComments = new char[200];
-		strcpy_s(summary.m_pComments, 199, "Improve_Mark");
 		pMainFrame->WriteLog(_T("APTCARD"));
 		CRoutingProtocolAptCard::SetStaticParameters(Cfg.m_nK, 3, fHigh, 3 * Cfg.m_nTimeOutSecond * 1000);
 		for (int i = 0; i < nLength; ++i)
@@ -233,8 +233,6 @@ void CRouterSimulatorView::InitHostProtocol(const CSimulatorCfg & Cfg)
 	}
 	else if (strcmp(Cfg.m_strProtocolName, PROTOCOL_NAME_SLPD) == 0)
 	{
-		summary.m_pComments = new char[200];
-		strcpy_s(summary.m_pComments, 199, "SLPD_FIRST_TRY");
 		pMainFrame->WriteLog(_T("SLPD"));
 		CRoutingProtocolSlpd::SetStaticParameters(Cfg.m_nK, fHigh);
 		for (int i = 0; i < nLength; ++i)
@@ -249,8 +247,6 @@ void CRouterSimulatorView::InitHostProtocol(const CSimulatorCfg & Cfg)
 	}
 	else if (strcmp(Cfg.m_strProtocolName, PROTOCOL_NAME_MHLPP) == 0)
 	{
-		summary.m_pComments = new char[200];
-		strcpy_s(summary.m_pComments, 199, "MHLPP_FIRST_TRY");
 		pMainFrame->WriteLog(_T("MHLPP"));
 		CRoutingProtocolMhlpp::SetStaticParameters(fHigh, Cfg.m_fAnonyRadius);
 		for (int i = 0; i < nLength; ++i)

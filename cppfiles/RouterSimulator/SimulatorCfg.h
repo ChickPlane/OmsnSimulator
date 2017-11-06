@@ -8,10 +8,12 @@ public:
 	void ReadFromFile(char * strSettingFilePath);
 
 	static void CopyString(char ** pStrDes, char * strSrc);
+	static char * GetFolderName(char * pPathName);
 
 	char * m_strSettingFilePath;
 
 	char * m_strWorkFolder;
+	char * m_strComment;
 	char * m_strMapName;
 	char * m_strProtocolName;
 	int m_nNodeCount;

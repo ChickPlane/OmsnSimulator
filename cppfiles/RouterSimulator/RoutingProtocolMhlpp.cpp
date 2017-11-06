@@ -317,9 +317,6 @@ void CRoutingProtocolMhlpp::OnBswPkgReachDestination(CRoutingProcessBsw * pCallB
 	
 			CPkgMhlppReply * pNewReply = ForwardToOriginal(pReply);
 			GetReplyProcess()->InsertToDataMap(pNewReply);
-
-			strLog.Format(_T("\nAgency %d To %d"), GetHostId(), pNewReply->GetReceiverId());
-			WriteLog(strLog);
 			return;
 		}
 		else
@@ -327,7 +324,7 @@ void CRoutingProtocolMhlpp::OnBswPkgReachDestination(CRoutingProcessBsw * pCallB
 			// The original requirestor.
 			if (SetSissionRecord(pReply->m_pTestSession->m_nSessionId, REC_MHLPP_ST_REP_RETURN))
 			{
-				strLog.Format(_T("\nOri req %d"), GetHostId());
+				strLog.Format(_T("\nReturn to original %d"), GetHostId());
 				WriteLog(strLog);
 			}
 		}
@@ -395,10 +392,6 @@ BOOL CRoutingProtocolMhlpp::TryToFinishObfuscation(const CPkgMhlpp & Obfuscating
 	{
 		return FALSE;
 	}
-
-	CString strLog;
-	strLog.Format(_T("%d finish at %d"), ObfuscatingPkg.m_pTestSession->m_nSessionId, GetHostId());
-	WriteLog(strLog);
 
 	CTestSessionBsw * pTestSession = new CTestSessionBsw();
 	*(CTestSession*)pTestSession = *ObfuscatingPkg.m_pTestSession;
