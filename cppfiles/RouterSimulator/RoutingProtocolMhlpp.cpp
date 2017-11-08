@@ -85,6 +85,25 @@ void CRoutingProtocolMhlpp::Turn(BOOL bOn)
 	GetHelloProcess()->StartWork(TRUE);
 }
 
+int CRoutingProtocolMhlpp::GetCarryingPkgNumber(int nParam)
+{
+	switch (nParam)
+	{
+	case PROTOCOL_PKG_TYPE_SUPPLY:
+	{
+		return 0;
+	}
+	case PROTOCOL_PKG_TYPE_QUERY:
+	{
+		return GetQueryProcess()->GetDataMapSize() + m_WaitingList.GetSize();
+	}
+	case PROTOCOL_PKG_TYPE_REPLY:
+	{
+		return GetReplyProcess()->GetDataMapSize();
+	}
+	}
+}
+
 void CRoutingProtocolMhlpp::OnEngineConnection(BOOL bAnyOneNearby, BOOL bDifferentFromPrev)
 {
 	GetHelloProcess()->OnSomeoneNearby(bAnyOneNearby, bDifferentFromPrev);

@@ -9,11 +9,14 @@ public:
 
 	static void CopyString(char ** pStrDes, char * strSrc);
 	static char * GetFolderName(char * pPathName);
+	void GetFolderPathByParams(char * strRet, int nRetLen) const;
+	const char * GetFolderNameByParams();
+	void GetParametersString(char * strRet, int nRetLen) const;
 
 	char * m_strSettingFilePath;
 
-	char * m_strWorkFolder;
 	char * m_strComment;
+	char * m_strWorkFolder;
 	char * m_strMapName;
 	char * m_strProtocolName;
 	int m_nNodeCount;
@@ -26,6 +29,8 @@ public:
 	double m_fAnonyRadius;
 	int m_nTimeOutSecond;
 
+private:
+	char m_strFolderName[200];
 
 };
 

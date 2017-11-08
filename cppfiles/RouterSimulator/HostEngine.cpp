@@ -116,9 +116,9 @@ void CHostEngine::TransmitMessage(CRoutingProtocol * pFrom, CRoutingProtocol * p
 		delete pMsg;
 		return;
 	}
-	if (m_Summary.IsWorking() && pMsg->IncreaseForwardNumbers() > 0)
+	if (m_Summary.IsSessionRecordWorking() && pMsg->IncreaseForwardNumbers() > 0)
 	{
-		m_Summary.m_RecentData.m_EngineRecords[SS_TOTLE_YELL] += 1;
+		m_Summary.m_RecentSessionTag.m_EngineRecords[SS_TOTLE_YELL] += 1;
 	}
 	++m_nMsgId;
 	CTransmitionRecord newRecord(pFrom, pTo, pMsg, m_nMsgId);
@@ -213,8 +213,30 @@ void CHostEngine::RegisterUser(CEngineUser * pUser)
 	m_NotifyList.AddTail(pUser);
 }
 
-void CHostEngine::ChangeSummary()
+void CHostEngine::ChangeSummary(BOOL bReal)
 {
+	ULONGLONG ullRecentTick = GetTickCount64();
+#ifdef DEBUG
+	const int nMinInterval = 200;
+#else
+	const int nMinInterval = 1000;
+#endif
+	if (ullRecentTick - m_ullLastNotifySummaryTick < nMinInterval)
+	{
+		if (bReal)
+		{
+			m_bNeedNotifySummary = TRUE;
+		}
+		return;
+	}
+	if (bReal == FALSE)
+	{
+		if (m_bNeedNotifySummary == FALSE)
+		{
+			return;
+		}
+	}
+	m_ullLastNotifySummaryTick = ullRecentTick;
 	POSITION pos = m_NotifyList.GetHeadPosition();
 	while (pos)
 	{
@@ -337,7 +359,7 @@ void CHostEngine::NotifyTimeChange()
 	{
 		m_NotifyList.GetNext(pos)->OnEngineTimeChanged(m_lnSimTimeMillisecond);
 	}
-	ChangeSummary();
+	ChangeSummary(TRUE);
 }
 
 void CHostEngine::UpdateStartTick()
@@ -458,7 +480,12 @@ int CHostEngine::CheckEventList()
 					return 0;
 				}
 				NotifyTimeChange();
-				m_Summary.AddTag(m_lnSimTimeMillisecond);
+				if (m_Summary.IsTimeForSessionTag(m_lnSimTimeMillisecond))
+				{
+					CalculateBuffers();
+					m_Summary.AddSessionTag(m_lnSimTimeMillisecond);
+				}
+				m_Summary.AddProtocolTag(m_lnSimTimeMillisecond);
 				m_lnSimTimeMillisecond = FirstEvent.m_lnSimTime;
 			}
 
@@ -779,6 +806,29 @@ void CHostEngine::PeriodForcastAndJudge()
 	}
 
 	PreJudgeSeveralPeriods(lnInterval);
+}
+
+void CHostEngine::CalculateBuffers()
+{
+	double nTotalSupply = 0;
+	double nTotalQuery = 0;
+	double nTotalReply = 0;
+	int nHostCount = m_pRoadNet->m_allHosts.GetSize();
+	for (int i = SERVER_NODE_COUNT; i < nHostCount; ++i)
+	{
+		nTotalSupply += m_pRoadNet->m_allHosts[i]->m_pProtocol->GetCarryingPkgNumber(PROTOCOL_PKG_TYPE_SUPPLY);
+		nTotalQuery += m_pRoadNet->m_allHosts[i]->m_pProtocol->GetCarryingPkgNumber(PROTOCOL_PKG_TYPE_QUERY);
+		nTotalReply += m_pRoadNet->m_allHosts[i]->m_pProtocol->GetCarryingPkgNumber(PROTOCOL_PKG_TYPE_REPLY);
+	}
+	if (nHostCount > SERVER_NODE_COUNT)
+	{
+		nTotalSupply /= (nHostCount - SERVER_NODE_COUNT);
+		nTotalQuery /= (nHostCount - SERVER_NODE_COUNT);
+		nTotalReply /= (nHostCount - SERVER_NODE_COUNT);
+	}
+	m_Summary.m_RecentSessionTag.m_EngineRecords[SS_AVE_SUPPLY_BUFFER] = nTotalSupply;
+	m_Summary.m_RecentSessionTag.m_EngineRecords[SS_AVE_QUERY_BUFFER] = nTotalQuery;
+	m_Summary.m_RecentSessionTag.m_EngineRecords[SS_AVE_REPLY_BUFFER] = nTotalReply;
 }
 
 void CHostEngine::NotifyAllReceivers(const CMsgCntJudgeReceiverReport * pReport, CTransmitionRecord & tr)

@@ -10,6 +10,7 @@
 CRoutingProtocol::CRoutingProtocol()
 	: m_fCommunicationRadius(0)
 	, m_nSessionRecordEntrySize(0)
+	, m_nProtocolRecordEntrySize(0)
 	, m_nForwardBoundary(0)
 {
 }
@@ -64,6 +65,18 @@ void CRoutingProtocol::SetEnvironment(CHost * pHost, CHostEngine * pEngine)
 	for (int i = 0; i < m_Processes.GetSize(); ++i)
 	{
 		m_Processes[i]->SetEngine(pEngine);
+	}
+
+	CStatisticSummary & summary = GetEngine()->GetSummary();
+	if (summary.m_RecentProtocolTag.m_ProtocolRecords.GetSize() != m_nProtocolRecordEntrySize)
+	{
+		summary.m_RecentProtocolTag.m_ProtocolRecords.SetSize(m_nProtocolRecordEntrySize);
+	}
+
+	int nTotalSessionStatisticNumber = GetTotalSessionStatisticEntryNumber();
+	if (summary.m_RecentSessionTag.m_SessionRecords.GetSize() != nTotalSessionStatisticNumber)
+	{
+		summary.m_RecentSessionTag.m_SessionRecords.SetSize(nTotalSessionStatisticNumber);
 	}
 }
 
@@ -180,16 +193,32 @@ int CRoutingProtocol::GetProcessId(CRoutingProcess * pProcess)
 }
 
 
-int CRoutingProtocol::GetDebugNumber(int nParam)
+int CRoutingProtocol::GetCarryingPkgNumber(int nParam)
 {
-	return 0;
+	switch (nParam)
+	{
+	case PROTOCOL_PKG_TYPE_SUPPLY:
+	{
+		return 0;
+	}
+	case PROTOCOL_PKG_TYPE_QUERY:
+	{
+		return 0;
+	}
+	case PROTOCOL_PKG_TYPE_REPLY:
+	{
+		return 0;
+	}
+	}
 }
 
 void CRoutingProtocol::WriteLog(const CString & strLog)
 {
+#ifdef DEBUG
 	CString strWriteDown = m_strLogPrefix + _T(" ") + strLog;
 	EngineWriteLog(strWriteDown);
 	OutputDebugString(_T("\n") + strWriteDown);
+#endif
 }
 
 BOOL CRoutingProtocol::gm_bEnableLbsp = TRUE;
@@ -200,7 +229,7 @@ BOOL CRoutingProtocol::SetSissionRecord(int nSessionId, int nEventId)
 	if (pRecord->m_pMilestoneTime[nEventId] == INVALID_SIMTIME)
 	{
 		pRecord->m_pMilestoneTime[nEventId] = GetSimTime();
-		UpdateEngineSummary();
+		OnSessionRecordChanged();
 		return TRUE;
 	}
 	else
@@ -215,25 +244,28 @@ BOOL CRoutingProtocol::SetSissionForwardNumber(int nSessionId, int nForwardNumbe
 	if (pRecord->m_nForwardTimes == 0)
 	{
 		pRecord->m_nForwardTimes = nForwardNumber;
-		UpdateEngineSummary();
+		OnSessionRecordChanged();
 		return TRUE;
 	}
 	return FALSE;
 }
 
-void CRoutingProtocol::UpdateEngineSummary()
+void CRoutingProtocol::OnSessionRecordChanged()
 {
 	CStatisticSummary & summary = GetEngine()->GetSummary();
-	if (summary.m_RecentData.m_ProtocolRecords.GetSize() != m_nSessionRecordEntrySize + ENGINE_RECORD_MAX)
+	int nTotalSessionStatisticNumber = GetTotalSessionStatisticEntryNumber();
+	if (summary.m_RecentSessionTag.m_SessionRecords.GetSize() != nTotalSessionStatisticNumber)
 	{
-		summary.m_RecentData.m_ProtocolRecords.SetSize(m_nSessionRecordEntrySize + ENGINE_RECORD_MAX);
+		summary.m_RecentSessionTag.m_SessionRecords.SetSize(nTotalSessionStatisticNumber);
 	}
 
-	for (int i = 0; i < m_nSessionRecordEntrySize + ENGINE_RECORD_MAX; ++i)
+	for (int i = 0; i < nTotalSessionStatisticNumber; ++i)
 	{
-		summary.m_RecentData.m_ProtocolRecords[i] = 0;
+		summary.m_RecentSessionTag.m_SessionRecords[i] = 0;
 	}
 
+	int nForwardRecordCount = 0;
+	int nForwardCountIndex = 0;
 	POSITION pos = gm_allSessionRecords.GetStartPosition();
 	while (pos)
 	{
@@ -245,17 +277,58 @@ void CRoutingProtocol::UpdateEngineSummary()
 		{
 			if (pRecord->m_pMilestoneTime[i] > INVALID_SIMTIME)
 			{
-				summary.m_RecentData.m_ProtocolRecords[i]++;
+				summary.m_RecentSessionTag.m_SessionRecords[i]++;
 			}
 		}
-		summary.m_RecentData.m_ProtocolRecords[i] += pRecord->m_nForwardTimes;
+		nForwardCountIndex = i;
+		if (pRecord->m_nForwardTimes > 0)
+		{
+			nForwardRecordCount++;
+			summary.m_RecentSessionTag.m_SessionRecords[nForwardCountIndex] += pRecord->m_nForwardTimes;
+		}
 	}
-	int nReachNumber = summary.m_RecentData.m_ProtocolRecords[m_nForwardBoundary];
-	if (nReachNumber > 0)
+	if (nForwardRecordCount > 0)
 	{
-		summary.m_RecentData.m_ProtocolRecords[m_nSessionRecordEntrySize + ENGINE_RECORD_FORWARD_TIMES] /= nReachNumber;
+		summary.m_RecentSessionTag.m_SessionRecords[m_nSessionRecordEntrySize + ENGINE_RECORD_FORWARD_TIMES] /= nForwardRecordCount;
 	}
-	GetEngine()->ChangeSummary();
+	GetEngine()->ChangeSummary(TRUE);
+}
+
+void CRoutingProtocol::OnProtocolRecordChanged()
+{
+	CStatisticSummary & summary = GetEngine()->GetSummary();
+	if (summary.m_RecentProtocolTag.m_ProtocolRecords.GetSize() != m_nProtocolRecordEntrySize)
+	{
+		ASSERT(0);
+		summary.m_RecentProtocolTag.m_ProtocolRecords.SetSize(m_nProtocolRecordEntrySize);
+	}
+
+	for (int i = 0; i < m_nProtocolRecordEntrySize; ++i)
+	{
+		summary.m_RecentProtocolTag.m_ProtocolRecords[i] = 0;
+	}
+
+	POSITION pos = gm_allProtocolRecords.GetStartPosition();
+	while (pos)
+	{
+		const CRoutingProtocol * pProtocol = NULL;
+		CProtocolRecord * pProtocolRecord = NULL;
+		gm_allProtocolRecords.GetNextAssoc(pos, pProtocol, pProtocolRecord);
+		int i = 0;
+		for (i = 0; i < m_nProtocolRecordEntrySize; ++i)
+		{
+			summary.m_RecentProtocolTag.m_ProtocolRecords[i] += pProtocolRecord->m_pData[i];
+		}
+	}
+	
+	if (gm_allProtocolRecords.GetSize() > 1)
+	{
+		for (int i = 0; i < m_nProtocolRecordEntrySize; ++i)
+		{
+			summary.m_RecentProtocolTag.m_ProtocolRecords[i] /= gm_allProtocolRecords.GetSize();
+		}
+	}
+	GetEngine()->ChangeSummary(TRUE);
 }
 
 CTestRecord * CRoutingProtocol::GetSessionRecord(int nSessionId)
@@ -269,7 +342,32 @@ CTestRecord * CRoutingProtocol::GetSessionRecord(int nSessionId)
 	return pRecord;
 }
 
+CProtocolRecord * CRoutingProtocol::GetProtocolRecord() const
+{
+	CProtocolRecord * pFindResult = NULL;
+	if (gm_allProtocolRecords.Lookup(this, pFindResult))
+	{
+		return pFindResult;
+	}
+	pFindResult = new CProtocolRecord(m_nProtocolRecordEntrySize);
+	gm_allProtocolRecords[this] = pFindResult;
+	return pFindResult;
+}
+
+double CRoutingProtocol::GetProtocolRecordValue(int nEventId) const
+{
+	return GetProtocolRecord()->m_pData[nEventId];
+}
+
+void CRoutingProtocol::SetProtocolRecordValue(int nEventId, double fValue)
+{
+	GetProtocolRecord()->m_pData[nEventId] = fValue;
+	OnProtocolRecordChanged();
+}
+
 CMap<int, int, CTestRecord *, CTestRecord *> CRoutingProtocol::gm_allSessionRecords;
+
+CMap<const CRoutingProtocol *, const CRoutingProtocol *, CProtocolRecord *, CProtocolRecord *> CRoutingProtocol::gm_allProtocolRecords;
 
 CString CRoutingProtocol::GetDebugString() const
 {

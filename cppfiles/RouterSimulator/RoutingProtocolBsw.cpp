@@ -53,6 +53,25 @@ void CRoutingProtocolBsw::Turn(BOOL bOn)
 	GetHelloProcess()->StartWork(TRUE);
 }
 
+int CRoutingProtocolBsw::GetCarryingPkgNumber(int nParam)
+{
+	switch (nParam)
+	{
+	case PROTOCOL_PKG_TYPE_SUPPLY:
+	{
+		return 0;
+	}
+	case PROTOCOL_PKG_TYPE_QUERY:
+	{
+		return GetQueryProcess()->GetDataMapSize();
+	}
+	case PROTOCOL_PKG_TYPE_REPLY:
+	{
+		return GetReplyProcess()->GetDataMapSize();
+	}
+	}
+}
+
 COLORREF CRoutingProtocolBsw::GetImportantLevel() const
 {
 	int nQ = GetQueryProcess()->GetDataMapSize();

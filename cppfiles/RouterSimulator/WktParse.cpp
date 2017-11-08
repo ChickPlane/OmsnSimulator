@@ -18,6 +18,10 @@ CWktParse::~CWktParse()
 CList<CLineInMap> * CWktParse::Parse(char * filename, double & l, double & r, double & t, double & b)
 {
 	ifstream fin(filename);
+	if (!fin.is_open())
+	{
+		return NULL;
+	}
 	CList<CLineInMap> * pRet = new CList<CLineInMap>();
 	int nInputmax = 40 * 2000;
 	char * pInputBuffer = new char[nInputmax];

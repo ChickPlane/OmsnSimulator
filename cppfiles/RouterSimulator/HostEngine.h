@@ -60,7 +60,7 @@ public:
 	int GetActualSpeed() const;
 	CRoadNet * GetRoadNet();
 	void RegisterUser(CEngineUser * pUser);
-	void ChangeSummary();
+	void ChangeSummary(BOOL bReal);
 	CStatisticSummary & GetSummary();
 
 	//double GetAveSurroundingHosts(double fRadius, int nComment);
@@ -113,6 +113,7 @@ protected:
 	const CMsgCntJudgeReceiverReport * GetFullJudgeReport(SIM_TIME lnTime);
 	void PreJudgeSeveralPeriods(SIM_TIME lnInterval);
 	void PeriodForcastAndJudge();
+	void CalculateBuffers();
 
 	static void NotifyAllReceivers(const CMsgCntJudgeReceiverReport * pReport, CTransmitionRecord & tr);
 
@@ -164,7 +165,8 @@ private:
 	CHostConnection m_Connections;
 	ULONGLONG m_ullLastUiTick;
 private:
-	ULONGLONG m_aaa;
+	BOOL m_bNeedNotifySummary;
+	ULONGLONG m_ullLastNotifySummaryTick;
 
 };
 

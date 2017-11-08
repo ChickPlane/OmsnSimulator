@@ -908,7 +908,7 @@ void CMapGui::CreateRandomPackages(int nNumber, SIM_TIME lnTimeOut)
 	SIM_TIME lnTimeEnd = lnCurrentST + lnTimeOut;
 	m_lnExpectEndTime = lnTimeEnd + 10000;
 
-	m_pEngine->GetSummary().StartTest(lnCurrentST, lnTimeEnd, 1 * 60 * 1000);
+	m_pEngine->GetSummary().StartTest(lnCurrentST, lnTimeEnd);
 	char * pEmpty = new char[nHostCount];
 	CCommonFunctions::PickMFromNDisorder(nNum, pEmpty, nHostCount);
 

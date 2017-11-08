@@ -53,7 +53,7 @@ protected:
 	virtual void OnEndPrinting(CDC* pDC, CPrintInfo* pInfo);
 	void DestroyEngine();
 
-	void InitHostProtocol(const CSimulatorCfg & Cfg);
+	BOOL InitHostProtocol(const CSimulatorCfg & Cfg);
 
 // й╣ож
 public:

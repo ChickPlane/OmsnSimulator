@@ -12,6 +12,10 @@ CTestRecord::CTestRecord()
 
 
 CTestRecord::CTestRecord(const CTestRecord & src)
+	: m_nSessionId(0)
+	, m_nForwardTimes(0)
+	, m_pMilestoneTime(NULL)
+	, m_nMilestoneNumber(0)
 {
 	*this = src;
 }
@@ -59,4 +63,59 @@ void CTestRecord::Reset()
 		m_pMilestoneTime = NULL;
 	}
 	m_nMilestoneNumber = 0;
+}
+
+CProtocolRecord::CProtocolRecord()
+	: m_pData(NULL)
+	, m_nDataLen(0)
+{
+
+}
+
+CProtocolRecord::CProtocolRecord(int nDataNumber)
+	: m_nDataLen(nDataNumber)
+{
+	if (nDataNumber > 0)
+	{
+		m_pData = new double[nDataNumber];
+		memset(m_pData, 0, sizeof(double) * nDataNumber);
+	}
+	else
+	{
+		m_pData = NULL;
+	}
+}
+
+CProtocolRecord::CProtocolRecord(const CProtocolRecord & src)
+	: CProtocolRecord()
+{
+	*this = src;
+}
+
+CProtocolRecord::~CProtocolRecord()
+{
+	Reset();
+}
+
+void CProtocolRecord::Reset()
+{
+	if (m_pData)
+	{
+		delete[] m_pData;
+		m_pData = NULL;
+	}
+	m_nDataLen = 0;
+}
+
+CProtocolRecord & CProtocolRecord::operator=(const CProtocolRecord & src)
+{
+	Reset();
+	m_nDataLen = src.m_nDataLen;
+	if (m_nDataLen > 0)
+	{
+		m_pData = new double[m_nDataLen];
+		memcpy_s(m_pData, m_nDataLen, src.m_pData, src.m_nDataLen);
+	}
+	m_pData = NULL;
+	return *this;
 }

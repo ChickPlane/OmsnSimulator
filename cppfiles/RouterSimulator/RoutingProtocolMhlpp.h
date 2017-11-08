@@ -23,7 +23,7 @@ public:
 	virtual COLORREF GetImportantLevel() const;
 	virtual int GetInfoList(CMsgShowInfo & allMessages) const;
 	virtual void Turn(BOOL bOn);
-	virtual int GetDebugNumber(int nParam) { return 0; }
+	virtual int GetCarryingPkgNumber(int nParam);
 	CString GetDebugString() const { return _T(""); }
 	virtual void OnEngineConnection(BOOL bAnyOneNearby, BOOL bDifferentFromPrev);
 

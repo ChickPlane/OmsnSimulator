@@ -23,3 +23,18 @@ public:
 	int m_nMilestoneNumber;
 };
 
+
+class CProtocolRecord
+{
+public:
+	CProtocolRecord();
+	CProtocolRecord(int nDataNumber);
+	CProtocolRecord(const CProtocolRecord & src);
+	CProtocolRecord & operator=(const CProtocolRecord & src);
+	virtual ~CProtocolRecord();
+
+	void Reset();
+
+	double * m_pData;
+	int m_nDataLen;
+};

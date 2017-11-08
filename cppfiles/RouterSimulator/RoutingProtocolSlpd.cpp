@@ -78,9 +78,23 @@ void CRoutingProtocolSlpd::Turn(BOOL bOn)
 	GetHelloProcess()->StartWork(TRUE);
 }
 
-int CRoutingProtocolSlpd::GetDebugNumber(int nParam)
+int CRoutingProtocolSlpd::GetCarryingPkgNumber(int nParam)
 {
-	return 0;
+	switch (nParam)
+	{
+	case PROTOCOL_PKG_TYPE_SUPPLY:
+	{
+		return 0;
+	}
+	case PROTOCOL_PKG_TYPE_QUERY:
+	{
+		return GetQueryProcess()->GetDataMapSize() + GetSlpdProcess()->GetObfuscationCount();
+	}
+	case PROTOCOL_PKG_TYPE_REPLY:
+	{
+		return GetReplyProcess()->GetDataMapSize();
+	}
+	}
 }
 
 CString CRoutingProtocolSlpd::GetDebugString() const

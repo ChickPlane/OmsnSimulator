@@ -242,9 +242,6 @@ void CRoutingProcessBsw::InsertToDataMap(CPkgBswData* pPkg)
 void CRoutingProcessBsw::InsertToDestinationRecvRecord(const CBswIdAndTimeout & BT)
 {
 	InsertToBTList(BT, m_PkgRecvRecord);
-	CString strOut;
-	strOut.Format(_T("\n[BSW] %d insert %d"), m_pProtocol->GetHostId(), BT.m_nBswId);
-	OutputDebugString(strOut);
 }
 
 BOOL CRoutingProcessBsw::IsDestRecvRecordExist(int nBswId)

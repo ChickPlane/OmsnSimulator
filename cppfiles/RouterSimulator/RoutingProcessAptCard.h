@@ -42,6 +42,7 @@ public:
 	static void CleanSendingList(CList<CAppointmentCard*> & SendingList);
 	virtual void OnReceivedCards(const CPkgAptCardCards * pCards);
 
+	virtual int GetAllAcListSize() const;
 	virtual int GetTrustListSize() const { return m_TrustCards.GetSize(); }
 	virtual int GetReadyListSize() const { return m_ReadyCards.GetSize(); }
 	virtual int GetDispenseListSize() const { return m_DispensedCards.GetSize(); }
@@ -50,8 +51,6 @@ public:
 	virtual int GetCarryingMessages(CMsgShowInfo & allMessages) const;
 	static void SetParameters(int nK, int nSeg, SIM_TIME lnAcTimeout);
 	virtual BOOL GetAndRemoveAgencyRecord(USERID uOldId, int nOldApt, CAptCardAgencyRecord & retRecord);
-
-	static BOOL CheckSameAptCard(const CRoutingProcessAptCard * pA, const CRoutingProcessAptCard * pB);
 
 public:
 	virtual int GetInfoList(CMsgShowInfo & allMessages) const;

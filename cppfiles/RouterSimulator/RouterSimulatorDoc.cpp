@@ -164,10 +164,21 @@ BOOL CRouterSimulatorDoc::OnOpenDocument(LPCTSTR lpszPathName)
 	m_Cfg.ReadFromFile(filename);
 	delete[] filename;
 
-	_mkdir(m_Cfg.m_strWorkFolder);
+	char newFolderPath[200] = {0};
+	m_Cfg.GetFolderPathByParams(newFolderPath, 200);
+	if (ENOENT == _mkdir(newFolderPath))
+	{
+		AfxMessageBox(_T("Create folder error!"));
+		return FALSE;
+	}
 
 	double fLeft = DBL_MAX, fRight = 0.0, fTop = DBL_MAX, fBottom = 0.0;
 	m_pLineInMap = CWktParse::Parse(m_Cfg.m_strMapName, fLeft, fRight, fTop, fBottom);
+	if (m_pLineInMap == NULL)
+	{
+		AfxMessageBox(_T("MAP PATH ERROR!"));
+		return FALSE;
+	}
 
 	m_pRoadNet->Init(*m_pLineInMap, fLeft, fRight, fTop, fBottom);
 

@@ -24,6 +24,9 @@ CRoutingProtocolAptCard::CRoutingProtocolAptCard()
 	pAptCardProcess->SetProcessUser(this);
 	m_nAptCardProcessId = AddProcess(pAptCardProcess);
 	m_nSessionRecordEntrySize = REC_AC_ST_MAX;
+	m_nProtocolRecordEntrySize = REC_AC_PTL_MAX;
+	m_nSentAcCardPkgNumber = 0;
+	m_nSentAcCardNumber = 0;
 }
 
 CRoutingProtocolAptCard::~CRoutingProtocolAptCard()
@@ -103,10 +106,23 @@ void CRoutingProtocolAptCard::Turn(BOOL bOn)
 	GetHelloProcess()->StartWork(TRUE);
 }
 
-int CRoutingProtocolAptCard::GetDebugNumber(int nParam)
+int CRoutingProtocolAptCard::GetCarryingPkgNumber(int nParam)
 {
-	CRoutingProcessAptCard * pAptCardProcess = (CRoutingProcessAptCard*)m_Processes[m_nAptCardProcessId];
-	return pAptCardProcess->GetCreatedCount();
+	switch (nParam)
+	{
+	case PROTOCOL_PKG_TYPE_SUPPLY:
+	{
+		return GetAptCardProcess()->GetAllAcListSize();
+	}
+	case PROTOCOL_PKG_TYPE_QUERY:
+	{
+		return GetQueryProcess()->GetDataMapSize();
+	}
+	case PROTOCOL_PKG_TYPE_REPLY:
+	{
+		return GetReplyProcess()->GetDataMapSize();
+	}
+	}
 }
 
 CString CRoutingProtocolAptCard::GetDebugString() const
@@ -130,6 +146,13 @@ void CRoutingProtocolAptCard::OnBuiltConnectWithOthers(CRoutingProcessHello * pC
 	// APT CARD
 	CPkgAptCardCards * pNewCards = GetAptCardProcess()->GetSendingList(pACAck->m_bAskForCards, pACAck->m_nHoldingTrustNumber, pACAck->m_pSender);
 	sendingList.AddTail(pNewCards);
+	if (pNewCards->m_nCardNumber > 0)
+	{
+		m_nSentAcCardNumber += pNewCards->m_nCardNumber;
+		SetProtocolRecordValue(REC_AC_PTL_SENT_CARD_NUMBER, m_nSentAcCardNumber);
+		m_nSentAcCardPkgNumber++;
+		SetProtocolRecordValue(REC_AC_PTL_SENT_CARDPKG_NUMBER, m_nSentAcCardPkgNumber);
+	}
 
 	// BSW REPLY
 	GetReplyProcess()->OnEncounterUser(pPkg->m_pSender, sendingList, pACAck);
@@ -302,6 +325,7 @@ BOOL CRoutingProtocolAptCard::IsTrustful(CRoutingProcessAptCard * pCallBy, const
 
 void CRoutingProtocolAptCard::OnGetNewCards(CRoutingProcessAptCard * pCallBy, const CPkgAptCardCards * pPkg)
 {
+	SetProtocolRecordValue(REC_AC_PTL_HOLDING_TRUST_CARD_NUMBER, GetAptCardProcess()->GetTrustListSize());
 	PrepareAllWaitingQueries();
 	SendQueries(pPkg->m_pSender);
 }

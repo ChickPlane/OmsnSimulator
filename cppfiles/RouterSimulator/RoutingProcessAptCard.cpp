@@ -117,26 +117,6 @@ BOOL CRoutingProcessAptCard::GetAndRemoveAgencyRecord(USERID uOldId, int nOldApt
 	return FALSE;
 }
 
-BOOL CRoutingProcessAptCard::CheckSameAptCard(const CRoutingProcessAptCard * pA, const CRoutingProcessAptCard * pB)
-{
-	POSITION posA = pA->m_TrustCards.GetHeadPosition();
-	while (posA)
-	{
-		CAppointmentCard * pACard = pA->m_TrustCards.GetNext(posA);
-		POSITION posB = pB->m_TrustCards.GetHeadPosition();
-		while (posB)
-		{
-			CAppointmentCard * pBCard = pB->m_TrustCards.GetNext(posB);
-			if (pACard->m_nCid == pBCard->m_nCid && pACard->m_nCapt == pBCard->m_nCapt)
-			{
-				ASSERT(0);
-				return TRUE;
-			}
-		}
-	}
-	return FALSE;
-}
-
 int CRoutingProcessAptCard::GetInfoList(CMsgShowInfo & allMessages) const
 {
 	CMsgShowRow row;
@@ -228,11 +208,11 @@ void CRoutingProcessAptCard::CreateNewAptCards(CList<CAppointmentCard*> & Sendin
 
 		SendingList.AddTail(pGeneratedCard);
 	}
-// 	for (int i = nExistCardNumber; i < m_nNeededCardNumber; ++i)
-// 	{
-// 		CAppointmentCard * pGeneratedCard = CreateSingleNewAptCard(pCreatList);
-// 		m_SendingList.AddTail(pGeneratedCard);
-// 	}
+
+	if (pCreatList)
+	{
+		m_pProtocol->SetProtocolRecordValue(REC_AC_PTL_EXIST_CREATED_CARD_NUMBER, pCreatList->m_Records.GetSize());
+	}
 }
 
 int CRoutingProcessAptCard::GetLastAcHopCardNumber(const CList<CAppointmentCard*> & SendingList)
@@ -559,10 +539,6 @@ void CRoutingProcessAptCard::OnReceivedCards(const CPkgAptCardCards * pCards)
 			m_DispensedCards.AddTail(pNewCard);
 		}
 	}
-	if (CheckSameAptCard(this, ((CRoutingProtocolAptCard*)(pCards->m_pSender))->GetAptCardProcess()) == TRUE)
-	{
-		int k = 3;
-	}
 	if (pCards->m_nCardNumber > 0)
 	{
 		m_pUser->OnGetNewCards(this, pCards);
@@ -571,6 +547,11 @@ void CRoutingProcessAptCard::OnReceivedCards(const CPkgAptCardCards * pCards)
 	{
 		m_pUser->OnGetNoneCards(this, pCards);
 	}
+}
+
+int CRoutingProcessAptCard::GetAllAcListSize() const
+{
+	return GetTrustListSize() + GetReadyListSize() + GetDispenseListSize();
 }
 
 // Clean All AC in Sending List

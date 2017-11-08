@@ -20,7 +20,7 @@ public:
 	virtual COLORREF GetImportantLevel() const;
 	virtual int GetInfoList(CMsgShowInfo & allMessages) const;
 	virtual void Turn(BOOL bOn);
-	virtual int GetDebugNumber(int nParam);
+	virtual int GetCarryingPkgNumber(int nParam);
 	CString GetDebugString() const;
 	virtual void OnEngineConnection(BOOL bAnyOneNearby, BOOL bDifferentFromPrev);
 
@@ -42,7 +42,8 @@ public:
 	virtual BOOL IsTrustful(CRoutingProcessAptCard * pCallBy, const CRoutingProtocol * pOther) const;
 	virtual void OnGetNewCards(CRoutingProcessAptCard * pCallBy, const CPkgAptCardCards * pPkg);
 	virtual void OnGetNoneCards(CRoutingProcessAptCard * pCallBy, const CPkgAptCardCards * pPkg);
-public:
+
+protected:
 	BOOL IsFriend(const CRoutingProtocol * pOther) const;
 	BOOL IsLongTimeNoSee(const CRoutingProtocol * pOther) const;
 	CRoutingProcessAptCard * GetAptCardProcess() const;
@@ -74,5 +75,7 @@ private:
 	CMap<const CRoutingProtocol*, const CRoutingProtocol*, SIM_TIME, SIM_TIME> m_lastTimeExchange;
 	CList<CQueryMission*> m_WaitingMissions;
 	CList<CPseudonymPairRecord> m_PseduonymPairs;
+	int m_nSentAcCardPkgNumber;
+	int m_nSentAcCardNumber;
 };
 

@@ -15,6 +15,12 @@ class CYell;
 
 #define INVALID_PROCESS_ID -1
 
+typedef enum {
+	PROTOCOL_PKG_TYPE_SUPPLY,
+	PROTOCOL_PKG_TYPE_QUERY,
+	PROTOCOL_PKG_TYPE_REPLY,
+}PROTOCOL_PKG_TYPE;
+
 class CRoutingProtocol :
 	public CEngineUser
 {
@@ -46,18 +52,25 @@ public:
 	virtual void TransmitMessage(CRoutingProtocol * pTo, CYell * pMsg);
 	virtual void TransmitSingleSentence(CSentence * pSentence);
 	virtual int GetProcessId(CRoutingProcess * pProcess);
-	virtual int GetDebugNumber(int nParam);
+	virtual int GetCarryingPkgNumber(int nParam);
 	virtual CString GetDebugString() const;
 
 	void WriteLog(const CString & strLog);
 
+	virtual double GetProtocolRecordValue(int nEventId) const;
+	virtual void SetProtocolRecordValue(int nEventId, double fValue);
+
 	static BOOL gm_bEnableLbsp;
 
 protected:
-	BOOL SetSissionRecord(int nSessionId, int nEventId);
-	BOOL SetSissionForwardNumber(int nSessionId, int nForwardNumber);
-	void UpdateEngineSummary();
+	virtual BOOL SetSissionRecord(int nSessionId, int nEventId);
+	virtual BOOL SetSissionForwardNumber(int nSessionId, int nForwardNumber);
+	void OnSessionRecordChanged();
+	void OnProtocolRecordChanged();
 	CTestRecord * GetSessionRecord(int nSessionId);
+	CProtocolRecord * GetProtocolRecord() const;
+
+	int GetTotalSessionStatisticEntryNumber() { return m_nSessionRecordEntrySize + ENGINE_RECORD_MAX; }
 
 protected:
 	CHost * m_pHost;
@@ -65,6 +78,8 @@ protected:
 	CArray<CRoutingProcess *> m_Processes;
 	CString m_strLogPrefix;
 	static CMap<int, int, CTestRecord *, CTestRecord *> gm_allSessionRecords;
+	static CMap<const CRoutingProtocol *, const CRoutingProtocol *, CProtocolRecord *, CProtocolRecord *> gm_allProtocolRecords;
 	int m_nSessionRecordEntrySize;
+	int m_nProtocolRecordEntrySize;
 	int m_nForwardBoundary;
 };

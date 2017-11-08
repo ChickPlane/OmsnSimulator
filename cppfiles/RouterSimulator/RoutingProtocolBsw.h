@@ -13,6 +13,7 @@ public:
 	virtual void CreateQueryMission(const CQueryMission * pMission);
 	virtual void SetLocalParameters(int nBswCopyCount);
 	virtual void Turn(BOOL bOn);
+	virtual int GetCarryingPkgNumber(int nParam);
 	virtual COLORREF GetImportantLevel() const;
 	virtual void OnEngineConnection(BOOL bAnyOneNearby, BOOL bDifferentFromPrev);
 

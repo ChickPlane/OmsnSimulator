@@ -19,10 +19,12 @@ CSimulatorCfg::CSimulatorCfg()
 	, m_fAnonyRadius(0)
 	, m_nTimeOutSecond(0)
 {
+	m_strFolderName[0] = 0;
 }
 
 CSimulatorCfg& CSimulatorCfg::operator=(const CSimulatorCfg & src)
 {
+	CopyString(&m_strComment, src.m_strComment);
 	CopyString(&m_strSettingFilePath, src.m_strSettingFilePath);
 	CopyString(&m_strWorkFolder, src.m_strWorkFolder);
 	CopyString(&m_strMapName, src.m_strMapName);
@@ -35,6 +37,7 @@ CSimulatorCfg& CSimulatorCfg::operator=(const CSimulatorCfg & src)
 	m_fPrivacyLow = src.m_fPrivacyLow;
 	m_fAnonyRadius = src.m_fAnonyRadius;
 	m_nTimeOutSecond = src.m_nTimeOutSecond;
+	strcpy_s(m_strFolderName, 200, src.m_strFolderName);
 	return *this;
 }
 
@@ -67,8 +70,9 @@ void CSimulatorCfg::ReadFromFile(char * strSettingFilePath)
 	ifstream fin(m_strSettingFilePath);
 
 	fin.getline(inputBuffer, LINE_LENGTH);
+	CopyString(&m_strComment, inputBuffer);
+	fin.getline(inputBuffer, LINE_LENGTH);
 	CopyString(&m_strWorkFolder, inputBuffer);
-	CopyString(&m_strComment, GetFolderName(m_strWorkFolder));
 	fin.getline(inputBuffer, LINE_LENGTH);
 	CopyString(&m_strMapName, inputBuffer);
 	fin.getline(inputBuffer, LINE_LENGTH);
@@ -121,4 +125,30 @@ char * CSimulatorCfg::GetFolderName(char * pPathName)
 		}
 	}
 	return NULL;
+}
+
+void CSimulatorCfg::GetFolderPathByParams(char * strRet, int nRetLen) const
+{
+	strcpy_s(strRet, nRetLen, m_strWorkFolder);
+	char strFolderName[200];
+	GetParametersString(strFolderName, 200);
+	strcat_s(strRet, nRetLen, strFolderName);
+}
+
+const char * CSimulatorCfg::GetFolderNameByParams()
+{
+	GetParametersString(m_strFolderName, 200);
+	return m_strFolderName;
+}
+
+void CSimulatorCfg::GetParametersString(char * strRet, int nRetLen) const
+{
+	if (m_strComment)
+	{
+		sprintf_s(strRet, nRetLen, "C%02dK%dP%02dB%02dT%02dm_%s", (int)m_fCommunicateRadius, m_nK, (int)m_fPrivacyHigh, m_nBswCopyCount, m_nTimeOutSecond / 60, m_strComment);
+	}
+	else
+	{
+		sprintf_s(strRet, nRetLen, "C%02dK%dP%02dB%02dT%02dm_", (int)m_fCommunicateRadius, m_nK, (int)m_fPrivacyHigh, m_nBswCopyCount, m_nTimeOutSecond / 60);
+	}
 }

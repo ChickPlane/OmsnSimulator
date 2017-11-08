@@ -116,21 +116,30 @@ void CRouterSimulatorView::OnEngineTimeChanged(SIM_TIME lnCurrentTime)
 void CRouterSimulatorView::ChangeSummary(const CStatisticSummary & summary)
 {
 	CString strSummary;
-	summary.m_RecentData.m_ProtocolRecords.GetSize();
-	for (int i = 0; i < summary.m_RecentData.m_ProtocolRecords.GetSize(); ++i)
+	summary.m_RecentSessionTag.m_SessionRecords.GetSize();
+	for (int i = 0; i < summary.m_RecentSessionTag.m_SessionRecords.GetSize(); ++i)
 	{
-		double fRd = summary.m_RecentData.m_ProtocolRecords[i];
+		double fRd = summary.m_RecentSessionTag.m_SessionRecords[i];
 		CString strTmp;
-		strTmp.Format(_T("%f"), fRd);
+		strTmp.Format(_T("%0.1f"), fRd);
 		strSummary += strTmp + _T(" ; ");
 	}
 	strSummary += _T(" | ");
-	summary.m_RecentData.m_EngineRecords.GetSize();
-	for (int i = 0; i < summary.m_RecentData.m_EngineRecords.GetSize(); ++i)
+	summary.m_RecentProtocolTag.m_ProtocolRecords.GetSize();
+	for (int i = 0; i < summary.m_RecentProtocolTag.m_ProtocolRecords.GetSize(); ++i)
 	{
-		double fRd = summary.m_RecentData.m_EngineRecords[i];
+		double fRd = summary.m_RecentProtocolTag.m_ProtocolRecords[i];
 		CString strTmp;
-		strTmp.Format(_T("%f"), fRd);
+		strTmp.Format(_T("%0.1f"), fRd);
+		strSummary += strTmp + _T(" ; ");
+	}
+	strSummary += _T(" | ");
+	summary.m_RecentSessionTag.m_EngineRecords.GetSize();
+	for (int i = 0; i < summary.m_RecentSessionTag.m_EngineRecords.GetSize(); ++i)
+	{
+		double fRd = summary.m_RecentSessionTag.m_EngineRecords[i];
+		CString strTmp;
+		strTmp.Format(_T("%0.1f"), fRd);
 		strSummary += strTmp + _T(" ; ");
 	}
 	m_pEditMsgStatistic->SetWindowText(strSummary);
@@ -192,7 +201,7 @@ void CRouterSimulatorView::DestroyEngine()
 	}
 }
 
-void CRouterSimulatorView::InitHostProtocol(const CSimulatorCfg & Cfg)
+BOOL CRouterSimulatorView::InitHostProtocol(const CSimulatorCfg & Cfg)
 {
 	CRoutingProtocol::gm_bEnableLbsp = TRUE;
 
@@ -207,9 +216,10 @@ void CRouterSimulatorView::InitHostProtocol(const CSimulatorCfg & Cfg)
 	summary.m_fTrust = fHigh;
 	summary.m_pWorkPath = new char[200];
 	summary.m_pWorkPath[0] = 0;
-	strcpy_s(summary.m_pWorkPath, 200, Cfg.m_strWorkFolder);
+	Cfg.GetFolderPathByParams(summary.m_pWorkPath, 200);
 	summary.m_pComments = new char[200];
-	strcpy_s(summary.m_pComments, 199, Cfg.m_strComment);
+	summary.m_pComments[0] = 0;
+	Cfg.GetParametersString(summary.m_pComments, 200);
 	m_pEngine->SetCommunicationRadius(Cfg.m_fCommunicateRadius);
 	double fSpeedLimit = pDoc->m_pRoadNet->GetSpeedLimit();
 
@@ -259,7 +269,7 @@ void CRouterSimulatorView::InitHostProtocol(const CSimulatorCfg & Cfg)
 			pDoc->m_pRoadNet->m_allHosts[i]->m_pProtocol = pAptCard;
 		}
 	}
-	else
+	else if (strcmp(Cfg.m_strProtocolName, PROTOCOL_NAME_BSW) == 0)
 	{
 		pMainFrame->WriteLog(_T("BSW"));
 		for (int i = 0; i < nLength; ++i)
@@ -272,6 +282,11 @@ void CRouterSimulatorView::InitHostProtocol(const CSimulatorCfg & Cfg)
 			pDoc->m_pRoadNet->m_allHosts[i]->m_pProtocol = pBsw;
 		}
 	}
+	else
+	{
+		return FALSE;
+	}
+	return TRUE;
 }
 
 void CRouterSimulatorView::OnRButtonUp(UINT /* nFlags */, CPoint point)
@@ -307,7 +322,7 @@ void CRouterSimulatorView::OnButtonCreateMsgs()
 	CHost * pHostTo = pRoadNet->m_allHosts.GetAt(0);
 	SIM_TIME lnTimeOut = m_pEngine->GetSimTime() + nTimeOut * 1000;
 
-	m_pEngine->GetSummary().StartTest(m_pEngine->GetSimTime(), lnTimeOut, 1*60*1000);
+	m_pEngine->GetSummary().StartTest(m_pEngine->GetSimTime(), lnTimeOut);
 
 	CCommonFunctions::PickMFromNDisorder(nNum, pEmpty, nHostCount);
 
@@ -534,7 +549,7 @@ void CRouterSimulatorView::OnSize(UINT nType, int cx, int cy)
 	}
 	if (m_pEditMsgStatistic)
 	{
-		nWidth = 700;
+		nWidth = 850;
 		m_pEditMsgStatistic->MoveWindow(nMostRight, nMostTop, nWidth, 30);
 		nMostRight += nWidth + 5;
 	}
@@ -581,11 +596,20 @@ LRESULT CRouterSimulatorView::OnDataPrepareFinished(WPARAM wParam, LPARAM lParam
 	CRouterSimulatorDoc * pDoc = GetDocument();
 	//InitHostProtocol(pDoc->m_Cfg.m_nBswCopyCount, pDoc->m_Cfg.m_strProtocolName, pDoc->m_Cfg.m_fCommunicateRadius, pDoc->m_Cfg.m_nK, pDoc->m_Cfg.m_fPrivacyHigh, pDoc->m_Cfg.m_fPrivacyLow, pDoc->m_Cfg.m_fAnonyRadius);
 	InitHostProtocol(pDoc->m_Cfg);
-	m_pMapGui->PostMessage(MSG_ID_INIT_OK, AUTO_RUN_TEST);
+	if (InitHostProtocol(pDoc->m_Cfg))
+	{
+		m_pMapGui->PostMessage(MSG_ID_INIT_OK, AUTO_RUN_TEST);
 
-	CString strLabel;
-	strLabel.Format(_T("Mobile Host:%d"), pDoc->m_pRoadNet->m_allHosts.GetSize() - SERVER_NODE_COUNT);
-	m_pEditLabel->SetWindowText(strLabel);
+		CString strLabel;
+		strLabel.Format(_T("Mobile Host:%d"), pDoc->m_pRoadNet->m_allHosts.GetSize() - SERVER_NODE_COUNT);
+		m_pEditLabel->SetWindowText(strLabel);
+	}
+	else
+	{
+		CMainFrame * pMainFrame = (CMainFrame*)AfxGetMainWnd();
+		pMainFrame->WriteLog(CString(pDoc->m_Cfg.m_strProtocolName));
+		AfxMessageBox(_T("PROTOCOL NAME ERROR!"));
+	}
 
 	return 0;
 }
